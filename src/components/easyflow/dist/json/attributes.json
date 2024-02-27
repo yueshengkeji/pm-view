@@ -1,0 +1,6 @@
+{
+  "easy-flow/coding": {
+    "type": "string",
+    "description": "窗口编码"
+  }
+}
