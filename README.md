@@ -32,3 +32,6 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### 扫码添加作者微信
+![image text](https://github.com/yueshengkeji/pm/blob/main/src/main/resources/assets/img/img.png "扫码加作者微信")
