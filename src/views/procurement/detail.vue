@@ -180,13 +180,13 @@ export default {
     event: 'change'
   },
   watch: {
-  socketData:{
-    handler(val) {
-            if(val.type == "upp"){
-                this.loadData(true)
-            }
-          },
-  },
+    socketData:{
+      handler(val) {
+        if(val.type == "upp"){
+          this.loadData(true)
+        }
+      },
+    },
     item: {
       handler() {
         if (this.item.id != this.data.id) {
@@ -235,13 +235,13 @@ export default {
     this.reset();
 
     this.$nextTick(() => {
-          window.onfocus = () => {
-            if (localStorage.getItem("upp") == "1") {
-              this.loadData(true)
-              localStorage.setItem("upp","0")
-            }
-          }
-        })
+      window.onfocus = () => {
+        if (localStorage.getItem("upp") == "1") {
+          this.loadData(true)
+          localStorage.setItem("upp","0")
+        }
+      }
+    })
   },
   methods: {
     closeInstanceHandler(isClose) {
@@ -338,8 +338,8 @@ export default {
     },
     loadSuccess(procurement) {
       if (procurement.pm01326 == '1') {
-        procurement.proCompanyName = '子公司采购'
-        this.companyName = '子公司名称'
+        procurement.proCompanyName = '开丽采购'
+        this.companyName = '江苏开丽智控科技有限公司'
       } else {
         procurement.proCompanyName = '默认采购'
         this.companyName = this.$store.state.api.cname

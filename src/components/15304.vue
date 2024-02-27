@@ -189,6 +189,9 @@
             <template v-slot:item.moneyTax="{item}">
               {{ formatNumber(item.moneyTax) }}
             </template>
+            <template v-slot:item.applySum="{item}">
+              <a href="###" @click="applyHistoryHandler(item)">{{ item.applySum - item.sum }}</a>
+            </template>
           </v-data-table>
         </v-col>
       </v-row>
@@ -239,6 +242,16 @@
     <v-snackbar centered v-model="tooltip" :timeout="-1">{{ tooltipContent }}
       <v-btn color="primary" @click="openMaterial(true)">知道了</v-btn>
     </v-snackbar>
+
+    <v-dialog v-model="applyHistoryDialog">
+      <v-card class="pa-3">
+        <list-by-plan-row-id :id="planRowId"></list-by-plan-row-id>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="applyHistoryDialog=false">关闭</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -257,7 +270,8 @@ export default {
   name: "frame-15304",
   components: {
     easyFlow,
-    selectMaterial
+    selectMaterial,
+    listByPlanRowId: () => import('@/views/apply/listByApplyRowId.vue')
   },
   props: {
     frameId: String,
@@ -354,7 +368,7 @@ export default {
       {text: "型号", value: 'model', width: '15%'},
       {text: "单位", value: 'unit.name'},
       {text: "品牌", value: 'brand', width: '100px'},
-      {text: "申请数量", value: 'sum'},
+      {text: "申请数", value: 'sum'},
       {text: "备注", value: 'remark', width: '15%'},
       {text: "已采购", value: 'ySum'},
     ],
@@ -410,14 +424,17 @@ export default {
       ]
     },
     showWaring: false,
-    waringMsg: null
+    waringMsg: null,
+    applyHistoryDialog: false,
+    planRowId: null
   }),
 
   created() {
     this.loadProject()
     if (this.edit) {
       this.headers.splice(6, 0,
-          {text: "计划数量", value: 'planSum'},
+          {text: "计划数", value: 'planSum'},
+          {text: "已申请", value: 'applySum'},
           {text: "成本", value: 'planPrice', class: 'hidden'},
           {text: "合计", value: 'moneyTax', class: 'hidden'})
     }
@@ -430,6 +447,10 @@ export default {
     this.loadData()
   },
   methods: {
+    applyHistoryHandler(item) {
+      this.applyHistoryDialog = true
+      this.planRowId = item.planRowId
+    },
     loadProject(value) {
       if (value && value != '') {
         search(value).then(data => {
@@ -903,7 +924,8 @@ export default {
         this.showWaring = false
         this.data.applyMaterialList.forEach((item, idx) => {
           //本次采购申请 + 历史采购申请 > 计划数，预警提示
-          if (item && item.planRowId != "" && (parseFloat(item.sum) + item.applySum) > item.planSum) {
+          item.sum = parseFloat(item.sum)
+          if (item && item.planRowId != "" && (item.sum + item.applySum - item.sum) > item.planSum) {
             this.waringMsg = `第${idx + 1}行，申请采购数超过计划总数`
             this.showWaring = true
             return false;
