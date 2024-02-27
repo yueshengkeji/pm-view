@@ -1,4 +1,9 @@
-# pm2-desktop
+# pm-view 项目管理平台前端代码
+
+## 架构如下：
+vuetify、butterfly-vue（流程过程图）、echarts、html2canvas、qrcode
+vue-baidu-map、vue-okr-tree、vue-print-nb、vue-router、vue-ueditor-wrap
+、xlsx
 
 ## Project setup
 ```
@@ -9,6 +14,11 @@ npm install
 ```
 npm run serve
 ```
+如果你的后台端口修改过，请修改vue.config.js配置文件中的代理地址端口
+如果你的后台增加了上下文地址，请修改request.js中baseURL
+然后浏览器访问：http://127.0.0.1:8080/vuetify 即可访问到登录地址
+默认用户名：1001
+默认密码：@123@123
 
 ### Compiles and minifies for production
 ```
