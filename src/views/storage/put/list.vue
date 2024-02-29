@@ -395,6 +395,10 @@ export default {
     setMaterEdit(data) {
       data.forEach(item => {
         item.edit = false
+        if(item.project==null)
+        {
+          item.project = {name:'-'}
+        }
       })
     },
     showSignState() {

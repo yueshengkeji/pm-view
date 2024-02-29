@@ -190,7 +190,7 @@
               {{ formatNumber(item.moneyTax) }}
             </template>
             <template v-slot:item.applySum="{item}">
-              <a href="###" @click="applyHistoryHandler(item)">{{ item.applySum - item.sum }}</a>
+              <a href="###" @click="applyHistoryHandler(item)">{{ item.applySum }}</a>
             </template>
           </v-data-table>
         </v-col>
@@ -858,6 +858,11 @@ export default {
             mater.moneyTax = mater.planPrice * mater.sum;
             apply.applyMoney += mater.moneyTax;
             mater.apply = temp;
+            mater.applySum = mater.applySum == null ? 0 : mater.applySum
+            mater.applySum = mater.applySum - mater.sum
+            if(mater.applySum < 0){
+              mater.applySum = 0
+            }
             if (mater.planRowId == "") {
               mater.planRowId = mater.id
             }
