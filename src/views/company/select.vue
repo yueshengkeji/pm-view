@@ -1,5 +1,7 @@
 <template>
   <v-autocomplete dense hide-details
+                  :error-messages="error"
+                  :rules="rules"
                   auto-select-first
                   @change="$emit('change',company)"
                   v-model="company"
@@ -8,7 +10,7 @@
                   :search-input.sync="searchCompany"
                   item-value="id"
                   item-text="name"
-                  label="单位名称"></v-autocomplete>
+                  :label="label"></v-autocomplete>
 </template>
 
 <script>
@@ -64,12 +66,18 @@ export default {
     event: "change"
   },
   props: {
+    error:null,
+    rules:null,
     type: {
       type: String,
       default: 'Object'
     },
     data: null,
-    search: null
+    search: null,
+    label:{
+      type:String,
+      default:'选择单位'
+    }
   }
 
 }

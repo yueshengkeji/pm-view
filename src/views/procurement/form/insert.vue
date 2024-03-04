@@ -670,8 +670,9 @@ export default {
           frameColumn: 'pm01301'
         }).then(() => {
           //更新订单状态为已发起
-          updateState({id: p.id, state: 0})
-          this.closeWindow()
+          updateState({id: p.id, state: 0}).finally(()=>{
+            this.closeWindow()
+          })
         }).catch(() => {
           this.loading = false
         })

@@ -139,3 +139,56 @@ export function queryById(id){
         method:'get'
     })
 }
+
+export function updateTerm(term){
+    return request({
+        url:'term',
+        method:'post',
+        data:term
+    })
+}
+export function deleteTerm(id){
+    return request({
+        url:`term/${id}`,
+        method:'delete',
+    })
+}
+export function getBillList(param)
+{
+    return request({
+        url:'zujin/billList',
+        method:'get',
+        params:param
+    })
+}
+
+export function insertBill(bill)
+{
+    return request({
+        url:'zujin/bill',
+        method:'put',
+        data:bill
+    })
+}
+export function updateBill(bill)
+{
+    return request({
+        url:'zujin/bill',
+        method:'post',
+        data:bill
+    })
+}
+export function exportBill(param)
+{
+    return request({
+        url:'zujin/exportBillList',
+        method:'get',
+        params:param
+    })
+}
+export function deleteBill(id){
+    return request({
+        url:`zujin/bill/${id}`,
+        method:'delete',
+    })
+}
