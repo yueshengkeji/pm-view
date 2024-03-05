@@ -301,7 +301,6 @@ export default {
         q = Object.assign({}, this.options2)
       }
       q = Object.assign(q, this.query)
-      q.state = 'wait,pay'
       q.page = 1
       exportBill(q).then(result => {
         this.downloadFile(result)

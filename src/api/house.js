@@ -36,3 +36,9 @@ export function mapJson(floor) {
         method: 'get'
     })
 }
+export function del(id){
+    return request({
+        url:`zujinHouse/${id}`,
+        method:'delete'
+    })
+}
