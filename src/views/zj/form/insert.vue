@@ -196,10 +196,10 @@
     </v-form>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-col sm="2" v-if="data.id == null">
+      <v-col sm="2">
         <easy-flow coding="1320287" dense ref="easyFlow" :default-flow-name="defaultFlow"></easy-flow>
       </v-col>
-      <v-col sm="2" v-if="data.id == null">
+      <v-col sm="2">
         <file-upload ref="file" @change="fileChangeHandler"></file-upload>
       </v-col>
       <v-radio-group
@@ -261,7 +261,11 @@
               <v-text-field type="number" v-model="t.money" label="金额*"
                             :rules="[v => !!v || '请输入计费金额']"></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="3">
+              <v-text-field type="number" v-model="t.price" label="单价*"
+                            :rules="[v => !!v || '请输入单价']"></v-text-field>
+            </v-col>
+            <v-col cols="3">
               <v-select v-model="t.unit" :items="unitItems" label="计费单位*" :rules="rules.unit"></v-select>
             </v-col>
             <v-col cols="6">
@@ -330,8 +334,8 @@
       <v-card class="pa-5">
         <v-card-title>保证金登记</v-card-title>
         <v-form ref="bzjForm">
-          <v-text-field :rules="bzjRules.money" label="保证金金额" type="number" v-model="bzj.money"></v-text-field>
-          <v-autocomplete label="类型"
+          <v-text-field :rules="bzjRules.money" label="保证金金额*" type="number" v-model="bzj.money"></v-text-field>
+          <v-autocomplete label="类型*"
                           :rules="bzjRules.type"
                           :items="bzjTypeItems"
                           auto-select-first
@@ -339,7 +343,7 @@
           >
           <v-menu v-model="bzjMenu" transition="scale-transition" offset-y>
             <template v-slot:activator="{ on, attrs }">
-              <v-text-field v-model="bzj.startDate" :rules="bzjRules.startDatetime" label="开始日期" readonly
+              <v-text-field v-model="bzj.startDate" :rules="bzjRules.startDatetime" label="区间开始日期*" readonly
                             v-bind="attrs"
                             v-on="on"></v-text-field>
             </template>
@@ -348,7 +352,7 @@
 
           <v-menu v-model="bzjMenu2" transition="scale-transition" offset-y>
             <template v-slot:activator="{ on, attrs }">
-              <v-text-field v-model="bzj.datetime" :rules="bzjRules.datetime" label="截止日期" readonly v-bind="attrs"
+              <v-text-field v-model="bzj.datetime" :rules="bzjRules.datetime" label="区间截止日期*" readonly v-bind="attrs"
                             v-on="on"></v-text-field>
             </template>
             <v-date-picker @change="bzjMenu2 = false" v-model="bzj.datetime" no-title scrollable></v-date-picker>
@@ -356,7 +360,7 @@
 
           <v-menu v-model="bzjMenu3" transition="scale-transition" offset-y>
             <template v-slot:activator="{ on, attrs }">
-              <v-text-field v-model="bzj.endDate" :rules="bzjRules.endDatetime" label="缴费截止日期" readonly
+              <v-text-field v-model="bzj.endDate" :rules="bzjRules.datetime" label="缴费截止日期*" readonly
                             v-bind="attrs"
                             v-on="on"></v-text-field>
             </template>
@@ -371,6 +375,10 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <component v-bind:is="printComponent"
+               v-bind:contractId="contractId"
+               v-on:success="printComponent = null"
+    ></component>
   </v-card>
 </template>
 
@@ -381,6 +389,7 @@ import {insertContractWordRecord} from "@/api/contractWordModel";
 import EasyFlow from "@/components/easyflow/easyFlow.vue";
 import FileUpload from "@/components/fileUpload.vue";
 import SelectCompany from "@/views/company/select.vue";
+import {list} from '@/api/yetai'
 
 export default {
   name: "zj-insert",
@@ -390,7 +399,7 @@ export default {
     EasyFlow,
   },
   data: () => ({
-    receivedError:null,
+    receivedError: null,
     loading: false,
     bzj: {
       money: "",
@@ -464,6 +473,7 @@ export default {
       {value: 'endDate', text: '截止日期'},
       {value: 'type', text: '计费方式'},
       {value: 'unit', text: '计费单位'},
+      {value: 'money', text: '金额'},
       {value: 'payCycle', text: '支付周期'},
       {value: 'monthBill', text: '是否自然月账单'},
       {value: 'payType', text: '付款方式'},
@@ -485,6 +495,9 @@ export default {
     ],
     typeItems: [
       {value: 'regular', text: '固定金额'},
+      // {value: 'regularPreferential', text: '固定租金(优惠阶段)'},
+      {value: 'commission', text: '提成租金'},
+      {value: 'compare', text: '提成固定较高租金'},
     ],
     unitItems: [
       {value: 'month', text: '每月'},
@@ -495,6 +508,7 @@ export default {
       {value: 'towMonth', text: '两月付'},
       {value: 'quarter', text: '季付'},
       {value: 'one', text: '一次性付清'},
+      {value: 'final', text: '固定扣点'},
     ],
     payTypeItems: [
       {value: 'day', text: '固定日期'},
@@ -502,7 +516,7 @@ export default {
     priceItems: [
       {value: 'area', text: '按面积单价'},
     ],
-    nameItems: ["租金", "管理费", "推广服务费", "二清管理费", "装修管理费"],
+    nameItems: ["租金", "管理费", "推广服务费", "二清管理费", "装修管理费","筹备期装修管理费","营运期装修管理费","装修建筑垃圾清运费","临时水费","临时电费"],
     t: {
       name: null,
       startDate: null,
@@ -516,11 +530,17 @@ export default {
       firstStartDate: null,
       firstEndDate: null,
       firstMoney: null,
-      priceType: null
+      priceType: null,
+      money:null,
+      price:null
     },
     bzjItems: [],
 
     update: false,
+
+    //打印
+    contractId: null,
+    printComponent: null,
   }),
   props: {
     type: {
@@ -544,7 +564,7 @@ export default {
   },
   created() {
     this.loadHouses()
-    this.reset()
+    this.reset(this.type)
 
     if (this.type == 0) {
       this.defaultFlow = "租赁合同审批单"
@@ -553,6 +573,10 @@ export default {
     } else {
       this.defaultFlow = "物业管理费合同审批"
     }
+
+    list().then(items => {
+      this.yitaiItems = items
+    })
 
     if (this.id) {
       this.loadById(this.id)
@@ -568,8 +592,8 @@ export default {
               this.houseList.push(item)
             })
           }
-          if(!result.brandCompany){
-            result.brandCompany = {name:'-'}
+          if (!result.brandCompany) {
+            result.brandCompany = {name: '-'}
           }
           this.data = result
           result.termList.forEach((val, idx) => {
@@ -662,12 +686,15 @@ export default {
     },
     insertBzjEvent() {
       let valid = this.$refs['bzjForm'].validate();
-      if (valid && !this.update) {
-        this.bzj.idx = this.bzjItems.length
-        this.bzjItems.push(this.bzj)
-        this.bzjDialog = false
+      if (valid) {
+        if(!this.update){
+            this.bzj.idx = this.bzjItems.length
+            this.bzjItems.push(this.bzj)
+            this.bzjDialog = false
+        }
+        this.update = false
       }
-      this.update = false
+
     },
     saveMoneyHandler() {
       let valid = this.$refs.moneyForm.validate()
@@ -709,7 +736,10 @@ export default {
       if (this.data.endDatetime) {
         endDate = this.data.endDatetime
       }
-
+      let money = null
+      if (this.data.houses && this.data.houses.length > 0) {
+        money = this.data.houses[0].money
+      }
       this.t = Object.assign({
         name: null,
         startDate: startDate,
@@ -724,6 +754,8 @@ export default {
         firstEndDate: null,
         firstMoney: null,
         priceType: null,
+        money: money,
+        price: null
       }, {})
     },
     filesHandler() {
@@ -744,7 +776,7 @@ export default {
           return;
         }
 
-        if(!this.data.receivedCompany || !this.data.receivedCompany.id){
+        if (!this.data.receivedCompany || !this.data.receivedCompany.id) {
           this.receivedError = '请选择收款单位'
           return;
         }
@@ -756,8 +788,8 @@ export default {
         this.data.bzjList = this.bzjItems
         if (this.data.id != null) {
           if (!this.offEdit) {
-            updateZujin(this.data).then((result) => {
-              insertContractWordRecord(result)
+            updateZujin(this.data).then(() => {
+              insertContractWordRecord(this.data)
             }).finally(() => {
               this.$emit("close")
               this.loading = false
@@ -766,9 +798,9 @@ export default {
         } else {
           insertZujin(this.data).then(result => {
 
-            insertContractWordRecord(result)
+            insertContractWordRecord(this.data)
             this.$refs.easyFlow.startFlow({
-              title: result.company + "合同审批",
+              title: result.brandCompany.name + "合同审批",
               content: result.remark || '',
               frameId: result.id + "-zujin",
               frameCoding: 1320287,
@@ -816,14 +848,14 @@ export default {
               if (this.$refs.easyFlow) {
                 //发起审批流程
                 this.$refs.easyFlow.startFlow({
-                  title: result.company + "合同审批",
+                  title: result.brandCompany.name + "合同审批",
                   content: result.remark || '',
                   frameId: result.id + "-zujin",
                   frameCoding: 1320287,
                   frameColumn: 'id'
                 })
               }
-              insertContractWordRecord(result)
+              insertContractWordRecord(this.data)
               this.loading = false
               this.$emit("close")
             })
@@ -833,14 +865,14 @@ export default {
             if (this.$refs.easyFlow) {
               //发起审批流程
               this.$refs.easyFlow.startFlow({
-                title: result.company + "合同审批",
+                title: result.brandCompany.name + "合同审批",
                 content: result.remark || '',
                 frameId: result.id + "-zujin",
                 frameCoding: 1320287,
                 frameColumn: 'id'
               })
             }
-            insertContractWordRecord(result)
+            insertContractWordRecord(this.data)
             this.loading = false
             this.$emit("close")
           })
@@ -894,7 +926,14 @@ export default {
         this.acreageMessage = null
       }
     },
-    reset() {
+    reset(t) {
+      if (t == 0) {
+        this.defaultFlow = "租赁合同审批单"
+      } else if (t == 2) {
+        this.defaultFlow = "多经类合同审批单"
+      } else {
+        this.defaultFlow = "物业管理费合同审批"
+      }
       this.data = {
         receivedCompany: null,
         dayNum: null,
@@ -904,9 +943,9 @@ export default {
           name: null,
           address: null,
           taxNumber: null,
-          relationP:null,
-          openAccount:null,
-          telephoneP:null
+          relationP: null,
+          openAccount: null,
+          telephoneP: null
         },
         brand: null,
         payType: 0,
@@ -929,12 +968,13 @@ export default {
         yearRental: null,
         endDatetime: null,
         kjType: [{money: 0}],
-        type: this.type,
+        type: t,
         files: null,
         planDate: null,
         openDate: null,
         billType: ''
       }
+
     }
   }
 }

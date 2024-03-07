@@ -81,3 +81,11 @@ export function updateMobileInfo(data)
 export function getUserLogin(){
     return request.get('staff/getUserLogin')
 }
+
+export function exportAll(param) {
+    return request({
+        url: '/staff/exportAll',
+        method: 'get',
+        params: param
+    })
+}

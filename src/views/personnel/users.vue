@@ -14,8 +14,9 @@
           <template v-slot:top>
             <v-row>
               <v-col lg="3">
-                <v-btn color="primary" @click="addStaff">新增</v-btn>
-                <v-btn class="ml-1" v-if="$store.state.user.name == '1001'" :loading="syncLoading"
+                <v-btn color="primary" @click="addStaff" class="mr-1" outlined>新增</v-btn>
+                <v-btn @click="exportHandler" class="mr-1" outlined>导出</v-btn>
+                <v-btn outlined v-if="$store.state.user.name == '1001'" :loading="syncLoading"
                        title="拉取微信用户手机号、邮箱信息" @click="syncWeiCharUser">同步微信信息
                 </v-btn>
               </v-col>
@@ -176,7 +177,7 @@
 
 <script>
 import {
-  deleteCarPlate,
+  deleteCarPlate, exportAll,
   getInfoByStDevice,
   getStaffAll,
   getStaffHead,
@@ -497,6 +498,17 @@ export default {
       } catch (e) {
         return "-";
       }
+    },
+    exportHandler(){
+      this.loading = true;
+      let param = Object.assign({}, this.options)
+      param.sortBy = this.options.sortBy[0]
+      param.sortDesc = this.options.sortDesc[0]
+      param.searchText = this.search
+      param.status = this.leave ? "unLogin" : null
+      exportAll(param).then(href=>{
+        this.downloadFile(href)
+      })
     },
     list() {
       this.loading = true;

@@ -88,9 +88,6 @@
                 deep: true,
             },
             searchStaff(value) {
-                if (this.$store.state.user.name != "1001") {
-                    value = "陈钰";
-                }
                 this.searchStaffLoading = true;
                 getStaff(value).then(staffs => {
                     this.staffList = staffs;

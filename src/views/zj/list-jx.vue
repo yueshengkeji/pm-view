@@ -1,4 +1,4 @@
-<template>
+list-jx.vue<template>
   <div>
     <div v-if="loadDetailByHouse == null">
       <v-row>
@@ -206,7 +206,7 @@
       </v-data-table>
     </div>
     <v-dialog v-model="dialog" @close="dialog = false" fullscreen>
-      <concat-detail :id="detailId" @close="closeHandler()"></concat-detail>
+      <concat-detail :type="type" ref="concatDetail" :id="detailId" @close="closeHandler()"></concat-detail>
     </v-dialog>
     <v-dialog v-model="deleteDialog" @close="deleteDialog = false" width="30%">
       <v-card>
@@ -1008,13 +1008,16 @@ export default {
       if (this.$refs.file) {
         this.$refs.file.reset()
       }
-      if (type == 0) {
-        this.defaultFlow = "租赁合同审批单"
-      } else if (type == 2) {
-        this.defaultFlow = "多经类合同审批单"
-      } else {
-        this.defaultFlow = "物业管理费合同审批"
+      if(this.$refs.concatDetail){
+        this.$refs.concatDetail.reset(type)
       }
+      // if (type == 0) {
+      //   this.defaultFlow = "租赁合同审批单"
+      // } else if (type == 2) {
+      //   this.defaultFlow = "多经类合同审批单"
+      // } else {
+      //   this.defaultFlow = "物业管理费合同审批"
+      // }
       this.reset(type)
       this.dialog = true
     },
