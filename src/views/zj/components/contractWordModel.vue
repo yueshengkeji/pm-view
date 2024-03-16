@@ -1,5 +1,15 @@
 <template>
     <v-container>
+<!--        <v-row>-->
+<!--            <v-col>-->
+<!--                <v-file-input-->
+<!--                        accept=".docx,.doc"-->
+<!--                        prepend-icon="mdi-camera"-->
+<!--                        label="上传模板"-->
+<!--                        @change="uploadModelFile"-->
+<!--                ></v-file-input>-->
+<!--            </v-col>-->
+<!--        </v-row>-->
         <v-row>
                 <v-col cols="12" md="6">
                     <v-select label="模板类型"
@@ -33,14 +43,16 @@
 </template>
 <script>
     import VueUeditorWrap from "vue-ueditor-wrap";
-    import {listContractWordModel,updateContractWordModel,listContractWordModelParams} from "../../../api/contractWordModel";
+    import {listContractWordModel,updateContractWordModel,listContractWordModelParams,uploadWord} from "../../../api/contractWordModel";
 
     export default {
         name: 'contractWordModel',
         components: {VueUeditorWrap},
         data: () => ({
             modelTypes: [],
-            modelItem: null,
+            modelItem: {
+                type:0
+            },
 
             editDocument: null,
             moduleHtml: '',
@@ -51,12 +63,14 @@
             },
 
             contractParamItem:null,
-            contractParams: []
+            contractParams: [],
+
+            modelFile:null
         }),
 
         created() {
             this.listWordModel()
-            this.listContractWordModelParams()
+            // this.listContractWordModelParams()
         },
 
         watch: {
@@ -64,6 +78,7 @@
                 handler() {
                     if (this.modelItem != null) {
                         this.loadWordModel(this.modelItem)
+                        this.listContractWordModelParams()
                     }
                 },
                 deep: true
@@ -78,7 +93,7 @@
 
         methods: {
             listContractWordModelParams(){
-                listContractWordModelParams().then(res => {
+                listContractWordModelParams({type:this.modelItem.type}).then(res => {
                     this.contractParams = res
                 })
             },
@@ -109,7 +124,6 @@
             },
 
             submit: function () {
-                console.log(this.editDocument)
                 let list = this.editDocument.document.getElementById("list")
                 if (list != null) {
                     list.remove();
@@ -134,6 +148,17 @@
                 })
             },
 
+            uploadModelFile(info){
+                let form = new FormData();
+                form.append('file',info)
+                uploadWord(form).then(res => {
+                    this.editDocument.execCommand('cleardoc');
+                    this.editDocument.execCommand('insertHtml', res)
+                    console.log(res)
+                }).catch(e =>{
+                    console.log(e)
+                })
+            }
 
         }
     }

@@ -192,3 +192,28 @@ export function deleteBill(id){
         method:'delete',
     })
 }
+
+export function proZujinPromotionList(data) {
+    return request({
+        url: 'zujin/proZujinPromotionList',
+        method: 'get',
+        params:data
+    })
+}
+
+export function updatePromotion(data) {
+    return request({
+        url: 'zujin/updatePromotion',
+        method: 'post',
+        data
+    })
+}
+
+export function deletePromotion(data) {
+    return request({
+        url: 'zujin/deletePromotion',
+        method:'post',
+        data
+    })
+
+}

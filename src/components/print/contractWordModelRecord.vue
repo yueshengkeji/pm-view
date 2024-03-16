@@ -26,7 +26,7 @@
 
         }),
         props: {
-            contractId: Number,
+            contractId: String,
         },
         mounted() {
             let than = this

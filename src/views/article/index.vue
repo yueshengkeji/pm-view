@@ -397,7 +397,7 @@ export default {
         this.thisFolder.parentId = this.thisFolder.parent.id
       }
       this.editModule.wordToHtml = this.folderModule
-      if (this.editModule.id == null || this.editModule.id == "") {
+      if ((this.editModule.id == null || this.editModule.id == "") && this.thisFolder.id == null) {
         //新增模板
         this.editModule.name = this.thisFolder.name
         insertWord(this.editModule).then((module) => {

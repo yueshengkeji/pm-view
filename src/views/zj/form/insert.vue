@@ -130,6 +130,9 @@
           <v-text-field dense label="联系手机号" v-model="data.brandCompany.telephoneP"></v-text-field>
         </v-col>
         <v-col sm="2">
+          <v-text-field dense label="邮箱" v-model="data.brandCompany.emailP"></v-text-field>
+        </v-col>
+        <v-col sm="2">
           <v-select dense
                     label="发票类型"
                     placeholder="请选择发票类型"
@@ -137,10 +140,10 @@
                     :items="billTypes"
                     return-object></v-select>
         </v-col>
-        <v-col sm="4">
+        <v-col sm="3">
           <v-text-field dense label="发票地址" v-model="data.brandCompany.address"></v-text-field>
         </v-col>
-        <v-col sm="4">
+        <v-col sm="3">
           <v-text-field dense label="纳税人识别号" v-model="data.brandCompany.taxNumber"></v-text-field>
         </v-col>
       </v-row>
@@ -150,6 +153,7 @@
           <v-tabs v-model="tab">
             <v-tab key="zl">租赁条款</v-tab>
             <v-tab key="bzj">保证金条款</v-tab>
+            <v-tab key="tgf">推广费条款</v-tab>
           </v-tabs>
           <v-btn @click="insertMoneyHandler" small outlined absolute color="primary" right style="margin-top:-20px">
             新增
@@ -190,6 +194,14 @@
                 </template>
               </v-data-table>
             </v-tab-item>
+            <v-tab-item key="tgf">
+              <v-data-table :items.sync="tgfItems" :headers="tgfHeader" hide-default-footer :items-per-page="-1">
+                <template v-slot:item.action="{item}">
+                  <v-btn color="error" x-small outlined @click="deleteTgfHandler(item)">删除</v-btn>
+                </template>
+              </v-data-table>
+            </v-tab-item>
+
           </v-tabs-items>
         </v-col>
       </v-row>
@@ -209,9 +221,9 @@
       >
         <v-radio label="租赁合同" :value="0"></v-radio>
         <v-radio label="物管合同" :value="1"></v-radio>
-        <v-radio label="多经类" :value="2"></v-radio>
       </v-radio-group>
       <v-btn @click="printContractWord">打印</v-btn>
+<!--      <v-btn @click="exportWord">导出word</v-btn>-->
       <v-btn @click="insertZujin" color="primary" :loading="loading">确定</v-btn>
       <v-btn @click="saveData" :loading="loading">仅保存数据</v-btn>
       <v-btn @click="filesHandler">查看附件</v-btn>
@@ -261,9 +273,13 @@
               <v-text-field type="number" v-model="t.money" label="金额*"
                             :rules="[v => !!v || '请输入计费金额']"></v-text-field>
             </v-col>
-            <v-col cols="3">
+            <v-col cols="1.5">
               <v-text-field type="number" v-model="t.price" label="单价*"
-                            :rules="[v => !!v || '请输入单价']"></v-text-field>
+                            ></v-text-field>
+            </v-col>
+            <v-col cols="1.5">
+              <v-text-field type="number" v-model="t.fixPercent" label="固定扣点*"
+                            ></v-text-field>
             </v-col>
             <v-col cols="3">
               <v-select v-model="t.unit" :items="unitItems" label="计费单位*" :rules="rules.unit"></v-select>
@@ -375,21 +391,78 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="tgfDialog" width="50%">
+      <v-card class="pa-3">
+        <v-form ref="tgfForm">
+          <v-row>
+            <v-col cols="12">
+              <v-text-field v-model="tgfItem.name" label="推广费名称*" :rules="[v => !!v || '请输入推广名称']"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" v-model="tgfItem.price" label="推广单价(元/次)*"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" v-model="tgfItem.times" label="推广次数*" :rules="[v => !!v || '请输入推广费金额']"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" v-model="tgfItem.money" label="推广金额*"
+                            :rules="[v => !!v || '请输入推广费金额']"></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" v-model="tgfItem.voucher" label="抵用券*"
+                            :rules="[v => !!v || '请输入抵用券金额']"></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" v-model="tgfItem.liquidatedDamages" label="违约金*"
+                            :rules="[v => !!v || '请输入违约金金额']"></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" v-model="tgfItem.firstBar" label="头条单价(元/次)*"
+                            :rules="[v => !!v || '请输入头条单价']"></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" v-model="tgfItem.secondBar" label="次条单价(元/次)*"
+                            :rules="[v => !!v || '请输入次条单价']"></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" v-model="tgfItem.otherBar" label="其他单价(元/次)*"
+                            :rules="[v => !!v || '请输入其他单价']"></v-text-field>
+            </v-col>
+          </v-row>
+        </v-form>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="saveTgfHandler">确定</v-btn>
+          <v-btn @click="tgfDialog=false">取消</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <component v-bind:is="printComponent"
                v-bind:contractId="contractId"
                v-on:success="printComponent = null"
     ></component>
+
+    <instance-detail :frame="frameId"
+                     @close="closeFrameHandler"></instance-detail>
   </v-card>
 </template>
 
 <script>
 import {houseList} from '@/api/house'
-import {insertZujin, updateZujin, queryById, updateTerm, deleteTerm, deleteBzj} from "@/api/zujin";
+import {insertZujin, updateZujin, queryById, updateTerm, deleteTerm, deleteBzj, deletePromotion} from "@/api/zujin";
 import {insertContractWordRecord} from "@/api/contractWordModel";
 import EasyFlow from "@/components/easyflow/easyFlow.vue";
 import FileUpload from "@/components/fileUpload.vue";
 import SelectCompany from "@/views/company/select.vue";
 import {list} from '@/api/yetai'
+// import {selectContractWordRecordByContractId} from "../../../api/contractWordModel";
+// import {saveAs} from "file-saver"
+// import htmlDocx from "html-docx-js/dist/html-docx"
 
 export default {
   name: "zj-insert",
@@ -397,6 +470,7 @@ export default {
     SelectCompany,
     FileUpload,
     EasyFlow,
+    instanceDetail: () => import('@/components/easyflow/instance-detail.vue'),
   },
   data: () => ({
     receivedError: null,
@@ -495,7 +569,7 @@ export default {
     ],
     typeItems: [
       {value: 'regular', text: '固定金额'},
-      // {value: 'regularPreferential', text: '固定租金(优惠阶段)'},
+      {value: 'regularPreferential', text: '固定租金(优惠阶段)'},
       {value: 'commission', text: '提成租金'},
       {value: 'compare', text: '提成固定较高租金'},
     ],
@@ -532,7 +606,8 @@ export default {
       firstMoney: null,
       priceType: null,
       money:null,
-      price:null
+      price:null,
+      fixPercent:null
     },
     bzjItems: [],
 
@@ -541,6 +616,36 @@ export default {
     //打印
     contractId: null,
     printComponent: null,
+
+    //推广费
+    tgfDialog:false,
+    tgfItems:[],
+    tgfHeader:[
+      {value: 'name', text: '费用名称'},
+      {value: 'price', text: '单价(元/次)'},
+      {value: 'times', text: '推广次数'},
+      {value: 'money', text: '推广费用'},
+      {value: 'voucher', text: '抵用券'},
+      {value: 'liquidatedDamages', text: '违约金'},
+      {value: 'firstBar', text: '头条单价(元/次)'},
+      {value: 'secondBar', text: '次条单价(元/次)'},
+      {value: 'otherBar', text: '其他单价(元/次)'},
+      {value: 'action', text: '操作'}
+    ],
+    tgfItem:{
+      id:null,
+      contractId:null,
+      name:null,
+      times:null,
+      price:null,
+      money:null,
+      voucher:null,
+      liquidatedDamages:null,
+      firstBar:null,
+      secondBar:null,
+      otherBar:null,
+    },
+    frameId:null
   }),
   props: {
     type: {
@@ -568,9 +673,7 @@ export default {
 
     if (this.type == 0) {
       this.defaultFlow = "租赁合同审批单"
-    } else if (this.type == 2) {
-      this.defaultFlow = "多经类合同审批单"
-    } else {
+    }  else {
       this.defaultFlow = "物业管理费合同审批"
     }
 
@@ -580,9 +683,19 @@ export default {
 
     if (this.id) {
       this.loadById(this.id)
+    }else {
+      let id = this.$route.params.id
+      if(id){
+        this.loadById(id)
+      }
     }
   },
   methods: {
+    closeFrameHandler(isClose) {
+      if (!isClose) {
+        this.frameId = null
+      }
+    },
     loadById(id) {
       if (id) {
         queryById(id).then(result => {
@@ -602,9 +715,13 @@ export default {
           result.bzjList.forEach((val, idx) => {
             val.idx = idx
           })
+          result.tgfList.forEach((val,idx) => {
+            val.idx = idx
+          })
 
           this.zlItems = result.termList
           this.bzjItems = result.bzjList
+          this.tgfItems = result.tgfList
         })
       }
     },
@@ -715,6 +832,21 @@ export default {
       if (this.tab == '0') {
         this.resetMoneyType()
         this.moneyTypeDialog = true
+      } else if (this.tab == '2'){
+        this.tgfDialog = true
+        this.tgfItem = {
+          id:null,
+          contractId:null,
+          name:null,
+          times:null,
+          price:null,
+          money:null,
+          voucher:null,
+          liquidatedDamages:null,
+          firstBar:null,
+          secondBar:null,
+          otherBar:null
+        }
       } else {
         this.bzj = Object.assign({
           money: "",
@@ -740,13 +872,30 @@ export default {
       if (this.data.houses && this.data.houses.length > 0) {
         money = this.data.houses[0].money
       }
+
+      let payCycle = null
+      if(this.data.payType == 1){
+        payCycle = 'quarter'
+      }else if(this.data.payType == 2){
+        payCycle = 'month'
+      }else if(this.data.payType == 3){
+        payCycle = 'towMonth'
+      }
+
+      // {value: 'month', text: '月付'},
+      // {value: 'towMonth', text: '两月付'},
+      // {value: 'quarter', text: '季付'},
+      // {text: '季度方式', value: 1},
+      // {text: '月付方式', value: 2},
+      // {text: '双月付', value: 3},
+
       this.t = Object.assign({
         name: null,
         startDate: startDate,
         endDate: endDate,
         type: 'regular',
         unit: null,
-        payCycle: null,
+        payCycle: payCycle,
         monthBill: null,
         payType: 'day',
         payDay: null,
@@ -755,12 +904,12 @@ export default {
         firstMoney: null,
         priceType: null,
         money: money,
-        price: null
+        price: null,
+        fixPercent:null
       }, {})
     },
     filesHandler() {
-      console.log("fileshandler", this.item)
-      this.frameId = this.item.id + "-zujin"
+      this.frameId = this.data.id + "-zujin"
     },
     saveData() {
       let valid = this.$refs['zujinForm'].validate();
@@ -815,9 +964,31 @@ export default {
       }
     },
     printContractWord() {
-      this.contractId = this.data.id
+      this.contractId = this.data.id +""
       this.printComponent = () => import('@/components/print/contractWordModelRecord.vue')
     },
+    // exportWord(){
+    //   this.contractId = this.data.id
+    //   selectContractWordRecordByContractId({contractId:this.contractId}).then(result => {
+    //     if (result != null){
+    //       let rt = result.richText
+    //       this.downLoadWord(rt)
+    //     } else {
+    //       this.$store.state.showTooltip.msg = "未保存合同模板记录，无法导出"
+    //       this.$store.state.showTooltip.show = true
+    //       this.$store.state.showTooltip.back = () => {
+    //         this.$store.state.showTooltip.show = false
+    //       }
+    //     }
+    //   })
+    // },
+    // downLoadWord(data){
+    //   saveAs(
+    //           htmlDocx.asBlob(data,{orientation: "landscape"}),
+    //           "租赁合同.doc"
+    //   )
+    // },
+
     fileChangeHandler({files}) {
       this.data.files = ""
       files.forEach(item => {
@@ -974,7 +1145,32 @@ export default {
         openDate: null,
         billType: ''
       }
+      this.zlItems = []
+      this.bzjItems = []
+    },
 
+    //推广费
+    deleteTgfHandler(item){
+      deletePromotion(item).then(res => {
+        if (res == 1){
+          this.tgfItems.forEach((val,idx) => {
+            if (item.idx == val.idx){
+              this.tgfItems.splice(idx,1)
+            }
+          })
+        }
+      })
+    },
+    saveTgfHandler(){
+      let valid = this.$refs.tgfForm.validate()
+      if (valid){
+        if(!this.update){
+          this.tgfItem.idx = this.tgfItems.length
+          this.tgfItems.push(this.tgfItem)
+          this.tgfDialog = false
+        }
+        this.update = false
+      }
     }
   }
 }

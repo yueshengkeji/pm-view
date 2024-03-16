@@ -3,7 +3,7 @@
     <v-form ref="entertainForm">
 
       <v-toolbar flat>
-        <v-toolbar-title>租赁信息</v-toolbar-title>
+        <v-toolbar-title>租赁信息<v-btn right outlined small absolute :to="`/zj/form/insert/${frameId.replace('-zujin','')}`" target="_blank">修改</v-btn></v-toolbar-title>
       </v-toolbar>
       <v-row>
         <!--            <v-col sm="1">-->

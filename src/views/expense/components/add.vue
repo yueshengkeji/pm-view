@@ -100,7 +100,7 @@
 import fileUpload from "../../../components/fileUpload";
 import easyFlow from "../../../components/easyflow/easyFlow";
 import {search} from "../../../api/project";
-import {queryAll, selectById, insert, update, deleteFile, deleteSubject} from "../../../api/expense";
+import {queryAll, selectById, insert, update, deleteFile} from "../../../api/expense";
 
 export default {
   name: 'add',
@@ -221,14 +221,15 @@ export default {
   },
   methods: {
     deleteItemHandler(item) {
-      delete this.dessertsMap[item.course.id]
+      console.log(item)
+      // delete this.dessertsMap[item.course.id]
       for (let i = 0; i < this.desserts.length; i++) {
         if (this.desserts[i].course.id == item.course.id) {
           this.desserts.splice(i, 1)
-          if (item.id) {
+          // if (item.id) {
             //从服务器删除报销科目
-            deleteSubject(item.id)
-          }
+            // deleteSubject(item.id)
+          // }
         }
       }
     },
@@ -347,10 +348,11 @@ export default {
 
     },
     courseSelectAction() {
+      this.desserts = []
       this.coursesSelect.forEach(item => {
-        if (this.dessertsMap[item.id]) {
-          return
-        }
+        // if (this.dessertsMap[item.id]) {
+        //   return
+        // }
         this.expenseSubjectItemReset()
         if (Object.prototype.toString.call(item) != '[object Object]') {
           this.expenseSubjectItem.course.name = item
@@ -359,7 +361,7 @@ export default {
           this.expenseSubjectItem.course = item
           this.desserts.push(this.expenseSubjectItem)
         }
-        this.dessertsMap[item.id] = this.expenseSubjectItem
+        // this.dessertsMap[item.id] = this.expenseSubjectItem
       })
     },
     moneyChange() {

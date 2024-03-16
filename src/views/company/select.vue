@@ -34,6 +34,9 @@ export default {
     data: {
       handler() {
         this.company = Object.assign({}, this.data)
+        if(this.company){
+          this.companyList.push(this.company)
+        }
       },
       deep: true
     },
@@ -46,6 +49,7 @@ export default {
   created() {
     if (this.data) {
       this.company = Object.assign({}, this.data)
+      this.companyList.push(this.company)
     }
     this.searchCompany = this.search
     if (this.searchCompany) {
@@ -60,6 +64,8 @@ export default {
         }
       })
     }
+
+
   },
   model: {
     prop: "data",

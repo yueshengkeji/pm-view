@@ -1,11 +1,10 @@
-list-jx.vue<template>
+<template>
   <div>
     <div v-if="loadDetailByHouse == null">
       <v-row>
         <v-col sm="5" cols="12">
           <v-btn v-if="type == null" small color="primary" @click="openDialog(0)">租赁合同登记</v-btn>
           <v-btn class="ml-1" v-if="type == null" small color="primary" @click="openDialog(1)">物管合同登记</v-btn>
-          <v-btn class="ml-1" v-if="type == null" small color="primary" @click="openDialog(2)">多经类合同登记</v-btn>
           <v-btn @click="downloadExcel" small :loading="loading" class="ml-1">导出</v-btn>
           <v-menu ref="menu3" v-model="menu3" offset-y :close-on-content-click="false">
             <template v-slot:activator="{ on, attrs }">
@@ -226,8 +225,7 @@ list-jx.vue<template>
         <v-btn @click="mapDialog = false" absolute right bottom>返回</v-btn>
       </v-card>
     </v-dialog>
-    <instance-detail :frame="frameId"
-                     @close="closeFrameHandler"></instance-detail>
+
 
     <v-dialog v-model="modelPrintDialog">
       <v-card>
@@ -283,7 +281,6 @@ import contractWordModel from "./components/contractWordModel";
 export default {
   components: {
     houseMap,
-    instanceDetail: () => import('@/components/easyflow/instance-detail.vue'),
     contractWordModel,
     concatDetail: () => import('@/views/zj/form/insert.vue')
   },
@@ -1065,13 +1062,6 @@ export default {
       this.billItems = []
       this.loadHouses();
       this.offInsert = false
-    },
-
-    closeFrameHandler(isClose) {
-      console.log("closeFrameHandler", isClose)
-      if (!isClose) {
-        this.frameId = null
-      }
     },
 
 

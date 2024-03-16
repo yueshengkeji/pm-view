@@ -88,6 +88,14 @@
                           :rules="rules.openAccountRule"
             ></v-text-field>
           </v-col>
+          <v-col md="3">
+            <v-text-field v-model="company.emailP"
+                          label="联系邮箱"
+            ></v-text-field>
+          </v-col>
+          <v-col>
+            <v-text-field v-model="company.IDNumber" label="证件号码"></v-text-field>
+          </v-col>
 
         </v-row>
       </v-form>
@@ -245,6 +253,8 @@ export default {
         bankNumber2: null,
         openAccount2: null,
         lineNum:null,
+        emailP:null,
+        IDNumber:null
       }
     }
   }

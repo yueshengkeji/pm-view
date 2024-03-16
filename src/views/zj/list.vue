@@ -65,11 +65,9 @@
 
         <template v-slot:item="{ item }">
           <tr class="red--text text--lighten-1" @dblclick="detail($event, { item })" v-if="isEnd(item.endDatetime)">
+
             <td class="text-start">
-              {{ item.series }}
-            </td>
-            <td class="text-start">
-              {{ item.company }}
+              {{ item.brandCompany.name }}
             </td>
             <td class="text-start">
               {{ item.brand }}
@@ -119,11 +117,9 @@
           </tr>
 
           <tr class="light-blue--text text--darken-1" @dblclick="detail($event, { item })" v-else-if="isPay(item)">
+
             <td class="text-start">
-              {{ item.series }}
-            </td>
-            <td class="text-start">
-              {{ item.company }}
+              {{ item.brandCompany.name }}
             </td>
             <td class="text-start">
               {{ item.brand }}
@@ -173,11 +169,9 @@
           </tr>
 
           <tr @dblclick="detail($event, { item })" v-else>
+
             <td class="text-start">
-              {{ item.series }}
-            </td>
-            <td class="text-start">
-              {{ item.company }}
+              {{ item.brandCompany.name }}
             </td>
             <td class="text-start">
               {{ item.brand }}
@@ -230,341 +224,7 @@
     </div>
     <v-dialog v-model="dialog" @close="dialog = false" fullscreen>
       <v-card class="pa-3">
-        <v-form ref="zujinForm" class="pt-5">
-          <v-row dense class="mr-0">
-            <v-col sm="1">
-              <v-text-field dense label="合同编号" :rules="rules.series" v-model="data.series"></v-text-field>
-            </v-col>
-            <v-col sm="3">
-              <v-text-field dense label="租赁方" :rules="rules.company" v-model="data.company"></v-text-field>
-            </v-col>
-            <v-col sm="1">
-              <v-text-field dense label="品牌" :rules="rules.brand" v-model="data.brand"></v-text-field>
-            </v-col>
-            <v-col sm="1">
-              <v-text-field type="number" dense label="应收租金" :rules="rules.yearRental"
-                v-model="data.yearRental"></v-text-field>
-            </v-col>
-            <v-col sm="1">
-              <v-select dense :items="payTypes" label="付租方式" v-model="data.payType"></v-select>
-            </v-col>
-            <v-col sm="1">
-              <v-menu v-model="menu6" :close-on-content-click="false" transition="scale-transition" offset-y
-                min-width="auto">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field v-model="data.startDatetime"
-                  :rules="rules.startDatetime" label="合同开始日期" dense hide-details
-                    readonly v-bind="attrs" v-on="on"></v-text-field>
-                </template>
-                <v-date-picker v-model="data.startDatetime" no-title scrollable></v-date-picker>
-              </v-menu>
-            </v-col>
-            <v-col sm="1">
-              <v-menu v-model="menu4" :close-on-content-click="false" transition="scale-transition" offset-y
-                min-width="auto">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field v-model="data.endDatetime" :rules="rules.endDatetime" label="截止日期" dense hide-details
-                    readonly v-bind="attrs" v-on="on"></v-text-field>
-                </template>
-                <v-date-picker v-model="data.endDatetime" no-title scrollable></v-date-picker>
-              </v-menu>
-            </v-col>
-            <v-col sm="1">
-              <v-text-field dense label="租赁联系人" v-model="data.zlPerson"></v-text-field>
-            </v-col>
-            <v-col sm="2">
-              <v-text-field dense label="联系手机号" v-model="data.zlPersonTel"></v-text-field>
-            </v-col>
-            <v-col sm="4"></v-col>
-            <v-col sm="4" style="position:absolute;left: 0;top:75px">
-              <v-textarea dense rows="4" label="备注" v-model="data.remark"></v-textarea>
-            </v-col>
-            <v-col sm="2">
-              <v-radio-group dense v-model="data.zlType" @change="houseSelect" row>
-                <v-radio :value="0" label="固定商铺"></v-radio>
-                <v-radio :value="1" label="机动" @click="$refs.acreage.focus()"></v-radio>
-              </v-radio-group>
-            </v-col>
-            <v-col sm="2">
-              <v-autocomplete :items="houseList" dense multiple v-model="data.houses" :search-input.sync="searchHouse"
-                :disabled="data.zlType === 1" :error-messages="houseMessage" @change="houseChange" return-object
-                item-value="id" item-text="temp" auto-select-first placeholder="请选择商铺位置" title="支持多选，可输入商铺/楼层编号筛选"
-                append-icon="mdi-map-marker" @click:append="openMap" label="商铺位置">
-              </v-autocomplete>
-            </v-col>
-            <v-col sm="2">
-              <v-select dense label="业态" placeholder="请选择业态" v-model="data.yt" :items="yitaiItems" item-text="name"
-                :rules="rules.yt" return-object></v-select>
-            </v-col>
-            <v-col sm="2">
-              <v-text-field type="number" label="租赁面积" dense ref="acreage" :error-messages="acreageMessage"
-                @change="acreageMessage = null" v-model="data.acreage"></v-text-field>
-            </v-col>
-
-            <v-col sm="2" offset="4">
-              <v-checkbox dense label="有无孰商" v-model="data.sh" style="position:absolute;margin-top: 30px"></v-checkbox>
-              <v-checkbox label="有无递增" @change="dzNumberError = null" dense class="mt-0" hide-details
-                v-model="data.dz"></v-checkbox>
-
-            </v-col>
-            <v-col sm="1">
-              <v-text-field :disabled="!data.dz" label="递增比例" v-model="data.dzNumber" dense
-                :error-messages="dzNumberError" append-icon="%"></v-text-field>
-            </v-col>
-            <v-col sm="1">
-              <v-text-field dense label="招商经办人" v-model="data.staffName"></v-text-field>
-            </v-col>
-            <v-col sm="2" v-if="data.id == null">
-              <easy-flow coding="1320287" dense ref="easyFlow" :default-flow-name="defaultFlow"></easy-flow>
-            </v-col>
-            <v-col sm="2" v-if="data.id == null">
-              <file-upload ref="file" @change="fileChangeHandler"></file-upload>
-            </v-col>
-            <v-col sm="2" v-if="data.id != null">
-              <v-menu v-model="menu5" bottom right transition="scale-transition" origin="top left">
-                <template v-slot:activator="{ on }">
-                  <v-chip pill v-on="on" :disabled="offEdit">
-                    {{ '保证金:' + bzjMoneyCount }}
-                    <v-avatar right @click.stop="bzjDialog = true">
-                      <v-icon>mdi-plus</v-icon>
-                    </v-avatar>
-                  </v-chip>
-                </template>
-                <v-data-table :headers="bzjHeaders" sort-by="datetime" sort-desc :items="bzjItems">
-                  <template v-slot:item.datetime="{ item }">
-                    {{ dateFormat(new Date(item.datetime), 'YYYY-mm-dd') }}
-                  </template>
-                  <template v-slot:item.action="{ item }">
-                    <v-btn x-small color="error" @click.stop="deleteBzjHandler(item.id)">删除</v-btn>
-                  </template>
-                </v-data-table>
-              </v-menu>
-            </v-col>
-            <v-col sm="2" v-if="data.id != null">
-              <v-row key="row-sm-2" dense class="white">
-                <v-col style="background-color: rgba(218, 150, 148, 1);" cols="6">期初未开票
-                </v-col>
-                <v-col class="cursor" cols="6" style="background-color: rgba(218, 150, 148, 1)">
-                  <v-text-field @change="updateQcOweMoney(data.billOwe)" type="number" @focus="$event.target.select()"
-                    hide-details dense v-model="data.billOwe.oweMoney"></v-text-field>
-                </v-col>
-
-                <v-col style="background-color: rgba(0, 176, 240, 1)" cols="6">期初欠租</v-col>
-                <v-col class="cursor" cols="6" style="background-color: rgba(0, 176, 240, 1)">
-                  <v-text-field @change="updateQcOweMoney(data.moneyOwe)" type="number" @focus="$event.target.select()"
-                    hide-details dense v-model="data.moneyOwe.oweMoney"></v-text-field>
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-row>
-        </v-form>
-        <v-row class="mr-0">
-          <v-col cols="7" class="overflow-y-auto">
-            <v-data-table :headers="headers2" class="cursor" :loading="detailLoading" @click:row="editDetailItem"
-              hide-default-footer dense height="300" :items-per-page="-1" :items="ysMoneyItems">
-              <template v-slot:top>
-                <v-btn v-if="data.id != null" x-small color="primary" @click="newLine(ysMoneyItems)"
-                  :disabled="offInsert">
-                  收款登记
-                </v-btn>
-                <v-chip x-small>应收合计:{{ ysMoneyCount.toFixed(2) }}</v-chip>
-                <v-chip x-small>实收合计:{{ sjMoneyCount.toFixed(2) }}</v-chip>
-              </template>
-
-              <template v-slot:item.index="{ item }">
-                <v-btn absolute style="left: 5px;margin-top: -10px" v-if="item.edit" x-small color="primary"
-                  @click.stop="savePro()">保存
-                </v-btn>
-                <v-btn absolute style="left:55px;margin-top: -10px" v-if="item.edit" x-small color="error"
-                  @click.stop="cancelInsert()">取消
-                </v-btn>
-                <div v-else>{{ item.index }}</div>
-              </template>
-
-              <template v-slot:item.proDate="{ item }">
-                <v-menu :ref="item.id" v-if="item.edit" v-model="menu" :close-on-content-click="false"
-                  transition="scale-transition" offset-y min-width="auto">
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field v-model="item.proDate" class="pa-0" :ref="item.id + 'proDate'" autofocus dense
-                      hide-details readonly v-bind="attrs" v-on="on"></v-text-field>
-                  </template>
-                  <v-date-picker @input="dateChange(item, 'proDate')" v-model="item.proDate" no-title
-                    scrollable></v-date-picker>
-                </v-menu>
-                <div v-else @click.stop="editDetailItem('proDate', item)">{{ item.proDate }}</div>
-              </template>
-
-              <template v-slot:item.proMoney="{ item }">
-                <v-text-field hide-details :ref="item.id + 'proMoney'" type="number" class="pa-0" dense
-                  @keydown.enter="savePro" v-if="item.edit" v-model="item.proMoney"></v-text-field>
-                <div v-else @click.stop="editDetailItem('proMoney', item)">{{ item.proMoney }}</div>
-              </template>
-
-              <template v-slot:item.putDate="{ item }">
-                <v-menu :ref="item.id" v-if="item.edit" v-model="menu2" :close-on-content-click="false"
-                  transition="scale-transition" offset-y min-width="auto">
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field v-model="item.putDate" class="pa-0" :ref="item.id + 'putDate'" autofocus dense
-                      hide-details readonly v-bind="attrs" v-on="on"></v-text-field>
-                  </template>
-                  <v-date-picker @input="dateChange(item, 'putDate')" v-model="item.putDate" no-title
-                    scrollable></v-date-picker>
-                </v-menu>
-                <div v-else @click.stop="editDetailItem('putDate', item)">{{ item.putDate }}</div>
-              </template>
-
-              <template v-slot:item.putMoney="{ item }">
-                <v-text-field hide-details :ref="item.id + 'putMoney'" type="number" class="pa-0" dense
-                  @keydown.enter="savePro" v-if="item.edit" v-model="item.putMoney"></v-text-field>
-                <div v-else @click.stop="editDetailItem('putMoney', item)">{{ item.putMoney }}</div>
-              </template>
-              <template v-slot:item.remark="{ item }">
-                <v-text-field hide-details @keydown.enter="savePro" :ref="item.id + 'remark'" class="pa-0" dense
-                  v-if="item.edit" v-model="item.remark"></v-text-field>
-                <div v-else @click.stop="editDetailItem('remark', item)">{{ item.remark }}</div>
-              </template>
-            </v-data-table>
-          </v-col>
-          <v-col cols="5" class="overflow-y-auto">
-            <v-data-table :loading="detailLoading2" class="cursor" @click:row="editDetailItem2" calculate-widths dense
-              hide-default-footer height='300' :items-per-page="-1" :items="cwMoneyItems">
-              <template v-slot:top>
-                <v-btn v-if="data.id != null && !offEdit" x-small color="primary" @click="newLine2(cwMoneyItems)"
-                  :disabled="offInsert">
-                  财务登记
-                </v-btn>
-                <v-btn x-small color="primary" @click="newLine2(cwMoneyItems)" :disabled="true" title="未检测到T3帐套信息">
-                  用友T3数据
-                </v-btn>
-                <v-btn v-if="data.id != null && !offEdit" x-small color="primary" @click="newLine3(billItems)"
-                  :disabled="offInsert">
-                  会计科目
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
-                <v-btn v-if="detailItem.edit && !offEdit" :disabled="!offInsert" :loading="saveLoading" x-small
-                  color="primary" @click.stop="savePay">保存
-                </v-btn>
-                <v-btn v-if="detailItem.edit && !offEdit" :disabled="!offInsert" :loading="saveLoading" x-small
-                  color="error" @click.stop="cancelInsert">取消
-                </v-btn>
-              </template>
-              <template v-slot:body>
-                <thead>
-                  <tr>
-                    <template v-for="(headerItem1, idx1) in headers3">
-                      <th :colspan="headerItem1.colspan" :width="headerItem1.width" class="text-center"
-                        :key="'header1' + idx1" :style="{ textAlign: headerItem1.align }">
-                        {{ headerItem1.text }}
-                      </th>
-                    </template>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(item, idx) in cwMoneyItems" :key="'tbody' + idx">
-                    <td @click="editDetailItem2('proDate', item)" width="30%">
-                      <v-text-field v-model="item.billDate" title="开票日期" :ref="item.id + 'proDate'"
-                        @keydown.enter="savePay" v-if="!offEdit && item.edit" class="pa-0 mt-0" autofocus dense
-                        hide-details></v-text-field>
-                      <div v-if="!offEdit && !item.edit" @click.stop="editDetailItem('proDate', item)">
-                        {{ item.billDate }}
-                      </div>
-                      <div v-if="offEdit">{{ item.billDate }}</div>
-
-                    </td>
-                    <td @click="editDetailItem('billMoney', item)" width="20%">
-                      <v-text-field class="pa-0 mt-0" :ref="item.id + 'billMoney'" @keydown.enter="savePay" hide-details
-                        v-if="!offEdit && item.edit" title="开票金额" type="number" v-model="item.billMoney"
-                        dense></v-text-field>
-                      <div v-if="!offEdit && !item.edit">{{ item.billMoney }}</div>
-                      <div v-if="offEdit">{{ item.billMoney }}</div>
-                    </td>
-                    <td @click="editDetailItem2('payDate', item)" width="30%">
-                      <v-text-field v-model="item.payDate" v-if="!offEdit && item.edit" @keydown.enter="savePay"
-                        title="收款日期" :ref="item.id + 'payDate'" class="pa-0 mt-0" autofocus dense
-                        hide-details></v-text-field>
-                      <div v-if="!offEdit && !item.edit">{{ item.payDate }}</div>
-                      <div v-if="offEdit">{{ item.payDate }}</div>
-                    </td>
-                    <td @click="editDetailItem('payMoney', item)" width="20%">
-                      <v-text-field class="pa-0 mt-0" :ref="item.id + 'payMoney'" @keydown.enter="savePay" hide-details
-                        title="收款金额" type="number" v-if="!offEdit && item.edit" v-model="item.payMoney"
-                        dense></v-text-field>
-                      <div v-if="!offEdit && !item.edit">{{ item.payMoney }}</div>
-                      <div v-if="offEdit">{{ item.payMoney }}</div>
-                    </td>
-                  </tr>
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td class="border-top">合计</td>
-                    <td class="border-top">{{ billCount }}</td>
-                    <td class="border-top"></td>
-                    <td class="border-top">{{ payCount }}</td>
-                  </tr>
-                  <tr v-for="(billItem, idx) in billItems" :key="'tfoot' + idx"
-                    :title="`第一条账面欠租（会计科目余额）金额计算公式：期初欠租${item.moneyOwe.oweMoney}-期初未开票${item.billOwe.oweMoney}+开票情况合计数${billCount}-收款情况合计${payCount}`">
-                    <td class="border-top">
-                      <div>账面欠租</div>
-                    </td>
-                    <td class="border-top" colspan="2" @click="editDetailItem2('series', billItem)">
-                      <v-text-field v-if="!offEdit && billItem.edit" hide-details dense :ref="billItem.id + 'series'"
-                        autofocus placeholder="请输入科目名称" v-model="billItem.series"></v-text-field>
-                      <div v-if="!offEdit && !billItem.edit">{{ billItem.series }}</div>
-                      <div v-if="offEdit">{{ billItem.series }}</div>
-                    </td>
-                    <td class="border-top" style="background-color: rgba(190,160,199,1)"
-                      @click="editDetailItem2('money', billItem)">
-                      <v-text-field v-if="!offEdit && billItem.edit" hide-details dense :ref="billItem.id + 'money'"
-                        v-model="billItem.money"></v-text-field>
-                      <div v-if="!offEdit && !billItem.edit">{{ getZmMoney(billItem) }}</div>
-                      <div v-if="offEdit">{{ getZmMoney(billItem) }}</div>
-                    </td>
-                  </tr>
-                  <!--                                V1版本:title="`计算公式：期初欠租${data.moneyOwe.oweMoney}+实收合计${sjMoneyCount.toFixed(2)}-财务收款合计${payCount}`"-->
-                  <!--                                V2版本：:title="`计算公式：第一个账面欠款（会计科目）${data.kjType[0].money}>0，则显示该账面欠款（会计科目）金额：${data.kjType[0].money}`"-->
-                  <tr :title="`计算公式：第一个账面欠租（会计科目）${item.kjType[0].money}>0，则显示该账面欠租（会计科目）金额：${item.kjType[0].money}`">
-                    <td class="border-top">
-                      <div>实际欠租</div>
-                    </td>
-                    <td class="border-top" colspan="2">
-                    </td>
-                    <td class="border-top">
-                      <div>{{ getSjQMoney() }}</div>
-                    </td>
-                  </tr>
-                  <!--                                V1版本:title="`计算公式：期初未开票${data.billOwe.oweMoney}+实收合计${sjMoneyCount.toFixed(2)}-财务开票合计${billCount}`"-->
-                  <tr :title="`计算公式：第一个账面欠租（会计科目）${item.kjType[0].money}<=0，则显示该账面欠租（会计科目）金额：${item.kjType[0].money}`">
-                    <td class="border-top">
-                      <div>未开发票</div>
-                    </td>
-                    <td class="border-top" colspan="2">
-                    </td>
-                    <td class="border-top">
-                      <div>{{ getNoBillMoney() }}</div>
-                    </td>
-                  </tr>
-                </tfoot>
-              </template>
-            </v-data-table>
-          </v-col>
-        </v-row>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-radio-group
-                  v-model="data.type"
-                  mandatory
-                  row
-          >
-              <v-radio label="租赁合同" :value="0"></v-radio>
-              <v-radio label="物管合同" :value="1"></v-radio>
-              <v-radio label="多经类" :value="2"></v-radio>
-          </v-radio-group>
-          <v-btn @click="printContractWord">打印</v-btn>
-          <v-btn @click="insertZujin" color="primary">确定</v-btn>
-          <v-btn @click="saveData">仅保存数据</v-btn>
-          <v-btn @click="filesHandler" >查看附件</v-btn>
-          <v-btn @click="dialog = false">取消</v-btn>
-        </v-card-actions>
+        <concat-detail :type="type" ref="concatDetail" :id="detailId" @close="closeHandler()"></concat-detail>
       </v-card>
     </v-dialog>
     <v-dialog v-model="deleteDialog" @close="deleteDialog = false" width="30%">
@@ -672,7 +332,8 @@
     EasyFlow,
     houseMap,
     instanceDetail:() => import('@/components/easyflow/instance-detail.vue'),
-    contractWordModel
+    contractWordModel,
+    concatDetail: () => import('@/views/zj/form/insert.vue')
   },
   name: "zj-list",
   props: {
@@ -680,6 +341,7 @@
     loadDetailByHouse: null,
   },
   data: () => ({
+    detailId:null,
     frameId:null,
     defaultFlow:null,
     mapDialog: false,
@@ -719,8 +381,7 @@
     bzjItems: [],
     year: '2021',
     headers: [
-      { text: '合同编号', value: 'series' },
-      { text: '租赁方', value: 'company' },
+      { text: '租赁方', value: 'brandCompany.name' },
       { text: '品牌', value: 'brand' },
       { text: '业态', value: 'yt.name' },
       { text: '商铺位置', value: 'houses' },
@@ -886,6 +547,11 @@
     this.reset(0)
   },
   methods: {
+    closeHandler() {
+      this.detailId = null
+      this.dialog = false
+      this.list()
+    },
     fileChangeHandler({files}){
       this.data.files = ""
       files.forEach(item=>{
@@ -1345,21 +1011,8 @@
 
     detail(event, row) {
       this.item = row.item
-      if (this.item.houses.length > 0) {
-        this.item.houses.forEach(item => {
-          item.temp = item.pwNumber + ":" + item.acreage
-          this.houseList.push(item)
-        })
-      }
-      this.data = this.item
-      console.log("detail",this.data.yearRental)
-      this.loadBzj();
-      console.log("detail2",this.data.yearRental)
-      this.cancelInsert()
-      console.log("detail3",this.data.yearRental)
-      // this.loadProDetail()
+      this.detailId = row.item.id + ""
       this.dialog = true
-      console.log("detail4",this.data.yearRental)
     },
     loadBzj() {
       this.bzjMoneyCount = 0;

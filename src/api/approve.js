@@ -178,6 +178,19 @@ export function breakFlow(approve) {
     })
 }
 
+
+/**
+ * 驳回到指定审批人
+ * @param approve
+ */
+export function breakToCourse(data) {
+    return request({
+        url: `/myApprove/breakToCourse`,
+        method: "post",
+        data: data
+    })
+}
+
 /**
  * 已读
  * @param approve

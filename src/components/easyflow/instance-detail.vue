@@ -42,6 +42,7 @@
                   </div>
                 </v-row>
               </v-timeline-item>
+
               <template v-for="(item,i) in steps">
                 <v-timeline-item :color="getTimelineColor(item)"
                                  right
@@ -100,7 +101,7 @@
                        v-bind:frameId="frameId"></component>
             <v-row dense class="mt-5">
               <!--                            审批内容输入-->
-              <v-col lg="5" md="5" sm="4" cols="12" class="text-right">
+              <v-col lg="4" md="4" sm="4" cols="12" class="text-right">
                 <v-text-field autocomplete="off"
                               hide-details
                               class="mt-0"
@@ -108,7 +109,7 @@
                               label="请输入审批意见"></v-text-field>
               </v-col>
               <!--                            审批操作-->
-              <v-col lg="7" md="7" sm="8" cols="12" class="text-right">
+              <v-col lg="8" md="8" sm="8" cols="12" class="text-right">
                 <v-dialog v-model="showSelect" :width="dialogWidth">
                   <!--                        <v-subheader>{{selectApprovePerson.name}}</v-subheader>-->
                   <v-card class="white">
@@ -172,11 +173,36 @@
                        class="mr-1">
                   撤回
                 </v-btn>
-                <v-btn @click="breakApprove"
-                       :small="small"
-                       :disabled="operate || approve.approveState != null && approve.approveState >= 3"
-                       class="mr-1">驳回
-                </v-btn>
+                <v-menu open-on-hover
+                        v-model="breakMenu"
+                        top
+                        offset-y>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn class="mr-1"
+                           :disabled="operate || approve.approveState != null && approve.approveState >= 3"
+                           @click="breakApprove"
+                           :small="small"
+                           color="primary"
+                           dark
+                           v-bind="attrs"
+                           v-on="on">
+                      驳回
+                      <v-icon right dark small @cli.stop="breakMenu=true">
+                        mdi-arrow-up
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <template v-for="(item,i) in steps">
+                      <v-list-item :key="i" v-if="approve.courseId != item.courseId" @click="breakToStep(item)">
+                        <v-list-item-title>{{ item.courseName }}</v-list-item-title>
+                      </v-list-item>
+                    </template>
+                    <v-list-item @click="breakApprove" color="primary">
+                      <v-list-item-title>到发起人</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
                 <v-btn @click="printApprove"
                        :disabled="disabledPrint"
                        :small="small"
@@ -379,7 +405,7 @@ import {
   getApproveSteps,
   selectPersonConsent,
   appendApprove,
-  getApproveRecord
+  getApproveRecord, breakToCourse
 } from '@/api/approve'
 import {getStaff} from '@/api/staff'
 import {getFiles} from '@/api/files'
@@ -392,6 +418,7 @@ import axios from 'axios'
 export default {
   name: "instance-detail",
   data: () => ({
+    breakMenu: false,
     loadApproveLoading: false,
     defaultPos: 150,
     vertical: false,
@@ -792,10 +819,8 @@ export default {
     printApprove() {
       let t = () => new Promise(resolve => {
         try {
-          console.log("打印")
           resolve(require(`@/components/print/${this.instaceMsg.frameCoding}.vue`))
         } catch (e) {
-          console.log("打印样式异常", e)
           this.print.printComponent = () => import(`@/components/print/default.vue`);
         }
       });
@@ -830,7 +855,6 @@ export default {
       this.notify.show = true
     },
     appendApprove() {
-      console.log("加签", this.approve);
       this.notifyType = '加签'
       this.notify.show = true
     },
@@ -840,6 +864,21 @@ export default {
       } else {
         this.consentByParam(0);
       }
+      if (this.$store.state.api.approveMsgCount != null) {
+        this.$store.commit('setMsgCount', this.$store.state.api.approveMsgCount - 1)
+      }
+    },
+    breakToStep(step) {
+      this.consentLoading = true;
+      this.setContent();
+      if (this.approve.content == "同意") {
+        this.approve.content = "驳回";
+      }
+      breakToCourse({approve: this.approve, link: {id: step.courseId, name: step.courseName}}).then(() => {
+        this.closeDialog("break");
+      }).finally(() => {
+        this.consentLoading = false;
+      });
       if (this.$store.state.api.approveMsgCount != null) {
         this.$store.commit('setMsgCount', this.$store.state.api.approveMsgCount - 1)
       }
@@ -973,6 +1012,7 @@ export default {
         this.fqFlag = false;
         let steps = []
         result.forEach(item => {
+
           if (item.flowApproves && item.flowApproves.length > 0) {
             this.approveList = this.approveList.concat(item.flowApproves)
           } else {
@@ -1005,13 +1045,12 @@ export default {
           item.flowApproves.forEach(item2 => {
             if (item2.approveState <= 1) {
               step.status = item2.approveState
-            } else if (item2.approveState <= 3 && step.status === -1) {
+            } else if (item2.approveState <= 4 && (step.status === -1 || step.status >= 5)) {
               step.status = item2.approveState
             }
           })
           steps.push(step)
         })
-
         this.steps = steps
 
         this.$emit("loadSteps", steps)
@@ -1060,9 +1099,10 @@ export default {
             tempMap[item.courseId] = step;
             tempArray.push(step);
           } else {
-            let approves = tempMap[item.courseId].approves;
-            if ((item.approveState <= 1 && tempMap[item.courseId].status == 3)
-                || (tempMap[item.courseId].status >= 5 && item.approveState == 3)) {
+            let step = tempMap[item.courseId]
+            let approves = step.approves;
+            if ((item.approveState <= 1 && step.status == 3)
+                || (step.status >= 5 && (item.approveState == 3 || item.approveState == 4))) {
               //当前进度节点
               tempMap[item.courseId].status = item.approveState;
             }

@@ -35,7 +35,7 @@
                             <v-text-field dense label="合同编号" :rules="rules.series" v-model="data.series"></v-text-field>
                         </v-col>
                         <v-col sm="6">
-                            <v-text-field dense label="租赁方" :rules="rules.company"
+                            <v-text-field dense label="租赁方" :rules="rules.brandCompany.name"
                                           v-model="data.company"></v-text-field>
                         </v-col>
                         <v-col sm="6">
@@ -146,7 +146,7 @@
             year: '2021',
             headers: [
                 {text: '合同编号', value: 'series'},
-                {text: '租赁方', value: 'company'},
+                {text: '租赁方', value: 'brandCompany.name'},
                 {text: '品牌', value: 'brand'},
                 {text: '应收金额', value: 'yearRental'},
                 {text: '实际金额', value: 'sjMoney'},

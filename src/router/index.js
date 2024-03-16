@@ -153,9 +153,8 @@ const routes = [
                 name: 'workMaterialOut',
                 meta: {title: "办公用品领用"},
                 component: () => import(`../components/15223.vue`)
-            },
-            {
-                path: '/zj/form/insert',
+            },{
+                path: '/zj/form/insert/:id',
                 name: 'zjInsert',
                 meta: {title: "招商合同登记"},
                 component: () => import(`../views/zj/form/insert`)
