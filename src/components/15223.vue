@@ -53,6 +53,9 @@
         <template v-slot:item.sum="{item}">
           <v-text-field style="width: 100%" v-model="item.sum" type="number"></v-text-field>
         </template>
+        <template v-slot:item.material.unit.name="{item}">
+          <v-text-field style="width: 100%" v-model="item.material.unit.name"></v-text-field>
+        </template>
         <template v-slot:item.action="{item}">
           <v-btn x-small color="error" @click="deleteMater(item)">删除</v-btn>
         </template>
@@ -95,29 +98,33 @@ export default {
     },
     searchMater: {
       handler(val) {
-        window.setTimeout(()=>{
-          this.loadMaterList(val)
-        },300)
+        if(val && val != ""){
+          window.setTimeout(()=>{
+            this.loadMaterList(val)
+          },300)
+        }
       },
       deep: true
     },
     selectList: {
       handler(val) {
-        this.data.materOutList = []
         let idx = 0;
         val.forEach(item => {
-          console.log(item)
-          this.data.materOutList.push({
-            index: idx,
-            sum: 1,
-            taxPrice: 0,
-            taxMoney: 0,
-            outDate: this.data.outDate,
-            material: item,
-            remark: ''
-          })
+          if(this.data.materOutList[idx] == null){
+            this.data.materOutList.push({
+              index: idx,
+              sum: 1,
+              taxPrice: 0,
+              taxMoney: 0,
+              outDate: this.data.outDate,
+              material: item,
+              remark: ''
+            })
+          }
+
           idx++
         })
+        this.searchMater = ""
       },
       deep: true
     }
