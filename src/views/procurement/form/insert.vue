@@ -132,7 +132,7 @@
                title="保存表单数据，不发起审批流程"
                color="primary">保存
         </v-btn>
-        <v-btn @click="saveAndFlow" :loading="loading" small class="mr-1" title="保存表单数据，并发起审批流程"
+        <v-btn @click="saveAndFlow" :loading="loading" small title="保存表单数据，并发起审批流程"
                color="primary">提交
         </v-btn>
       </v-row>
@@ -554,6 +554,7 @@ export default {
       let materList = this.$refs.applyList.getProMaterial()
       materList.forEach(item => {
         item.index = this.data.material.length + 1
+        this.setPriceMoney(item)
         this.data.material.push(item)
         this.queryMaterStorage(item.material)
       })
@@ -673,6 +674,7 @@ export default {
           updateState({id: p.id, state: 0}).finally(()=>{
             this.closeWindow()
           })
+
         }).catch(() => {
           this.loading = false
         })
@@ -682,7 +684,6 @@ export default {
     },
     closeWindow() {
       this.loading = false
-      window.location.href = "about:blank";
       window.close();
     },
     contractHandler() {

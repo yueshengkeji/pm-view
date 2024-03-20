@@ -158,6 +158,18 @@ const routes = [
                 name: 'zjInsert',
                 meta: {title: "招商合同登记"},
                 component: () => import(`../views/zj/form/insert`)
+            },
+            {
+                path: '/procurement/back/insert/:proId',
+                name: 'proBackInsert',
+                meta: {title: "采购退料"},
+                component: () => import(`../views/procurement/back/insert.vue`)
+            },
+            {
+                path: '/procurement/back/update/:id',
+                name: 'proBackUpdate',
+                meta: {title: "采购退料编辑"},
+                component: () => import(`../views/procurement/back/update.vue`)
             }
         ]
     },

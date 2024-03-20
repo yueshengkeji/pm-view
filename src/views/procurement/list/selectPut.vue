@@ -55,6 +55,7 @@
           hide-default-footer>
         <template v-slot:item.putSum="{item}">
           <v-text-field @input="countMoney(item)"
+                        :title="`退库数量：${item.backSum}`"
                         type="number"
                         :error="item.error"
                         @focus="focusPutSum($event)"
@@ -497,7 +498,7 @@ export default {
           mater.index = index + 1
           procurement.proMoney += mater.moneyTax
           procurement.avgMoneys += mater.sum * mater.applyPrice
-          mater.putSum = mater.sum - mater.inSum
+          mater.putSum = (mater.sum - mater.backSum) - mater.inSum
           mater.moneyTax = mater.putSum * mater.priceTax
           this.setPrice(mater)
           this.setMoney(mater)

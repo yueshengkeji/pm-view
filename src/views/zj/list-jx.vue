@@ -196,6 +196,7 @@
             </td>
             <td class="text-start">
               <v-btn x-small @click="detail($event, { item: item })">明细</v-btn>
+              <v-btn :disabled="item.endFlag == 1" x-small @click="stopContract(item)" class="ml-1">合同终止</v-btn>
               <v-btn v-if="showDelete" class="ml-1" color="error" x-small @click="deleteItem(item)">
                 删除
               </v-btn>
@@ -237,6 +238,21 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!--新增合同终止协议-->
+    <v-dialog v-model="addDialog" width="60%">
+      <v-toolbar flat>
+        <v-toolbar-title>合同终止协议</v-toolbar-title>
+      </v-toolbar>
+      <v-card>
+        <add-pro-zujin-end ref="addProZujinEnd" :zujin="item"></add-pro-zujin-end>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="submitAdd">确定</v-btn>
+          <v-btn @click="addDialog=false">取消</v-btn>
+        </v-card-actions>
+      </v-card>
+
+    </v-dialog>
 
     <component v-bind:is="printComponent"
                v-bind:contractId="contractId"
@@ -274,6 +290,7 @@ import {insertOwe, updateOwe, updateQcOwe} from '@/api/proOwe'
 import {list} from '@/api/yetai'
 import {houseList} from '@/api/house'
 import houseMap from '@/views/zj/house/map'
+import addProZujinEnd from "./proZujinEnd/components/addProZujinEnd";
 
 
 import contractWordModel from "./components/contractWordModel";
@@ -282,7 +299,8 @@ export default {
   components: {
     houseMap,
     contractWordModel,
-    concatDetail: () => import('@/views/zj/form/insert.vue')
+    concatDetail: () => import('@/views/zj/form/insert.vue'),
+    addProZujinEnd
   },
   name: "zj-list",
   props: {
@@ -428,6 +446,9 @@ export default {
     btnLoading: false,
     contractId: null,
     printComponent: null,
+
+    //合同终止协议
+    addDialog:false,
 
     detailId: null
   }),
@@ -1050,7 +1071,8 @@ export default {
         type: type,
         files: null,
         planDatetime: null,
-        openDatetime: null
+        openDatetime: null,
+        endFlag:0
       }
       this.item = this.data
       this.ysMoneyItems = []
@@ -1137,6 +1159,22 @@ export default {
         this.btnLoading = false
         this.modelPrintDialog = false
       })
+    },
+
+    //合同终止协议
+    stopContract(item){
+      this.item = item
+      this.addDialog = true
+    },
+    submitAdd() {
+      if (this.$refs.addProZujinEnd.validateForm()) {
+        this.$refs.addProZujinEnd.submitAdd().then(() => {
+
+          this.list()
+          this.$refs.addProZujinEnd.reset()
+        })
+        this.addDialog = false
+      }
     },
 
 

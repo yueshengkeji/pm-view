@@ -114,7 +114,7 @@
         <procurement :frameId="applyDelete.proId"></procurement>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="deleteProcurement">确定删除</v-btn>
+          <v-btn color="primary" @click="deleteProcurement" :loading="deleteLoading">确定删除</v-btn>
           <v-btn @click="cancelApplyDelete">取消</v-btn>
         </v-card-actions>
       </v-card>
@@ -343,13 +343,14 @@ export default {
       })
     },
     deleteProcurement() {
+      this.deleteLoading = true
       deleteProcurementByApply(this.applyDelete).then(() => {
         this.applyDeleteDialog = false;
         this.deleteItem(this.applyDelete)
       }).catch(e => {
         this.msg = "删除失败,订单不存在或已入库，异常信息：" + e;
         this.showMsg = true;
-      })
+      }).finally(()=>this.deleteLoading = false)
     },
     cancelApplyDelete() {
       this.applyDelete.state = true;

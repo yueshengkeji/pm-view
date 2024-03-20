@@ -1,5 +1,5 @@
 <template>
-  <v-autocomplete dense hide-details
+  <v-autocomplete :dense="dense" hide-details
                   :error-messages="error"
                   :rules="rules"
                   auto-select-first
@@ -72,6 +72,10 @@ export default {
     event: "change"
   },
   props: {
+    dense:{
+      type:Boolean,
+      default:true
+    },
     error:null,
     rules:null,
     type: {

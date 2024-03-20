@@ -268,9 +268,13 @@
         <v-list-item link target="_blank" :to="`../returnToApply/${item.id}`">
           <v-list-item-title>材料回退</v-list-item-title>
         </v-list-item>
-        <v-list-item @click="allPutHandler(item)"
+        <v-list-item @click="allPutHandler(item)" target="_blank"
                      v-if="(item.putState == 0 || item.putState == 3) && item.state == 1 && dense">
           <v-list-item-title>消单</v-list-item-title>
+        </v-list-item>
+        <v-list-item :to="`/procurement/back/insert/${item.id}`"
+                     v-if="(item.putState == 0 || item.putState == 3) && item.state == 1">
+          <v-list-item-title>供应商退货</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -364,6 +368,7 @@
               indeterminate
               color="primary"
           ></v-progress-circular>
+          <v-btn @click="backListHandler">退货记录</v-btn>
           <v-btn @click="putListHandler">入库记录</v-btn>
           <v-btn @click="prevItem()" :disabled="prevDisabled">上一个</v-btn>
           <v-btn @click="nextItem()" :disabled="nextDisabled">下一个</v-btn>
@@ -381,7 +386,8 @@
     <!--        选择入库-->
     <v-dialog width="99%" v-model="selectPutDialog">
       <v-card class="white pt-1">
-        <select-put @putListHandler="putListHandler" @closePutHandler="closePutHandler" :procurement="item"></select-put>
+        <select-put @putListHandler="putListHandler" @closePutHandler="closePutHandler"
+                    :procurement="item"></select-put>
       </v-card>
     </v-dialog>
 
@@ -404,9 +410,22 @@
 
     <v-snackbar v-model="msgFlag">{{ msg }}</v-snackbar>
 
+    <!--    入库记录-->
     <v-dialog width="99%" v-model="putListDialog">
       <v-card class="pa-3">
         <pro-put-list :pro-id="proId"></pro-put-list>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="putListDialog=false">关闭</v-btn>
+        </v-card-actions>
+
+      </v-card>
+    </v-dialog>
+
+    <!--    退货记录-->
+    <v-dialog width="99%" v-model="backListDialog">
+      <v-card class="pa-3">
+        <back-list :pro-id="proId" @deleteHandler="deleteBackHandler"></back-list>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn @click="putListDialog=false">关闭</v-btn>
@@ -423,16 +442,16 @@ import {getProSign, putProMaterial} from '@/api/put'
 import storageManager from "../../storage/storageManager"
 import {getMessageByFrameId} from "@/api/usedFlowApi"
 import {getConfig, list as scList} from '@/api/systemConfig'
-import ProPutList from "@/views/storage/put/listByPro.vue";
 
 export default {
   name: "procurement-list",
   components: {
-    ProPutList,
     storageManager,
+    ProPutList: () => import("@/views/storage/put/listByPro"),
     detail: () => import("../detail"),
     selectPut: () => import("./selectPut"),
     instanceDetail: () => import("@/components/easyflow/instance-detail"),
+    backList: () => import("@/views/procurement/back/list"),
   },
   props: {
     isDownload: Boolean,
@@ -490,7 +509,7 @@ export default {
     ],
     items: [],
     dense: false,
-    dateItems: ["本月", "上月", "半年", "本年","去年","所有"],
+    dateItems: ["本月", "上月", "半年", "本年", "去年", "所有"],
     date: '所有',
     storageItems: [],
     menu: false,
@@ -558,7 +577,8 @@ export default {
     menu2: false,
 
     putListDialog: false,
-    proId: null
+    proId: null,
+    backListDialog: false
   }),
   watch: {
     op: {
@@ -629,6 +649,13 @@ export default {
     this.setDense()
   },
   methods: {
+    deleteBackHandler(){
+      this.item.putState = 3
+    },
+    backListHandler() {
+      this.backListDialog = true
+      this.proId = this.item.id
+    },
     putListHandler() {
       this.putListDialog = true
       this.proId = this.item.id

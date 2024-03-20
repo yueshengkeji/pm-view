@@ -83,9 +83,14 @@
             <div>{{ item.remark }}</div>
           </v-tooltip>
         </template>
+        <template v-slot:item.sum="{item}">
+          <div v-if="item.backSum > 0" :title="`退货数量：${item.backSum}`" class="red--text">{{item.sum}}</div>
+          <div v-else>{{item.sum}}</div>
+        </template>
         <template v-slot:item.inSum="{item}">
-          <div v-if="item.inSum <= 0">{{ item.inSum }}</div>
+          <div v-if="item.inSum <= 0" :title="`退货数量：${item.backSum}`">{{ item.inSum }}</div>
           <a v-else target="_blank"
+             :title="`退货数量：${item.backSum}`"
              :href="$router.options.base+'storage/put/detailByProMaterId/'+item.id+'/'+data.id">{{ item.inSum }}</a>
         </template>
         <template v-slot:item.ySum="{item}">
@@ -180,13 +185,13 @@ export default {
     event: 'change'
   },
   watch: {
-    socketData:{
-      handler(val) {
-        if(val.type == "upp"){
-          this.loadData(true)
-        }
-      },
-    },
+  socketData:{
+    handler(val) {
+            if(val.type == "upp"){
+                this.loadData(true)
+            }
+          },
+  },
     item: {
       handler() {
         if (this.item.id != this.data.id) {
@@ -235,13 +240,13 @@ export default {
     this.reset();
 
     this.$nextTick(() => {
-      window.onfocus = () => {
-        if (localStorage.getItem("upp") == "1") {
-          this.loadData(true)
-          localStorage.setItem("upp","0")
-        }
-      }
-    })
+          window.onfocus = () => {
+            if (localStorage.getItem("upp") == "1") {
+              this.loadData(true)
+              localStorage.setItem("upp","0")
+            }
+          }
+        })
   },
   methods: {
     closeInstanceHandler(isClose) {
@@ -338,8 +343,8 @@ export default {
     },
     loadSuccess(procurement) {
       if (procurement.pm01326 == '1') {
-        procurement.proCompanyName = '开丽采购'
-        this.companyName = '江苏开丽智控科技有限公司'
+        procurement.proCompanyName = '其他采购'
+        this.companyName = '其他采购'
       } else {
         procurement.proCompanyName = '默认采购'
         this.companyName = this.$store.state.api.cname

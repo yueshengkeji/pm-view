@@ -322,8 +322,8 @@ export default {
     },
     loadSuccess(procurement) {
       if (procurement.pm01326 == '1') {
-        procurement.proCompanyName = '子公司采购'
-        this.companyName = '子公司名称'
+        procurement.proCompanyName = '其他采购'
+        this.companyName = '其他采购'
       } else {
         procurement.proCompanyName = '默认采购'
         this.companyName = this.$store.state.api.cname

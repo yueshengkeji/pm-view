@@ -51,6 +51,14 @@ export function insertAdvertPlaceContractWordRecord(data) {
     })
 }
 
+export function insertProZujinEnd(data) {
+    return request({
+        url: '/contractWordModelRecord/insertProZujinEnd',
+        method: 'post',
+        data
+    })
+}
+
 export function selectContractWordRecordByContractId(data) {
     return request({
         url: '/contractWordModelRecord/getByContractId',
@@ -58,3 +66,5 @@ export function selectContractWordRecordByContractId(data) {
         params:data
     })
 }
+
+
