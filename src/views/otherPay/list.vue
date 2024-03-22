@@ -68,7 +68,8 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn @click="payDialog = false">关闭</v-btn>
-          <v-btn color="primary" @click="savePay">提交</v-btn>
+          <v-btn color="primary" @click="updatePay" :loading='subLoading' v-if="pay.id != null">保存</v-btn>
+          <v-btn color="primary" @click="savePay" :loading='subLoading'>{{pay.id == null ? '提交' : '重新审批'}}</v-btn>
         </v-card-actions>
       </v-card>
 
@@ -123,6 +124,8 @@ export default {
     },
     applyMoney: 0,
     payMoney: 0,
+    subLoading:false,
+    flowFlag:true
   }),
   watch: {
     options: {
@@ -219,19 +222,31 @@ export default {
       this.list()
       this.getSumMoney()
     },
+    updatePay(){
+        this.flowFlag = false
+        this.savePay()
+    },
     savePay() {
+      this.subLoading = true
       this.$refs.otherPay.save().then((result) => {
-        this.$refs.otherPay.$refs.flow.startFlow({
-          title: result.title + '-付款申请',
-          content: result.remark,
-          frameId: result.id,
-          frameCoding: 132029,
-          frameColumn: 'id'
-        }).then(() => {
+      if(this.flowFlag){
+      this.$refs.otherPay.$refs.flow.startFlow({
+                title: result.title + '-付款申请',
+                content: result.remark,
+                frameId: result.id,
+                frameCoding: 132029,
+                frameColumn: 'id'
+              }).then(() => {
+                this.list()
+                this.payDialog = false
+                this.subLoading = false
+              })
+      }else{
           this.list()
           this.payDialog = false
-        })
-      })
+          this.subLoading = false
+      }
+      }).finally(()=>this.flowFlag = true)
     },
     list() {
       this.queryParam.page = this.options.page
