@@ -3,10 +3,12 @@
         <v-form ref="addForm">
             <v-row>
                 <v-col md="3">
-                    <v-text-field label="合同名称" v-model="proZujinEndItem.contractName" :rules="[v => !!v || '请填写合同名称']"></v-text-field>
+                    <v-text-field label="合同名称" v-model="proZujinEndItem.contractName"
+                                  :rules="[v => !!v || '请填写合同名称']"></v-text-field>
                 </v-col>
                 <v-col md="3">
-                    <v-text-field label="乙方" v-model="proZujinEndItem.partB" :rules="[v => !!v || '请填写乙方']"></v-text-field>
+                    <v-text-field label="乙方" v-model="proZujinEndItem.partB"
+                                  :rules="[v => !!v || '请填写乙方']"></v-text-field>
                 </v-col>
                 <v-col md="1.5">
                     <v-text-field type="number" label="楼层" v-model="proZujinEndItem.floor"></v-text-field>
@@ -48,6 +50,10 @@
                                        @change="menu2 = false"></v-date-picker>
                     </v-menu>
                 </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="所有费用合计"
+                                  v-model="proZujinEndItem.otherPay"></v-text-field>
+                </v-col>
                 <v-col md="3">
                     <v-menu v-model="menu3" transition="scale-transition" offset-y :close-on-content-click="false"
                             min-width="auto">
@@ -63,6 +69,14 @@
                 <v-col md="2">
                     <v-text-field type="number" label="违约金"
                                   v-model="proZujinEndItem.bzj"></v-text-field>
+                </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="履约保证金"
+                                  v-model="proZujinEndItem.lyBzj"></v-text-field>
+                </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="物管保证金"
+                                  v-model="proZujinEndItem.wgBzj"></v-text-field>
                 </v-col>
                 <v-col md="2">
                     <v-text-field type="number" label="保证金退还限定天数" v-model="proZujinEndItem.returnDays"></v-text-field>
@@ -103,39 +117,42 @@
 
     export default {
         name: 'addProZujinEnd',
-        components: {EasyFlow,FileUpload},
+        components: {EasyFlow, FileUpload},
         props: {
             zujin: {
                 type: Object
             }
         },
-        data:() => ({
-            proZujinEndItem:{
-                id:null,
-                contractName:null,
-                partB:null,
-                floor:null,
-                pwNumber:null,
-                contractNum:null,
-                brandName:null,
-                endReason:null,
-                endDate:null,
-                returnHouseDate:null,
-                otherPayDate:null,
-                bzj:null,
-                returnDays:null,
-                overdueDay:null,
-                overdueDayMoney:null,
-                qualityBzj:null,
-                files:'',
-                type:4,
-                proZujin:null,
-                qualityTime:0
+        data: () => ({
+            proZujinEndItem: {
+                id: null,
+                contractName: null,
+                partB: null,
+                floor: null,
+                pwNumber: null,
+                contractNum: null,
+                brandName: null,
+                endReason: null,
+                endDate: null,
+                returnHouseDate: null,
+                otherPay: null,
+                otherPayDate: null,
+                bzj: null,
+                lyBzj: null,
+                wgBzj: null,
+                returnDays: 60,
+                overdueDay: null,
+                overdueDayMoney: null,
+                qualityBzj: null,
+                files: '',
+                type: 4,
+                proZujin: null,
+                qualityTime: 3
             },
-            menu1:false,
-            menu2:false,
-            menu3:false,
-            zujinItem:{
+            menu1: false,
+            menu2: false,
+            menu3: false,
+            zujinItem: {
                 receivedCompany: null,
                 dayNum: null,
                 series: null,
@@ -176,18 +193,18 @@
                 billType: ''
             }
         }),
-        watch:{
-            zujin:{
-                handler(){
-                    if (this.zujin != null){
+        watch: {
+            zujin: {
+                handler() {
+                    if (this.zujin != null) {
                         this.getProZujin(this.zujin)
                     }
                 },
-                deep:true,
+                deep: true,
             }
         },
         created() {
-            if (this.zujin != null){
+            if (this.zujin != null) {
                 this.getProZujin(this.zujin)
             }
         },
@@ -225,18 +242,20 @@
                     this.proZujinEndItem.files += item.id + ";"
                 })
             },
-            getProZujin(data){
+            getProZujin(data) {
                 queryById(data.id).then(result => {
                     this.zujinItem = result
                     this.dealData(this.zujinItem)
                 })
             },
-            dealData(data){
+            dealData(data) {
                 this.proZujinEndItem.partB = data.brandCompany.name
                 this.proZujinEndItem.floor = this.dealFloor(data.houses)
                 this.proZujinEndItem.pwNumber = this.dealPwNumber(data.houses)
                 this.proZujinEndItem.brandName = data.brand
                 this.proZujinEndItem.qualityBzj = this.dealQualityBzj(data.bzjList)
+                this.proZujinEndItem.wgBzj = this.dealWgBzj(data.bzjList)
+                this.proZujinEndItem.lyBzj = this.dealLyBzj(data.bzjList)
             },
 
             dealFloor(data) {
@@ -248,7 +267,7 @@
                         if (data.length <= 1) {
                             floor = floor + data[i].floor + ''
                         } else {
-                            if (floor.indexOf(data[i].floor) < 0){
+                            if (floor.indexOf(data[i].floor) < 0) {
                                 floor = floor + data[i].floor + ','
                             }
                         }
@@ -256,7 +275,7 @@
                     return floor
                 }
             },
-            dealPwNumber(data){
+            dealPwNumber(data) {
                 if (data == null || data.length <= 0) {
                     return '';
                 } else {
@@ -265,7 +284,7 @@
                         if (data.length <= 1) {
                             pwNumber = pwNumber + data[i].pwNumber + ''
                         } else {
-                            if (pwNumber.indexOf(data[i].pwNumber) < 0){
+                            if (pwNumber.indexOf(data[i].pwNumber) < 0) {
                                 pwNumber = pwNumber + data[i].pwNumber + ','
                             }
                         }
@@ -273,13 +292,13 @@
                     return pwNumber
                 }
             },
-            dealQualityBzj(data){
+            dealQualityBzj(data) {
                 if (data == null || data.length <= 0) {
                     return '';
                 } else {
                     let qualityBzj = ''
                     for (let i = 0; i < data.length; i++) {
-                        if (data[i].type == "质保保证金"){
+                        if (data[i].type == "质保保证金") {
                             qualityBzj = data[i].money + ''
                             break
                         }
@@ -287,29 +306,60 @@
                     return qualityBzj
                 }
             },
+            dealWgBzj(data) {
+                if (data == null || data.length <= 0) {
+                    return '';
+                } else {
+                    let wgBzj = ''
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i].type == "物管保证金") {
+                            wgBzj = data[i].money + ''
+                            break
+                        }
+                    }
+                    return wgBzj
+                }
+            },
+            dealLyBzj(data) {
+                if (data == null || data.length <= 0) {
+                    return '';
+                } else {
+                    let lyBzj = ''
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i].type == "履约保证金") {
+                            lyBzj = data[i].money + ''
+                            break
+                        }
+                    }
+                    return lyBzj
+                }
+            },
 
             reset() {
                 this.proZujinEndItem = {
-                    id:null,
-                    contractName:null,
-                    partB:null,
-                    floor:null,
-                    pwNumber:null,
-                    contractNum:null,
-                    brandName:null,
-                    endReason:null,
-                    endDate:null,
-                    returnHouseDate:null,
-                    otherPayDate:null,
-                    bzj:null,
-                    returnDays:null,
-                    overdueDay:null,
-                    overdueDayMoney:null,
-                    qualityBzj:null,
-                    files:'',
-                    type:4,
+                    id: null,
+                    contractName: null,
+                    partB: null,
+                    floor: null,
+                    pwNumber: null,
+                    contractNum: null,
+                    brandName: null,
+                    endReason: null,
+                    endDate: null,
+                    returnHouseDate: null,
+                    otherPay: null,
+                    otherPayDate: null,
+                    bzj: null,
+                    lyBzj: null,
+                    wgBzj: null,
+                    returnDays: 60,
+                    overdueDay: null,
+                    overdueDayMoney: null,
+                    qualityBzj: null,
+                    files: '',
+                    type: 4,
                     proZujin: null,
-                    qualityTime:null
+                    qualityTime: 3
                 }
             }
         }

@@ -491,7 +491,7 @@ export default {
       type: [v => !!v || '请选择或手动输入类型', v => (!!v) || '金额类型过长'],
       datetime: [v => !!v || '请选择时间'],
     },
-    bzjTypeItems: ['履约保证金', '质保保证金', '装修保证金'],
+    bzjTypeItems: ['履约保证金', '质保保证金', '装修保证金','物管保证金'],
     bzjDialog: false,
     menu: false,
     menu2: false,

@@ -140,6 +140,7 @@ export default {
   },
   name: "index",
   data: () => ({
+    deleteLoading:false,
     loading: false,
     menu: false,
     defaultTitle: "暂无代办工作",

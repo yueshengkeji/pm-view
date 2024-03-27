@@ -1,287 +1,516 @@
 <template>
-  <div>
+  <div :fluid="$vuetify.breakpoint.md"
+       :class="isMin ? 'pa-0' : ''"
+       v-show="!this.$store.getters.hideMenu">
+    <v-app-bar dense
+               app
+               :collapse="isMin"
+               class="ma-2"
+               :fixed="isMin"
+               :width="isMin ? 50 : undefined">
 
-    <v-row>
-      <v-col lg="3">
-        <v-treeview @click="active"
-                    activatable
-                    :items="menus"
-                    return-object
-                    item-text="name"
-                    @update:open="open"
-                    open-on-click
-                    :active.sync="active"
-                    @update:active="edit"></v-treeview>
-      </v-col>
-      <v-col lg="9">
-        <v-card>
-          <v-form ref="menuForm">
-            <v-container>
-              <v-row>
-                <v-col lg="2">
-                  <v-text-field label="菜单名称" :rules="nameRule" v-model="menu.name"></v-text-field>
-                </v-col>
-                <v-col lg="2">
-                  <v-autocomplete label="上级菜单" v-model="menu.parent.id" item-value="id"
-                                  item-text="name" :filter="filterMenus"
-                                  :items="menus"></v-autocomplete>
-                </v-col>
-                <v-col lg="2">
-                  <v-text-field label="实体类名称" v-model="menu.beanName"></v-text-field>
-                </v-col>
-                <v-col lg="2">
-                  <v-text-field label="排序序号" v-model="menu.sort"></v-text-field>
-                </v-col>
-                <v-col lg="2">
-                  <v-text-field label="url" v-model="menu.url"></v-text-field>
-                </v-col>
-                <v-col lg="2">
-                  <v-text-field label="菜单编码" v-model="menu.coding"></v-text-field>
-                </v-col>
-                <v-col lg="4">
-                  <v-text-field label="备注" v-model="menu.remark"></v-text-field>
-                </v-col>
-                <v-col lg="4">
-                  <v-text-field label="图标" v-model="menu.ico"></v-text-field>
-                </v-col>
-                <v-col lg="2">
-                  <v-checkbox label="是否隐藏" v-model="menu.hide"></v-checkbox>
-                </v-col>
-                <v-col lg="2">
-                  <v-checkbox label="是否外链" v-model="menu.outer"></v-checkbox>
-                </v-col>
-                <v-col lg="8">
-                  <v-text-field label="外链url" v-model="menu.outerPath"></v-text-field>
-                </v-col>
-                <v-col lg="4">
-                  <v-textarea rows="1" v-model="menu.flowSql" label="流程sql语句"></v-textarea>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col>
-                  <v-data-table :items="roles"
-                                hide-default-footer
-                                :items-per-page="1000"
-                                :headers="headers">
-                    <template v-slot:top>
-                      <v-btn @click="insertRole" :disabled="menu.id == null">新增角色</v-btn>
-                    </template>
-                    <template v-slot:item.actions="{ item }">
-                      <v-icon small class="mr-2" @click="insertRole(item)">
-                        mdi-account-multiple-plus
-                      </v-icon>
-                      <v-icon small @click="deleteRole(item)">
-                        mdi-delete
-                      </v-icon>
-                    </template>
-                  </v-data-table>
-                </v-col>
-              </v-row>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" @click="submit">提交</v-btn>
-                <v-btn color="error" class="ml-1" @click="deleteMenu">删除</v-btn>
-              </v-card-actions>
+      <v-app-bar-nav-icon @click="clickBar">
+        <template v-slot:default>
+          <v-icon>mdi-menu</v-icon>
+          <v-badge v-if="isMin" :value="showBadge" color="error" dot></v-badge>
+        </template>
+      </v-app-bar-nav-icon>
+
+      <v-toolbar-items v-if="!isMin">
+        <v-menu v-for="(menu) in menus" :key="menu.id" offset-y open-on-hover>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn exact
+                   v-if="!menu.hide"
+                   active-class="primary"
+                   @click="clickMenu($event,menu)"
+                   :to="{path:'/'+menu.url}"
+                   text
+                   v-bind="attrs"
+                   v-on="on">
+              <v-icon class="mr-1" right dark v-if="menu.ico != ''">{{ menu.ico }}</v-icon>
+              {{ menu.name }}
+            </v-btn>
+          </template>
+          <v-list dense v-if="menu.children && menu.children.length > 0">
+            <template v-for="(child) in menu.children">
+              <v-list-item active-class="primary"
+                           v-if="!child.outer && !child.hide"
+                           :to="{path:'/'+child.url}"
+                           link :key="child.id" @click="clickMenu($event,child,menu)">
+                <v-list-item-icon>
+                  <v-icon v-text="child.ico"></v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title v-text="child.name"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item v-else-if="!child.hide" link :key="child.id" @click="toExt(child,menu)">
+                <v-list-item-icon>
+                  <v-icon v-text="child.ico"></v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title v-text="child.name"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+          </v-list>
+        </v-menu>
+        <v-menu offset-y v-if="showTotalData">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn exact
+                   active-class="primary"
+                   text
+                   :title="`${query.start}至${query.end}`"
+                   v-bind="attrs"
+                   v-on="on">
+              入库数量：{{ putSum }}
+            </v-btn>
+          </template>
+          <v-date-picker @change="loadTotalData" v-model="query.start"></v-date-picker>
+        </v-menu>
+        <v-menu offset-y v-if="showTotalData">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn exact
+                   active-class="primary"
+                   text
+                   :title="`${query.start}至${query.end}`"
+                   v-bind="attrs"
+                   v-on="on">
+              出库数量：{{ outSum }}
+            </v-btn>
+          </template>
+          <v-date-picker @change="loadTotalData" v-model="query.end"></v-date-picker>
+        </v-menu>
+
+        <!--        集团帐套切换-->
+        <v-menu offset-y open-on-hover v-if="showGroup">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn exact
+                   active-class="primary"
+                   text
+                   v-bind="attrs"
+                   v-on="on">
+              <v-icon class="mr-1" right dark>mdi-group</v-icon>
+              集团帐套
+            </v-btn>
+          </template>
+          <v-list dense>
+            <template v-for="(menu) in items">
+              <v-list-item active-class="primary"
+                           link :key="menu.label" @click="clickGroupHandler($event,menu)">
+                <v-list-item-content>
+                  <v-list-item-title v-text="menu.label"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+          </v-list>
+        </v-menu>
+      </v-toolbar-items>
+      <v-menu open-on-hover bottom offset-y v-if="!isMin" :close-delay="100">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn small right fab absolute v-bind="attrs" v-on="on">
+            <v-img class="rounded-circle" width="30" style="position: absolute"
+                   :src="`/assets/img/${$store.state.user.id}.jpg`"></v-img>
+            <v-badge :value="showBadge" color="error" dot :offset-x="-10" :offset-y="-10"></v-badge>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="profile" link>
+            <v-list-item-title>{{ $store.state.user.name }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="profile" link>
+            <v-list-item-title>个人中心</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item link to="/approve/index" active-class="primary">
+            <v-list-item-title>我的审批</v-list-item-title>
+            <v-badge :value="showBadge" :content="approveInfoCount" color="error" :offset-x="10"
+                     :offset-y="-5"></v-badge>
+          </v-list-item>
+
+          <v-list-item link to="/approve/my-start" active-class="primary">
+            <v-list-item-title>我的发起</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item v-show="showPayMoneys" @click="toPayment" link>
+            <v-list-item-title>{{ year }}待付款合计:{{ payMoneys }}</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item @click="selectNavType">
+            <v-list-item-content>
+              <v-list-item-title>{{ menuType }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item @click="selectDark">
+            <v-list-item-content>
+              <v-list-item-title>{{ darkText }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
 
 
-            </v-container>
-          </v-form>
-        </v-card>
+          <v-list-item link @click="toOldSystemHandler">
+            <v-list-item-content>
+              <v-list-item-title>旧版系统</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
 
-      </v-col>
-    </v-row>
+          <v-list-item @click="exitLogin" link>
+            <v-list-item-title>退出登录</v-list-item-title>
+          </v-list-item>
 
-    <v-dialog v-model="addRole" width="30%">
-      <v-card class="pa-5">
-        <v-form ref="addRole">
-          <v-text-field v-model="role.menuId" v-text="menu.name" label="菜单名称"></v-text-field>
-          <v-autocomplete v-model="role.coding" :search-input.sync="search"
-                          :items="bindItems" item-value="coding" item-text="name" :rules="codingRule"
-                          label="角色名称"></v-autocomplete>
-        </v-form>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" @click="bind">确定</v-btn>
-        </v-card-actions>
-      </v-card>
+        </v-list>
+      </v-menu>
 
-    </v-dialog>
+    </v-app-bar>
+    <v-navigation-drawer v-model="drawer" absolute temporary v-if="isMin" app>
+      <v-list class="overflow-y-auto" :height="$vuetify.breakpoint.height">
+        <template v-for="(menu) in menus">
+          <v-list-item v-if="menu.children.length <= 0"
+                       active-class="primary"
+                       nav
+                       :key="menu.id"
+                       @click="clickMenu($event,menu)"
+                       :to="{path:'/'+menu.url}"
+                       dense>
+            <v-list-item-icon>
+              <v-icon>{{ menu.ico }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>{{ menu.name }}</v-list-item-title>
+          </v-list-item>
+          <v-list-group v-else
+                        :prepend-icon="menu.icon"
+                        :key="menu.id">
+
+            <template v-slot:activator>
+              <v-list-item-content>
+                <v-list-item-title>{{ menu.name }}</v-list-item-title>
+              </v-list-item-content>
+            </template>
+
+            <template v-for="(child) in menu.children">
+              <v-list-item active-class="primary" v-if="child.outer == false" :to="{path:'/'+child.url}"
+                           link :key="child.id" @click="clickMenu($event,child,menu)">
+                <v-list-item-icon>
+                  <v-icon v-text="child.ico"></v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title v-text="child.name"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item v-else link :key="child.id" @click="toExt(child,menu)">
+                <v-list-item-icon>
+                  <v-icon v-text="child.ico"></v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title v-text="child.name"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+          </v-list-group>
+        </template>
+
+        <v-divider></v-divider>
+        <v-list-item @click="profile" active-class="primary">
+          <v-list-item-content>
+            <v-list-item-title>{{ $store.state.user.name }}</v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-avatar>
+            <v-img :src="'data:image/png;base64,'+$store.state.user.avatar"></v-img>
+          </v-list-item-avatar>
+        </v-list-item>
+        <v-list-item link to="/user/profile" active-class="primary">
+          <v-list-item-content>
+            <v-list-item-title>个人中心</v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-avatar>
+            <v-icon>mdi-account-cog-outline</v-icon>
+          </v-list-item-avatar>
+        </v-list-item>
+
+        <v-list-item link to="/approve/index" active-class="primary">
+          <v-list-item-content>
+            <v-list-item-title>我的审批</v-list-item-title>
+            <v-badge :value="showBadge" :content="approveInfoCount" color="error" :offset-x="25"
+                     :offset-y="-4"></v-badge>
+          </v-list-item-content>
+          <v-list-item-avatar>
+            <v-icon>mdi-account-edit</v-icon>
+          </v-list-item-avatar>
+        </v-list-item>
+        <v-list-item link to="/approve/my-start" active-class="primary">
+          <v-list-item-content>
+            <v-list-item-title>我的发起</v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-avatar>
+            <v-icon>mdi-file-send</v-icon>
+          </v-list-item-avatar>
+        </v-list-item>
+
+        <v-list-item v-show="showPayMoneys" link to="/contract/payment/list" active-class="primary">
+          <v-list-item-content>
+            <v-list-item-title>{{ year }}待付款合计:{{ payMoneys }}</v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-avatar>
+            <v-icon>mdi-contactless-payment</v-icon>
+          </v-list-item-avatar>
+        </v-list-item>
+
+        <v-list-item @click="selectNavType">
+          <v-list-item-content>
+            <v-list-item-title>{{ menuType }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item @click="selectDark">
+          <v-list-item-content>
+            <v-list-item-title>{{ darkText }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+
+        <v-list-item link @click="toOldSystemHandler">
+          <v-list-item-content>
+            <v-list-item-title>旧版系统</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item @click="exitLogin" link>
+          <v-list-item-content>
+            <v-list-item-title>退出登录</v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-avatar>
+            <v-icon>mdi-exit-to-app</v-icon>
+          </v-list-item-avatar>
+        </v-list-item>
+
+      </v-list>
+    </v-navigation-drawer>
   </div>
 </template>
 
 <script>
-import {bindRole, deleteMenu, deleteRole, getById, getRoles, getRoot, insertMenu, updateMenu} from '@/api/menu'
-import {searchRoles} from '@/api/role'
+import {getPayMoney} from '@/api/payment'
+import {getTotal} from '@/api/put'
+import {getOutTotal} from '@/api/outMater'
+import {getUserLogin} from "@/api/staff";
 
 export default {
-  name: "index",
+  name: "pmMenu",
   data: () => ({
-    menus: [],
-    active: [],
-    menu: {parent: {name: null}},
-    roles: [],
-    headers: [
-      {text: '角色名称', value: 'name', width: '50%'},
-      {text: '操作', value: 'actions', sortable: false, width: '50%'},
-    ],
-    addRole: false,
-    addRoleTitle: "",
-    role: {
-      menuId: null,
-      coding: null
+    showBadge: false,
+    menus: null,
+    url: null,
+    payMoneys: 0,
+    showPayMoneys: false,
+    year: null,
+
+    drawer: false,
+    isMin: false,
+    menuType: '竖向菜单',
+    darkText: '夜间模式',
+    approveInfoCount: 0,
+    putSum: 0,
+    outSum: 0,
+    query: {
+      start: null,
+      end: null,
+      type: 1,
     },
-    search: null,
-    bindItems: [],
-    codingRule: [
-      v => !!v || "请选择角色",
+    showTotalData: false,
+
+    items: [
+      {label: "卓茂科技", value: 'http://222.184.233.10:8089/vuetify/login'},
+      {label: "连云港恒润", value: "http://222.184.233.10:8091/vuetify/login"},
+      {label: "连云港炯昌", value: "http://222.184.233.10:8096/vuetify/login"},
+      {label: "九华云水", value: "http://222.184.233.10:8097/vuetify/login"},
+      {label: "文峰物业", value: "http://222.184.233.10:16891/vuetify/login"},
+      {label: "锦绣汇", value: "http://222.184.233.10:16894/vuetify/login"},
     ],
-    nameRule: [
-      v => !!v || "请输入菜单名称",
-    ]
+    showGroup: false,
   }),
-  created() {
-    this.reset();
-    this.getRoot();
+  props: {
+    extMenu: Function,
   },
   watch: {
-    search(value) {
-      searchRoles(value).then(result => {
-        this.bindItems = result;
-      })
+    $route(to) {
+      this.setBadge(to.path)
+    },
+    approveInfoCount: {
+      handler() {
+        if (this.approveInfoCount > 99) {
+          this.approveInfoCount = 99
+        }
+        this.setBadge(this.$route.path)
+      }
+    },
+    "$store.state.api.approveMsgCount": {
+      handler() {
+        this.approveInfoCount = this.$store.state.api.approveMsgCount
+      }
+    }
+  },
+  created() {
+    this.setBadge(this.$route.path)
+    let m = this.$store.state.menus.menus;
+    let currentPath = this.$router.currentRoute.path;
+    m.forEach(i => {
+      let isCurrent = false;
+      if (i.children != null) {
+        i.children.forEach(child => {
+          child.parent = i;
+          let paramFlag = child.url.indexOf(":")
+          if (paramFlag != -1) {
+            child.url = child.url.substr(0, paramFlag - 1)
+          }
+          if (currentPath == ("/" + child.url)) {
+            isCurrent = true;
+          }
+        });
+        if (isCurrent) {
+          i.url = currentPath.substring(1);
+        }
+      }
+      if (i.url == "") {
+        i.url = "/";
+      }
+    });
+    this.menus = this.$store.state.menus.menus;
+    if (this.$store.state.user.roles.indexOf("采购") != -1
+        || this.$store.state.user.roles.indexOf("财务") != -1) {
+      this.showPayMoneys = true;
+      this.year = new Date().getFullYear();
+    }
+
+    if (this.$vuetify.breakpoint.xs || this.$vuetify.breakpoint.width <= 1024) {
+      this.isMin = true
+    } else {
+      this.isMin = localStorage.getItem("menuType") === "0"
+    }
+    // this.isMin = true;
+    this.menuType = this.isMin ? "横向菜单" : "竖向菜单"
+    this.$vuetify.theme.dark = localStorage.getItem("darkType") === "1"
+    this.darkText = this.$vuetify.theme.dark ? '正常模式' : "夜间模式"
+
+    this.$router.history.setupListeners();
+
+    if (this.$store.state.user.roles.indexOf("仓管") != -1 || this.$store.state.user.roles.indexOf("仓库") != -1) {
+      this.query.start = this.dateFormat(new Date(), 'YYYY-mm-dd')
+      this.query.end = this.query.start
+      this.showTotalData = true
+      this.loadTotalData()
+    }
+
+    if (this.$store.state.user.roles.indexOf("董事长") != -1
+        || this.$store.state.user.roles.indexOf("财务总监") != -1) {
+      this.showGroup = true
+    }
+    this.url = this.$route.path.substring(1)
+  },
+  mounted() {
+    if (this.showPayMoneys) {
+      this.loadPayMoney();
     }
   },
   methods: {
-    filterMenus(item, queryText, itemText) {
-      console.log(item.nau);
-      return itemText.indexOf(queryText) > -1;
+    clickGroupHandler(event, menu) {
+      getUserLogin().then(result => {
+        if (result) {
+          window.location.href = menu.value + `?userName=${result.userName}&passwd=${encodeURIComponent(result.passwd)}`
+        }
+      })
     },
-    bind() {
-      let valid = this.$refs['addRole'].validate();
-      if (valid) {
-        bindRole(this.role).then(() => {
-          this.loadRoles(this.menu);
-          this.role = {
-            menuId: null,
-            coding: null
-          }
-        });
-        this.addRole = false;
-      }
+    loadTotalData() {
+      getTotal(this.query).then(result => {
+        this.putSum = result
+      })
+      getOutTotal(this.query).then(result => {
+        this.outSum = result
+      })
     },
-    insertRole() {
-      this.addRole = true;
-      this.role.menuId = this.menu.id;
-      this.addRoleTitle = this.menu.name;
+    toOldSystemHandler() {
+      // window.location.href = '/managent/getPage?pageName=managerIndex'
+      window.location.href = '/managent/getPage?pageName=managerIndex&token=' + this.$store.state.user.token
     },
-    deleteRole(item) {
-      deleteRole(item.id).then(() => {
-        this.loadRoles(this.menu);
-      });
-    },
-    deleteMenu() {
-      if (this.menu.id != null) {
-        deleteMenu(this.menu.id).then(() => {
-          this.getRoot();
-          this.reset();
-        });
-      }
-    },
-    reset() {
-      this.menu = {
-        type: 3,
-        parent: {name: null},
-        name: null,
-        sort: null,
-        ico: null,
-        url: null,
-        remark: null,
-        outer: false,
-        outerPath: null,
-        hide: false,
-        beanName: null,
-        coding: null,
-        flowSql: null
-      }
-      this.roles = [];
-    },
-    edit(activeMenu) {
-      console.log("edit",activeMenu)
-      let menu = activeMenu[0];
-      if (menu.parentId) {
-        getById(menu.parentId).then(result => {
-          getById(menu.id).then(result2 => {
-            result2.parent = result
-            this.menu = result2
-            console.log("this.menu", this.menu.flowSql)
-          })
-        })
+    setBadge() {
+      // if (path === "/approve/index") {
+      //   this.showBadge = false
+      // }
+      if (this.approveInfoCount > 0) {
+        this.showBadge = true
       } else {
-        menu.parent = {id: null}
-        this.menu = menu
+        this.showBadge = false
       }
-      this.loadRoles(menu);
     },
-    loadRoles(menu) {
-      getRoles(menu.id).then(roles => {
-        this.roles = roles;
+    selectDark() {
+      this.$vuetify.theme.dark = !this.$vuetify.theme.dark
+      this.darkText = this.$vuetify.theme.dark ? '正常模式' : "夜间模式"
+      if (this.$vuetify.theme.dark) {
+        localStorage.setItem("darkType", "1");
+      } else {
+        localStorage.setItem("darkType", "0");
+      }
+    },
+    selectNavType() {
+      console.log("selectNavType")
+      this.isMin = !this.isMin;
+      if (this.isMin) {
+        this.menuType = "横向菜单"
+        localStorage.setItem("menuType", "0");
+      } else {
+        this.menuType = "竖向菜单"
+        localStorage.setItem("menuType", "1");
+      }
+      this.$emit("selectNavType", this.isMin)
+    },
+    clickBar() {
+      this.drawer = true
+    },
+    loadPayMoney() {
+      getPayMoney(this.year).then(moneys => {
+        this.payMoneys = moneys.money;
       })
     },
-    removeParam(item){
-      if(item.parent == null){
-        delete item['parent']
-      }
-      if(item.parentId == ''){
-        delete item['parentId']
-      }
-      if(item.children == null){
-        delete item['children']
+    toPayment() {
+      this.$router.push({path: '/contract/payment/list'});
+    },
+    profile() {
+      this.$router.push({path: '/user/profile'});
+    },
+    toExt(menu) {
+      if (this.extMenu != null) {
+        this.extMenu(menu);
+        this.url = menu.url;
+        if (menu.parent != null) {
+          menu.parent.url = this.url;
+        }
       }
     },
-    getRoot() {
-      getRoot(3).then(menus => {
-        menus.forEach(item=>{
-          this.removeParam(item);
-          item.children.forEach(item2=>{
-            this.removeParam(item2)
-          })
-        })
-        console.log("menus",menus)
-        this.menus = menus;
+    clickMenu(event, menu) {
+      if (this.url != menu.url && menu.url != null && menu.url !== "" && !menu.ext) {
+        this.url = menu.url
+        if (menu.parent != null) {
+          menu.parent.url = this.url
+        }
+        if (this.extMenu != null) {
+          this.extMenu(null)
+        }
+      } else if (this.url == null || this.url == menu.url) {
+        window.location.reload()
+      }
+    },
+    exitLogin() {
+      this.$store.dispatch("LogOut").then(() => {
+        console.log("退出成功");
+        this.$router.replace({path: "/login"});
       })
-    },
-    open(items) {
-      console.log("open",items)
-      if (items.length > 0) {
-        this.edit(items);
-      }
-    },
-    submit() {
-      let valid = this.$refs['menuForm'].validate();
-      if (valid) {
-        if (this.menu.parent.id == null) {
-          this.menu.parent = null;
-        } else {
-          this.menu.parentId = this.menu.parent.id;
-        }
-        if (this.menu.id != null) {
-          //更新
-          updateMenu(this.menu).then(() => {
-            this.reset();
-            this.getRoot();
-          });
-        } else {
-          //添加
-          insertMenu(this.menu).then(() => {
-            this.reset();
-            this.getRoot();
-          });
-        }
-      }
     }
   }
 }
 </script>
 
 <style scoped>
-
+.primary {
+  color: #FFF !important;
+}
 </style>

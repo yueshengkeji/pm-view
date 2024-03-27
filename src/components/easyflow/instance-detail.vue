@@ -1159,7 +1159,7 @@ export default {
       if (this.instaceMsg.frameCoding == "10563" && this.instaceMsg.title.indexOf("&") !== -1) {
         loadById(this.instaceMsg.frameId).then(payment => {
           getMessageByFrameId(payment.details[0].contract.id).then(contractMessage => {
-            getFiles(contractMessage.id, contractMessage.frameId, "undefined", mobile).then(this.fileResult)
+            getFiles(contractMessage.id, contractMessage.frameId, "10564", mobile).then(this.fileResult)
           })
         })
       } else {

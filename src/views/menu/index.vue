@@ -3,9 +3,15 @@
 
     <v-row>
       <v-col lg="3">
-        <v-treeview @click="active" activatable :items="menus" return-object item-text="name"
+        <v-treeview @click="active"
+                    activatable
+                    :items="menus"
+                    return-object
+                    item-text="name"
                     @update:open="open"
-                    open-on-click :active.sync="active" @update:active="edit"></v-treeview>
+                    open-on-click
+                    :active.sync="active"
+                    @update:active="edit"></v-treeview>
       </v-col>
       <v-col lg="9">
         <v-card>
@@ -199,6 +205,7 @@ export default {
       this.roles = [];
     },
     edit(activeMenu) {
+      console.log("edit",activeMenu)
       let menu = activeMenu[0];
       if (menu.parentId) {
         getById(menu.parentId).then(result => {
@@ -219,12 +226,31 @@ export default {
         this.roles = roles;
       })
     },
+    removeParam(item){
+      if(item.parent == null){
+        delete item['parent']
+      }
+      if(item.parentId == ''){
+        delete item['parentId']
+      }
+      if(item.children == null){
+        delete item['children']
+      }
+    },
     getRoot() {
       getRoot(3).then(menus => {
+        menus.forEach(item=>{
+          this.removeParam(item);
+          item.children.forEach(item2=>{
+            this.removeParam(item2)
+          })
+        })
+        console.log("menus",menus)
         this.menus = menus;
       })
     },
     open(items) {
+      console.log("open",items)
       if (items.length > 0) {
         this.edit(items);
       }

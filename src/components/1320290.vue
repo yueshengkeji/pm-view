@@ -35,6 +35,10 @@
                                   :rules="[v => !!v || '请选择房屋归还日期']" label="房屋归还日期" hide-details
                                   readonly></v-text-field>
                 </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="所有费用合计"
+                                  v-model="proZujinEndItem.otherPay" readonly></v-text-field>
+                </v-col>
                 <v-col md="3">
                     <v-text-field v-model="proZujinEndItem.otherPayDate"
                                   :rules="[v => !!v || '请选择所有费用支付截止日期']" label="所有费用支付截止日期" hide-details
@@ -43,6 +47,14 @@
                 <v-col md="2">
                     <v-text-field type="number" label="违约金"
                                   v-model="proZujinEndItem.bzj" readonly></v-text-field>
+                </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="履约保证金"
+                                  v-model="proZujinEndItem.lyBzj" readonly></v-text-field>
+                </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="物管保证金"
+                                  v-model="proZujinEndItem.wgBzj" readonly></v-text-field>
                 </v-col>
                 <v-col md="2">
                     <v-text-field type="number" label="保证金退还限定天数" v-model="proZujinEndItem.returnDays" readonly></v-text-field>

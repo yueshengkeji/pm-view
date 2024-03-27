@@ -3,10 +3,12 @@
         <v-form ref="addForm">
             <v-row>
                 <v-col md="3">
-                    <v-text-field label="合同名称" v-model="proZujinEndItem.contractName" :rules="[v => !!v || '请填写合同名称']"></v-text-field>
+                    <v-text-field label="合同名称" v-model="proZujinEndItem.contractName"
+                                  :rules="[v => !!v || '请填写合同名称']"></v-text-field>
                 </v-col>
                 <v-col md="3">
-                    <v-text-field label="乙方" v-model="proZujinEndItem.partB" :rules="[v => !!v || '请填写乙方']"></v-text-field>
+                    <v-text-field label="乙方" v-model="proZujinEndItem.partB"
+                                  :rules="[v => !!v || '请填写乙方']"></v-text-field>
                 </v-col>
                 <v-col md="1.5">
                     <v-text-field type="number" label="楼层" v-model="proZujinEndItem.floor"></v-text-field>
@@ -48,6 +50,10 @@
                                        @change="menu2 = false"></v-date-picker>
                     </v-menu>
                 </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="所有费用合计"
+                                  v-model="proZujinEndItem.otherPay"></v-text-field>
+                </v-col>
                 <v-col md="3">
                     <v-menu v-model="menu3" transition="scale-transition" offset-y :close-on-content-click="false"
                             min-width="auto">
@@ -63,6 +69,14 @@
                 <v-col md="2">
                     <v-text-field type="number" label="违约金"
                                   v-model="proZujinEndItem.bzj"></v-text-field>
+                </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="履约保证金"
+                                  v-model="proZujinEndItem.lyBzj"></v-text-field>
+                </v-col>
+                <v-col md="2">
+                    <v-text-field type="number" label="物管保证金"
+                                  v-model="proZujinEndItem.wgBzj"></v-text-field>
                 </v-col>
                 <v-col md="2">
                     <v-text-field type="number" label="保证金退还限定天数" v-model="proZujinEndItem.returnDays"></v-text-field>
@@ -100,48 +114,51 @@
     import {insertProZujinEnd} from "../../../../api/contractWordModel";
 
     export default {
-        name:'updateProZujinEnd',
-        components: {EasyFlow,FileUpload},
+        name: 'updateProZujinEnd',
+        components: {EasyFlow, FileUpload},
         props: {
             item: {
                 type: Object,
             }
         },
-        data:() => ({
-            proZujinEndItem:{
-                id:null,
-                contractName:null,
-                partB:null,
-                floor:null,
-                pwNumber:null,
-                contractNum:null,
-                brandName:null,
-                endReason:null,
-                endDate:null,
-                returnHouseDate:null,
-                otherPayDate:null,
-                bzj:null,
-                returnDays:null,
-                overdueDay:null,
-                overdueDayMoney:null,
-                qualityBzj:null,
-                files:null,
-                type:4,
+        data: () => ({
+            proZujinEndItem: {
+                id: null,
+                contractName: null,
+                partB: null,
+                floor: null,
+                pwNumber: null,
+                contractNum: null,
+                brandName: null,
+                endReason: null,
+                endDate: null,
+                returnHouseDate: null,
+                otherPay: null,
+                otherPayDate: null,
+                bzj: null,
+                lyBzj: null,
+                wgBzj: null,
+                returnDays: null,
+                overdueDay: null,
+                overdueDayMoney: null,
+                qualityBzj: null,
+                files: null,
+                type: 4,
                 proZujin: null,
-                qualityTime:null
+                qualityTime: null
             },
-            menu1:false,
-            menu2:false,
-            menu3:false,
+            menu1: false,
+            menu2: false,
+            menu3: false,
         }),
-        watch:{
-            item:{
-                handler(){
-                    if (this.item != null){
+        watch: {
+            item: {
+                handler() {
+                    if (this.item != null) {
                         this.proZujinEndItem = this.item
                     }
                 },
-                deep:true
+                deep: true
             }
         },
         methods: {
@@ -183,26 +200,29 @@
 
             reset() {
                 this.proZujinEndItem = {
-                    id:null,
-                    contractName:null,
-                    partB:null,
-                    floor:null,
-                    pwNumber:null,
-                    contractNum:null,
-                    brandName:null,
-                    endReason:null,
-                    endDate:null,
-                    returnHouseDate:null,
-                    otherPayDate:null,
-                    bzj:null,
-                    returnDays:null,
-                    overdueDay:null,
-                    overdueDayMoney:null,
-                    qualityBzj:null,
-                    files:null,
-                    type:4,
+                    id: null,
+                    contractName: null,
+                    partB: null,
+                    floor: null,
+                    pwNumber: null,
+                    contractNum: null,
+                    brandName: null,
+                    endReason: null,
+                    endDate: null,
+                    returnHouseDate: null,
+                    otherPay: null,
+                    otherPayDate: null,
+                    bzj: null,
+                    lyBzj: null,
+                    wgBzj: null,
+                    returnDays: null,
+                    overdueDay: null,
+                    overdueDayMoney: null,
+                    qualityBzj: null,
+                    files: null,
+                    type: 4,
                     proZujin: null,
-                    qualityTime:null
+                    qualityTime: null
                 }
             }
         }
