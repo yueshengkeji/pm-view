@@ -3,7 +3,7 @@
     <v-subheader>办公用品领用</v-subheader>
     <v-form ref="workArticle" class="pa-3">
       <v-row>
-        <v-col class="hidden-xs-only" md="3" cols="6">
+        <v-col class="hidden-xs-only" md="2" cols="6">
           <v-menu v-model="menu"
                   :close-on-content-click="false"
                   transition="scale-transition"
@@ -22,13 +22,16 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col class="hidden-xs-only" md="3" cols="6">
+        <v-col class="hidden-xs-only" md="2" cols="6">
           <v-text-field readonly label="领用人" v-model="data.staff.name"></v-text-field>
         </v-col>
-        <v-col class="hidden-xs-only" md="3" cols="6">
+        <v-col class="hidden-xs-only" md="2" cols="6">
           <easy-flow coding="15223" ref="flow" defaultFlowName="办公用品领用"></easy-flow>
         </v-col>
-        <v-col md="3" cols="12">
+        <v-col md="2" cols="12">
+          <v-text-field v-model="data.series" label="出库单号"></v-text-field>
+        </v-col>
+        <v-col md="4" cols="12">
           <v-autocomplete label="请输入需要的办公用品名称"
                           autofocus
                           v-model="selectList"
@@ -42,6 +45,9 @@
             </template>
           </v-autocomplete>
         </v-col>
+        <v-col cols="12">
+          <v-text-field label="备注" v-model="data.remark"></v-text-field>
+        </v-col>
       </v-row>
       <v-data-table
           hide-default-header
@@ -51,7 +57,7 @@
           :items-per-page="10000"
           hide-default-footer>
         <template v-slot:item.sum="{item}">
-          <v-text-field style="width: 100%" v-model="item.sum" type="number"></v-text-field>
+          <v-text-field style="width: 100%" @change="sumHandler(item)" v-model="item.sum" type="number"></v-text-field>
         </template>
         <template v-slot:item.material.unit.name="{item}">
           <v-text-field style="width: 100%" v-model="item.material.unit.name"></v-text-field>
@@ -61,7 +67,8 @@
         </template>
       </v-data-table>
     </v-form>
-    <v-btn class="float-right" v-if="showSaveBtn" color="primary" @click="save" :block="$vuetify.breakpoint.xs">提交</v-btn>
+    <v-btn class="float-right" v-if="showSaveBtn" color="primary" @click="save" :block="$vuetify.breakpoint.xs">提交
+    </v-btn>
   </div>
 </template>
 
@@ -98,10 +105,10 @@ export default {
     },
     searchMater: {
       handler(val) {
-        if(val && val != ""){
-          window.setTimeout(()=>{
+        if (val && val != "") {
+          window.setTimeout(() => {
             this.loadMaterList(val)
-          },300)
+          }, 300)
         }
       },
       deep: true
@@ -110,16 +117,20 @@ export default {
       handler(val) {
         let idx = 0;
         val.forEach(item => {
-          if(this.data.materOutList[idx] == null){
-            this.data.materOutList.push({
+          if (this.data.materOutList[idx] == null) {
+            let t = {
               index: idx,
               sum: 1,
-              taxPrice: 0,
+              taxPrice: item.planPrice,
               taxMoney: 0,
               outDate: this.data.outDate,
               material: item,
-              remark: ''
-            })
+              remark: '',
+              storageSum: item.putSum - item.outSum
+            }
+            t.taxMoney = t.sum * t.taxPrice
+            t.storageSum = isNaN(t.storageSum) ? 0 : t.storageSum
+            this.data.materOutList.push(t)
           }
 
           idx++
@@ -136,12 +147,13 @@ export default {
       {text: "办公用品名称", value: 'material.name', width: '20%'},
       {text: "领用数量", value: 'sum', width: '5%'},
       {text: "单位", value: 'material.unit.name', width: '9%'},
+      {text: "库存数量", value: 'storageSum', width: '9%'},
       {text: "操作", value: 'action', width: '6%'},
     ],
     items: [],
     searchMater: null,
     selectList: [],
-    showSaveBtn:false,
+    showSaveBtn: false,
   }),
   created() {
     this.showSaveBtn = this.$route.params.s == '1'
@@ -162,8 +174,8 @@ export default {
             frameColumn: 'po20401'
           }).then(() => {
             this.$emit("success", result)
-            if(this.showSaveBtn){
-              window.location.href = this.$router.options.base+'workMaterial/index'
+            if (this.showSaveBtn) {
+              window.location.href = this.$router.options.base + 'workMaterial/index'
             }
           })
         }
@@ -172,6 +184,11 @@ export default {
     deleteMater(deleteItem) {
       this.selectList.splice(deleteItem.index, 1)
     },
+    sumHandler(item) {
+      if (item.sum) {
+        item.taxMoney = item.sum * item.planPrice
+      }
+    },
     loadMaterList(val) {
       this.items = []
       loadMater({searchText: val, type: 1}).then(result => {
@@ -179,7 +196,7 @@ export default {
           this.items = result.rows
         } else {
           if (val != null) {
-            this.items.push({id: "-1", name: val, model: '', unit: {name: '个'}})
+            this.items.push({id: "-1", name: val, model: '', unit: {name: '个'}, planPrice: 0, outSum: 0, putSum: 0})
           }
         }
       })
@@ -199,7 +216,8 @@ export default {
           outDate: this.formatTimer(new Date()),
           staff: {id: this.$store.state.user.id, name: this.$store.state.user.name},
           series: null,
-          materOutList: []
+          materOutList: [],
+          remark: null
         }
       }
 

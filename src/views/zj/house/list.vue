@@ -33,8 +33,8 @@
         </v-row>
       </template>
       <template v-slot:item.action="{item}">
-        <v-btn @click="update(item)" x-small outlined class="mr-1">修改</v-btn>
-        <v-btn @click="deleteHandler(item)" x-small outlined color="error">删除</v-btn>
+        <v-btn @click="update(item)" x-small outlined class="mr-1" v-if="actionFlag">修改</v-btn>
+        <v-btn @click="deleteHandler(item)" x-small outlined color="error" v-if="actionFlag">删除</v-btn>
       </template>
       <template v-slot:item.flag="{item}">
         <v-chip :color="format(item.flag)" outlined x-small>{{ item.flag == 0 ? '未租' : '已租' }}</v-chip>
@@ -69,6 +69,7 @@ import {floors, houseList, insert, update,del} from '@/api/house'
 export default {
   name: "house-list",
   data: () => ({
+    actionFlag:false,
     ytItems: [],
     importFile: null,
     items: [],
@@ -80,6 +81,7 @@ export default {
       {text: '品类', value: 'type'},
       {text: '面积', value: 'acreage'},
       {text: '月单价', value: 'money'},
+      {text: '物业费单价', value: 'wyMoney'},
       {text: '备注', value: 'remark'},
       {text: '租赁状态', value: 'flag'},
       {text: '操作', value: 'action'}
@@ -116,6 +118,11 @@ export default {
     }
   },
   created() {
+
+    if(this.$store.state.user.roles.indexOf('系统') !== -1 || this.$store.state.user.roles.indexOf('管理员') !== -1){
+      this.actionFlag = true
+    }
+
     list().then(data => {
       this.ytItems = data
     })
@@ -208,7 +215,7 @@ export default {
           sheetList.forEach((name) => {
             let worksheet = workbook.Sheets[name]
             let newMater = xlsx.utils.sheet_to_json(worksheet, {
-              header: ["series", "floor", "pwNumber", "yetaiName", "type", "acreage", "money", "remark"]
+              header: ["series", "floor", "pwNumber", "yetaiName", "type", "acreage", "money", "wyMoney","remark"]
             })
             newMater.forEach((item, idx2) => {
               if (idx2 > 0) {
@@ -222,6 +229,9 @@ export default {
                   }
                   if (isNaN(item.money)) {
                     item.money = 0
+                  }
+                  if (isNaN(item.wyMoney)) {
+                    item.wyMoney = 0
                   }
                   try {
                     item.type = item.type.trim("")

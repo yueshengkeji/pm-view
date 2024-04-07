@@ -63,6 +63,10 @@
             </v-row>
             <v-row>
                 <div>
+                    <v-btn v-if="showContract == false" @click="showContract = true">合同预览</v-btn>
+                    <v-btn v-if="showContract == true" @click="showContract = false">关闭预览</v-btn>
+                </div>
+                <div v-if="showContract">
                     <h3 v-if="richText != null">合同预览</h3>
                     <v-container id="printc" v-html="richText">
                     </v-container>
@@ -85,6 +89,7 @@
         data: () => ({
             id: null,
             richText: '',
+            showContract:false,
 
             advertPlaceContractItem: {
                 id: null,

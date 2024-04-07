@@ -97,6 +97,7 @@
           <!--          右侧-->
           <v-col class="white ml-xs-0 ml-sm-2 pt-3" lg="9" md="9" sm="9" cols="12">
             <component v-bind:is="currentTabComponent"
+                       v-bind:consentHandler="consentFlag"
                        v-bind:frameCoding="frameCoding"
                        v-bind:frameId="frameId"></component>
             <v-row dense class="mt-5">
@@ -405,7 +406,7 @@ import {
   getApproveSteps,
   selectPersonConsent,
   appendApprove,
-  getApproveRecord, breakToCourse
+  getApproveRecord, breakToCourse, saveContent
 } from '@/api/approve'
 import {getStaff} from '@/api/staff'
 import {getFiles} from '@/api/files'
@@ -484,7 +485,8 @@ export default {
     imgItemIdx: null,
     notifyType: null,
     ftpFolder: null,
-    dialogWidth: null
+    dialogWidth: null,
+    consentFlag:false
   }),
   props: {
     approve: {
@@ -806,6 +808,10 @@ export default {
         staffs.forEach(id => {
           data.push({id: id})
         })
+        if(this.approveContent != null && this.approveContent != ""){
+          this.approve.content = this.approveContent
+          saveContent(this.approve)
+        }
         appendApprove(this.approve.id, {staff: data}).finally(() => {
           this.loadSteps()
           // this.message.content = "操作成功";
@@ -849,6 +855,7 @@ export default {
       } else {
         this.consentByParam(1);
       }
+      this.consentFlag = true
     },
     notifyHandler() {
       this.notifyType = '知会'
@@ -867,6 +874,7 @@ export default {
       if (this.$store.state.api.approveMsgCount != null) {
         this.$store.commit('setMsgCount', this.$store.state.api.approveMsgCount - 1)
       }
+      this.consentFlag = true
     },
     breakToStep(step) {
       this.consentLoading = true;
@@ -1059,6 +1067,7 @@ export default {
       })
     },
     loadSteps() {
+      this.consentFlag = false
       this.loadApproveLoading = true
       this.files = [];
       this.approveList = [];

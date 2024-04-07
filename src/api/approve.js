@@ -177,8 +177,6 @@ export function breakFlow(approve) {
         data: approve
     })
 }
-
-
 /**
  * 驳回到指定审批人
  * @param approve
@@ -231,6 +229,13 @@ export function appendApprove(id,persons){
         url:`/myApprove/appendApprove/${id}`,
         method:'post',
         data:persons
+    })
+}
+export function saveContent(approve){
+    return request({
+        url:`/myApprove/content`,
+        method:'post',
+        data:approve
     })
 }
 

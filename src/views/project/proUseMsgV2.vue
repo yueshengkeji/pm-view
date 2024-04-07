@@ -72,6 +72,11 @@
                 </v-btn>
               </td>
             </template>
+            <template v-else-if="item.expenseList != null">
+              <td :colspan="headers.length" :key="item.material.id">
+                <v-btn small @click="dataDetailId = item.material.id" color="primary">报销详细信息</v-btn>
+              </td>
+            </template>
           </template>
           <template v-slot:item.applySum="{item}">
             <v-btn :disabled="!isShowApplyDetail" small @click="applyDetail(item)">{{ item.applySum }}</v-btn>
@@ -359,7 +364,9 @@ export default {
       }
     },
     loadProList(row) {
-      if (row.item.procurementList.length <= 0) {
+      if(row.item.type == '报销科目'){
+        row.item.expenseList = []
+      }else if (row.item.procurementList.length <= 0) {
         listByProject(this.queryParam.projectId, row.item.materialId).then(result => {
           let cn = "";
           result.forEach(val => {

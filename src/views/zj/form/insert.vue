@@ -947,7 +947,7 @@ export default {
         } else {
           insertZujin(this.data).then(result => {
 
-            insertContractWordRecord(this.data)
+            insertContractWordRecord(result)
             this.$refs.easyFlow.startFlow({
               title: result.brandCompany.name + "合同审批",
               content: result.remark || '',
@@ -1043,7 +1043,7 @@ export default {
                 frameColumn: 'id'
               })
             }
-            insertContractWordRecord(this.data)
+            insertContractWordRecord(result)
             this.loading = false
             this.$emit("close")
           })

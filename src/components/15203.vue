@@ -31,13 +31,14 @@
 </template>
 
 <script>
-import {getContent, loadById} from '@/api/article'
+import {getContent, loadById, updateArticle} from '@/api/article'
 import {getMessageByFrameId} from '@/api/approve'
 
 export default {
   name: "frame-15203",
   props: {
     frameId: String,
+    consentHandler:Boolean
   },
   data: () => ({
     folderName: null,
@@ -62,6 +63,18 @@ export default {
         }
       },
       deep: true
+    },
+    consentHandler(){
+      if(this.consentHandler){
+        if(this.data.project.id == null){
+          this.data.project = null
+        }
+        this.data.content = this.$refs.iframe.contentDocument.getElementsByTagName('html')[0].innerHTML
+        updateArticle({
+          article: this.data,
+          attachs: []
+        })
+      }
     }
   },
   methods: {
@@ -76,6 +89,16 @@ export default {
         }
         if(article.remark == null){
           article.remark = ''
+          getMessageByFrameId(this.frameId).then(msg => {
+            let temp = window.setInterval(()=>{
+              if(this.loadSuccess){
+                if (msg != null) {
+                  this.data.remark = msg.content;
+                }
+                window.clearInterval(temp)
+              }
+            },100)
+          })
         }
         this.folderName = article.folder.name;
         this.data = article;
@@ -98,16 +121,6 @@ export default {
         }
       }).catch(e => {
         console.log("获取失败", e);
-      })
-      getMessageByFrameId(this.frameId).then(msg => {
-        let temp = window.setInterval(()=>{
-          if(this.loadSuccess){
-            if (msg != null) {
-              this.data.remark = msg.content;
-            }
-            window.clearInterval(temp)
-          }
-        },100)
       })
     },
     reset() {

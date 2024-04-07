@@ -2,6 +2,7 @@
   <div>
     <v-row>
       <v-col sm="3" cols="12" class="overflow-y-auto" style="max-height: 550px;">
+        <v-btn v-if="treeData.length == 0" x-small link @click.stop="insertFolderHander(null)">新增</v-btn>
         <v-treeview :active.sync="active"
                     :items="treeData"
                     :load-children="fetchFolders"
@@ -687,8 +688,10 @@ export default {
           htmlWord = htmlWord.replace(/0.5px/g, '1px');
         }
         window.setTimeout(() => {
-          this.article.editor.execCommand('cleardoc');
-          this.article.editor.execCommand('inserthtml', htmlWord);
+          if(this.article.editor){
+            this.article.editor.execCommand('cleardoc');
+            this.article.editor.execCommand('inserthtml', htmlWord);
+          }
         }, 1000)
       }).finally(() => {
         this.loading = false;
