@@ -5,8 +5,8 @@
         <div>{{ queryParam.tagName }}</div>
       </v-col>
       <v-col lg="2">
-        <v-btn color="primary" @click="insertHandler">新增</v-btn>
-        <v-btn color="primary" @click="exportEX" style="margin-left: 5px" :loading="exportLoading">导出</v-btn>
+        <v-btn color="primary" @click="insertHandler" small>新增</v-btn>
+        <v-btn @click="exportEX" style="margin-left: 5px" :loading="exportLoading" small>导出</v-btn>
         <v-switch v-model="queryParam.ifMine"
                   v-if="showAll"
                   label="我的" class="float-right" style="margin-top: 0px;"></v-switch>
@@ -55,9 +55,9 @@
                   :headers="headers">
 
       <template v-slot:item.action="{item}">
-        <v-btn v-if="item.state == 0" x-small color="error" @click="deleteHandler(item)">删除</v-btn>
-        <v-btn x-small class="ml-1" @click="detail(item)">明细</v-btn>
-        <v-btn v-if="item.state == 0" x-small class="ml-1" @click="editPay(item)">编辑</v-btn>
+        <v-btn v-if="item.state == 0" x-small color="error" @click="deleteHandler(item)" outlined>删除</v-btn>
+        <v-btn x-small class="ml-1" @click="detail(item)" outlined>明细</v-btn>
+        <v-btn v-if="item.state == 0" x-small class="ml-1" @click="editPay(item)" outlined>编辑</v-btn>
       </template>
 
     </v-data-table>
@@ -223,29 +223,29 @@ export default {
       this.getSumMoney()
     },
     updatePay(){
-        this.flowFlag = false
-        this.savePay()
+      this.flowFlag = false
+      this.savePay()
     },
     savePay() {
       this.subLoading = true
       this.$refs.otherPay.save().then((result) => {
-      if(this.flowFlag){
-      this.$refs.otherPay.$refs.flow.startFlow({
-                title: result.title + '-付款申请',
-                content: result.remark,
-                frameId: result.id,
-                frameCoding: 132029,
-                frameColumn: 'id'
-              }).then(() => {
-                this.list()
-                this.payDialog = false
-                this.subLoading = false
-              })
-      }else{
+        if(this.flowFlag){
+          this.$refs.otherPay.$refs.flow.startFlow({
+            title: result.title + '-付款申请',
+            content: result.remark,
+            frameId: result.id,
+            frameCoding: 132029,
+            frameColumn: 'id'
+          }).then(() => {
+            this.list()
+            this.payDialog = false
+            this.subLoading = false
+          })
+        }else{
           this.list()
           this.payDialog = false
           this.subLoading = false
-      }
+        }
       }).finally(()=>this.flowFlag = true)
     },
     list() {

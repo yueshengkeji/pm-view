@@ -1,18 +1,16 @@
 <template>
   <v-card>
     <v-card-title>
-      <v-row>
+      <v-row dense>
         <v-col
             cols="11"
             sm="2"
         >
-          <v-dialog
-              v-model="dialogNew"
-              :fullscreen="mobileFlag"
-          >
+          <v-dialog v-model="dialogNew" :fullscreen="mobileFlag">
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                   color="primary"
+                  small
                   dark
                   class="mb-2"
                   v-bind="attrs"
@@ -25,209 +23,207 @@
               <v-card-title>
                 <span class="text-h5">新增加班申请单</span>
               </v-card-title>
-
               <v-card-text>
                 <v-form ref="workOvertimeFormItem" lazy-validation>
-                  <v-container>
-                    <v-row>
-                      <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                          xs="2"
-                      >
-                        <v-text-field
-                            v-model="$store.state.user.name"
-                            label="加班人员"
-                            required
-                            readonly
-                        ></v-text-field>
-                      </v-col>
-                      <!--                                            <v-col-->
+                  <v-row dense>
+                    <v-col
+                        cols="12"
+                        sm="6"
+                        md="4"
+                        xs="2"
+                    >
+                      <v-text-field
+                          v-model="$store.state.user.name"
+                          label="加班人员"
+                          dense
+                          required
+                          readonly
+                      ></v-text-field>
+                    </v-col>
+                    <!--                                            <v-col-->
 
-                      <!--                                                    sm="6"-->
-                      <!--                                                    md="4"-->
-                      <!--                                                    xs="2"-->
-                      <!--                                            >-->
-                      <!--                                                <v-text-field-->
-                      <!--                                                        v-model="editedItem.name"-->
-                      <!--                                                        :rules="rules.nameRule"-->
-                      <!--                                                        label="单据编号"-->
-                      <!--                                                        required-->
-                      <!--                                                ></v-text-field>-->
-                      <!--                                            </v-col>-->
-                    </v-row>
-                    <v-row>
-                      <v-col
-                              cols="6" md="4" sm="3" xs="4"
+                    <!--                                                    sm="6"-->
+                    <!--                                                    md="4"-->
+                    <!--                                                    xs="2"-->
+                    <!--                                            >-->
+                    <!--                                                <v-text-field-->
+                    <!--                                                        v-model="editedItem.name"-->
+                    <!--                                                        :rules="rules.nameRule"-->
+                    <!--                                                        label="单据编号"-->
+                    <!--                                                        required-->
+                    <!--                                                ></v-text-field>-->
+                    <!--                                            </v-col>-->
+                  </v-row>
+                  <v-row dense>
+                    <v-col
+                        cols="6" md="4" sm="3" xs="4"
+                    >
+                      <v-menu
+                          ref="menu3"
+                          v-model="menu3"
+                          :close-on-content-click="false"
+                          :nudge-right="40"
+                          transition="scale-transition"
+                          offset-y
+                          min-width="auto"
                       >
-                        <v-menu
-                                ref="menu3"
-                                v-model="menu3"
-                                :close-on-content-click="false"
-                                :nudge-right="40"
-                                transition="scale-transition"
-                                offset-y
-                                min-width="auto"
-                        >
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-text-field
-                                    v-model="editedItem.overtime"
-                                    :rules="rules.overtimeRule"
-                                    label="加班日期"
-                                    required
-                                    prepend-icon="mdi-calendar"
-                                    readonly
-                                    v-bind="attrs"
-                                    v-on="on"
-                                    style="font-size: 14px"
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                              v-model="editedItem.overtime"
+                              :rules="rules.overtimeRule"
+                              label="加班日期"
+                              required
+                              prepend-icon="mdi-calendar"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"
+                              style="font-size: 14px"
 
-                            ></v-text-field>
-                          </template>
-                          <v-date-picker
-                                  v-model="editedItem.overtime"
-                                  :min="minDate"
-                                  @change="overtimeChanged"
-                          ></v-date-picker>
-                        </v-menu>
-                      </v-col>
-                      <v-col
-                              cols="6" md="4" sm="2" xs="2"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                            v-model="editedItem.overtime"
+                            :min="minDate"
+                            @change="overtimeChanged"
+                        ></v-date-picker>
+                      </v-menu>
+                    </v-col>
+                    <v-col
+                        cols="6" md="4" sm="2" xs="2"
+                    >
+                      <v-menu
+                          ref="menu4"
+                          v-model="menu4"
+                          :close-on-content-click="false"
+                          :nudge-right="40"
+                          :return-value.sync="editedItem.begin"
+                          transition="scale-transition"
+                          offset-y
+                          max-width="290px"
+                          min-width="290px"
                       >
-                        <v-menu
-                                ref="menu4"
-                                v-model="menu4"
-                                :close-on-content-click="false"
-                                :nudge-right="40"
-                                :return-value.sync="editedItem.begin"
-                                transition="scale-transition"
-                                offset-y
-                                max-width="290px"
-                                min-width="290px"
-                        >
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-text-field
-                                    v-model="editedItem.begin"
-                                    :rules="rules.beginRule"
-                                    label="开始时间"
-                                    prepend-icon="mdi-clock-time-four-outline"
-                                    readonly
-                                    v-bind="attrs"
-                                    v-on="on"
-                            ></v-text-field>
-                          </template>
-                          <v-time-picker
-                                  v-model="editedItem.begin"
-                                  v-if="menu4"
-                                  format="24hr"
-                                  @click:minute="$refs.menu4.save(editedItem.begin)"
-                          ></v-time-picker>
-                        </v-menu>
-                      </v-col>
-                    </v-row>
-                      <v-row>
-                        <v-col
-                                cols="6" md="4" sm="3" xs="4"
-                        >
-                          <v-menu
-                                  ref="menu6"
-                                  v-model="menu6"
-                                  :close-on-content-click="false"
-                                  :nudge-right="40"
-                                  transition="scale-transition"
-                                  offset-y
-                                  min-width="auto"
-                          >
-                            <template v-slot:activator="{ on, attrs }">
-                              <v-text-field
-                                      v-model="editedItem.overtimeEnd"
-                                      :rules="rules.overtimeRule"
-                                      label="截止日期"
-                                      required
-                                      prepend-icon="mdi-calendar"
-                                      readonly
-                                      v-bind="attrs"
-                                      v-on="on"
-                                      style="font-size: 14px"
-
-                              ></v-text-field>
-                            </template>
-                            <v-date-picker
-                                    v-model="editedItem.overtimeEnd"
-                                    @change="overtimeChanged6"
-                            ></v-date-picker>
-                          </v-menu>
-                        </v-col>
-                        <v-col
-                                cols="6" md="4" sm="2" xs="2"
-                        >
-                          <v-menu
-                                  ref="menu5"
-                                  v-model="menu5"
-                                  :close-on-content-click="false"
-                                  :nudge-right="40"
-                                  :return-value.sync="editedItem.end"
-                                  transition="scale-transition"
-                                  offset-y
-                                  max-width="290px"
-                                  min-width="290px"
-                                  :disabled="menu5Flag"
-                          >
-                            <template v-slot:activator="{ on, attrs }">
-                              <v-text-field
-                                      v-model="editedItem.end"
-                                      :rules="rules.endRule"
-                                      label="截止时间"
-                                      prepend-icon="mdi-clock-time-four-outline"
-                                      readonly
-                                      v-bind="attrs"
-                                      v-on="on"
-                              ></v-text-field>
-                            </template>
-                            <v-time-picker
-                                    v-model="editedItem.end"
-                                    v-if="menu5"
-                                    format="24hr"
-                                    @click:minute="$refs.menu5.save(editedItem.end)"
-                            ></v-time-picker>
-                          </v-menu>
-                        </v-col>
-                      </v-row>
-
-                      <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                              v-model="editedItem.begin"
+                              :rules="rules.beginRule"
+                              label="开始时间"
+                              prepend-icon="mdi-clock-time-four-outline"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-time-picker
+                            v-model="editedItem.begin"
+                            v-if="menu4"
+                            format="24hr"
+                            @click:minute="$refs.menu4.save(editedItem.begin)"
+                        ></v-time-picker>
+                      </v-menu>
+                    </v-col>
+                  </v-row>
+                  <v-row dense>
+                    <v-col
+                        cols="6" md="4" sm="3" xs="4"
+                    >
+                      <v-menu
+                          ref="menu6"
+                          v-model="menu6"
+                          :close-on-content-click="false"
+                          :nudge-right="40"
+                          transition="scale-transition"
+                          offset-y
+                          min-width="auto"
                       >
-                        <v-text-field
-                            type="number"
-                            v-model="editedItem.hour"
-                            :rules="rules.hourRule"
-                            onkeypress="return (/[\d.]/.test(String.fromCharCode(event.keyCode)))"
-                            label="时长"
-                            required
-                        ></v-text-field>
-                      </v-col>
-                      <v-col
-                      >
-                        <v-text-field
-                            v-model="editedItem.remark"
-                            label="备注"
-                            required
-                        ></v-text-field>
-                      </v-col>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                              v-model="editedItem.overtimeEnd"
+                              :rules="rules.overtimeRule"
+                              label="截止日期"
+                              required
+                              prepend-icon="mdi-calendar"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"
+                              style="font-size: 14px"
 
-                    <v-row>
-                      <v-col cols="12"
-                             sm="6"
-                             md="4">
-                        <easy-flow coding="1320276"
-                                   ref="overtimeFlow"
-                                   defaultFlowName="加班申请单"
-                        ></easy-flow>
-                      </v-col>
-                    </v-row>
-                  </v-container>
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                            v-model="editedItem.overtimeEnd"
+                            @change="overtimeChanged6"
+                        ></v-date-picker>
+                      </v-menu>
+                    </v-col>
+                    <v-col
+                        cols="6" md="4" sm="2" xs="2"
+                    >
+                      <v-menu
+                          ref="menu5"
+                          v-model="menu5"
+                          :close-on-content-click="false"
+                          :nudge-right="40"
+                          :return-value.sync="editedItem.end"
+                          transition="scale-transition"
+                          offset-y
+                          max-width="290px"
+                          min-width="290px"
+                          :disabled="menu5Flag"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                              v-model="editedItem.end"
+                              :rules="rules.endRule"
+                              label="截止时间"
+                              prepend-icon="mdi-clock-time-four-outline"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-time-picker
+                            v-model="editedItem.end"
+                            v-if="menu5"
+                            format="24hr"
+                            @click:minute="$refs.menu5.save(editedItem.end)"
+                        ></v-time-picker>
+                      </v-menu>
+                    </v-col>
+                  </v-row>
+
+                  <v-col
+                      cols="12"
+                      sm="6"
+                      md="4"
+                  >
+                    <v-text-field
+                        type="number"
+                        v-model="editedItem.hour"
+                        :rules="rules.hourRule"
+                        onkeypress="return (/[\d.]/.test(String.fromCharCode(event.keyCode)))"
+                        label="时长"
+                        required
+                    ></v-text-field>
+                  </v-col>
+                  <v-col
+                  >
+                    <v-text-field
+                        v-model="editedItem.remark"
+                        label="备注"
+                        required
+                    ></v-text-field>
+                  </v-col>
+
+                  <v-row dense>
+                    <v-col cols="12"
+                           sm="6"
+                           md="4">
+                      <easy-flow coding="1320276"
+                                 ref="overtimeFlow"
+                                 defaultFlowName="加班申请单"
+                      ></easy-flow>
+                    </v-col>
+                  </v-row>
                 </v-form>
               </v-card-text>
               <v-card-actions>
@@ -270,6 +266,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                  dense
                   v-model="dateStart"
                   label="开始日期"
                   prepend-icon="mdi-calendar"
@@ -303,6 +300,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
+                  dense
                   v-model="dateEnd"
                   label="结束日期"
                   prepend-icon="mdi-calendar"
@@ -326,6 +324,7 @@
 
         >
           <v-text-field
+              dense
               v-model="queryOvertime.searchText"
               append-icon="mdi-magnify"
               label="搜索"
@@ -413,7 +412,7 @@ export default {
       name: null,
       overtime: null,
       begin: null,
-      overtimeEnd:null,
+      overtimeEnd: null,
       end: null,
       hour: null,
       remark: null,
@@ -462,7 +461,7 @@ export default {
       end: null,
       approve: '',
     },
-    mobileFlag:false
+    mobileFlag: false
   }),
 
   created() {
@@ -547,7 +546,7 @@ export default {
     },
   },
   methods: {
-    difference(startTime,endTime){
+    difference(startTime, endTime) {
       var dateBegin = Date.parse(startTime);
       var dateEnd = Date.parse(endTime);
 

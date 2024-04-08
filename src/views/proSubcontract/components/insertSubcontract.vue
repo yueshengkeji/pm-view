@@ -76,6 +76,7 @@
 
         <v-col cols="3">
           <v-menu
+              :close-on-content-click="false"
               ref="menu2"
               v-model="menu2"
               offset-y
@@ -100,6 +101,7 @@
         </v-col>
         <v-col cols="3">
           <v-menu
+              :close-on-content-click="false"
               ref="menu3"
               v-model="menu3"
               offset-y
@@ -118,7 +120,7 @@
             </template>
             <v-date-picker
                 v-model="subcontract.endDate"
-                @input="$refs.menu2.save()"
+                @input="$refs.menu3.save()"
             ></v-date-picker>
           </v-menu>
         </v-col>
@@ -447,8 +449,8 @@ export default {
     },
     setDefaultProject(){
       this.projectItems.forEach(item=>{
-        if(item.name === this.project){
-          this.subcontract.project= item
+        if(item.name === this.project) {
+          this.subcontract.project = item
           return;
         }
       })

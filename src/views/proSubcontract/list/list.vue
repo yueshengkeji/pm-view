@@ -2,8 +2,8 @@
   <v-card>
     <v-row>
       <v-col md="4" sm="2" style="display: flex">
-        <v-btn color="primary" @click="insertSubcontract" style="margin-left: 10px">新增登记</v-btn>
-        <v-switch v-model="showAll" label="所有" @click="loadAll" style="margin-top: 0px;width: 104px"></v-switch>
+        <v-btn color="primary" small @click="insertSubcontract" style="margin-left: 10px">新增登记</v-btn>
+        <v-switch v-model="showAll" label="所有" @click="loadAll" class="ml-1" style="margin-top: 0px;width: 104px"></v-switch>
       </v-col>
       <v-col lg="1" md="2">
         <v-select label="审核状态" dense v-model="queryItem.approveStatus"
@@ -294,7 +294,7 @@ export default {
     async saveInsert() {
       if (this.$refs.insertSubcontract.validateForm()) {
         await this.$refs.insertSubcontract.submitContract().then(() => {
-            this.list()
+          this.list()
         })
         this.insertDialog = false
       }

@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col cols="12" md="3" sm="2" style="display: flex">
-        <v-btn color="primary" style="margin-left: 10px" @click="insertEntertain">招待申请</v-btn>
+        <v-btn color="primary" style="margin-left: 10px" @click="insertEntertain" small>招待申请</v-btn>
       </v-col>
       <v-col md="2" cols="12">
         <v-menu ref="menu" v-model="menu" :close-on-content-click="false">
@@ -68,7 +68,7 @@
         >
           mdi-delete
         </v-icon>
-        <v-btn x-small color="primary" @click="showDetail(item)">明细</v-btn>
+        <v-btn x-small color="primary" @click="showDetail(item)" outlined>明细</v-btn>
       </template>
     </v-data-table>
 

@@ -13,11 +13,11 @@
         class="elevation-1"
     >
       <template v-slot:item.createTime="{ item }">
-        <span>{{item.createTime | formatTimer}}</span>
+        <span>{{ item.createTime | formatTimer }}</span>
       </template>
 
       <template v-slot:item.startTime="{ item }">
-        <span>{{item.startTime | formatTimer}}</span>
+        <span>{{ item.startTime | formatTimer }}</span>
       </template>
 
       <template v-slot:item.actions="{ item }">
@@ -38,7 +38,7 @@
       </template>
 
     </v-data-table>
-    <v-dialog v-model="travelApply" width="80%">
+    <v-dialog v-model="travelApply" width="80%" :fullscreen="$vuetify.breakpoint.xs">
       <v-card>
         <v-card-title>出差申请</v-card-title>
         <v-card-text>
@@ -133,8 +133,9 @@
                 </v-col>
               </v-row>
               <v-row>
-                <span>出差类型:</span>
                 <v-radio-group
+                    label="出差类型"
+                    class="mt-0"
                     v-model="editedItem.travelType"
                     mandatory
                     row
@@ -150,8 +151,9 @@
                 </v-radio-group>
               </v-row>
               <v-row>
-                <span>交通工具:</span>
                 <v-radio-group
+                    label="交通工具"
+                    class="mt-0"
                     v-model="editedItem.transportation"
                     mandatory
                     row
@@ -189,7 +191,6 @@
                 </v-radio-group>
               </v-row>
               <v-row>
-                <span>差旅费用计划:</span>
                 <v-col cols="12" md="2" sm="2">
                   <v-text-field v-model="editedItem.travelFee" label="交通费(元)"
                                 onkeypress="return (/[\d.]/.test(String.fromCharCode(event.keyCode)))"></v-text-field>
@@ -271,11 +272,11 @@ import easyFlow from "@/components/easyflow/easyFlow.vue";
 export default {
   components: {
     easyFlow,
-    instanceDetail:()=>import('@/components/easyflow/instance-detail')
+    instanceDetail: () => import('@/components/easyflow/instance-detail')
   },
   name: 'travelApplication',
   data: () => ({
-    frame:null,
+    frame: null,
 
     dialogDelete: false,
 
@@ -438,11 +439,11 @@ export default {
   },
 
   methods: {
-    detailHandler(item){
+    detailHandler(item) {
       this.frame = item.id
     },
-    closeHandler(closeState){
-      if(closeState){
+    closeHandler(closeState) {
+      if (closeState) {
         this.frame = null
       }
     },
@@ -464,7 +465,7 @@ export default {
     DateDiff(sDate1, sDate2) {
       let oDate1 = sDate1.replace(/-/g, "/")
       let oDate2 = sDate2.replace(/-/g, "/")
-      let iDays = parseInt((Math.abs(new Date(oDate1).getTime() - new Date(oDate2).getTime()))/3600/1000/24)
+      let iDays = parseInt((Math.abs(new Date(oDate1).getTime() - new Date(oDate2).getTime())) / 3600 / 1000 / 24)
 
       // var aDate, oDate1, oDate2, iDays;
       // aDate = sDate1.split("-");
@@ -541,7 +542,7 @@ export default {
         this.tempItem.travelType = 1
       }
       travelApplicationApi.deleteTravelApplication(this.tempItem).then(result => {
-        console.log('deleteresult',result)
+        console.log('deleteresult', result)
         if (result == 1) {
           this.loadTravelApplicationMSG()
           this.tempItem = null
@@ -580,7 +581,7 @@ export default {
       let valid = this.$refs['travelApplicationForm'].validate();
       if (valid == true) {
         travelApplicationApi.insertTravelApplication(this.editedItem).then(result => {
-          console.log('result',result)
+          console.log('result', result)
           if (result.id != null) {
             this.flowInstance.message.title = result.traveller + "-出差申请";
             this.flowInstance.message.content = result.remark;

@@ -51,5 +51,9 @@ export default {
 
     getTaskToDo(){
         return http.get('applyForCar/getTaskToDo')
+    },
+
+    delApply(id){
+        return http.delete(`applyForCar/${id}`)
     }
 }
