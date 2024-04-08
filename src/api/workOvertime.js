@@ -12,5 +12,8 @@ export default {
     },
     getOverTime(data){
         return http.get('/overtimeForm/getOverTime',{params:data})
+    },
+    exportOvertime(data){
+        return http.get('/overtimeForm/exportOvertime',{params:data})
     }
 }

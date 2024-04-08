@@ -235,6 +235,10 @@ exports.install = (Vue, store) => {
                 StartTime = new Date(StartTime);
                 EndTime = new Date(EndTime);
             }
+            if(StartTime.getTime() > EndTime.getTime()){
+                return 0
+            }
+
             let ms = Math.abs(EndTime.getTime() - StartTime.getTime());
             // 实际工时（天） = 起止日期差 - 周六日数目。
             if ((StartTime.getMonth() == EndTime.getMonth())
