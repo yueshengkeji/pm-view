@@ -63,9 +63,9 @@ export default {
     loginClass: 'login grey lighten-5',
     autoLoading: false,
     valid: false,
-    inputPassword: '',
+    inputPassword: '@123@123',
     user: {
-      username: "",
+      username: "1001",
       password: "",
       remember: false,
       url: "",
