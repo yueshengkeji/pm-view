@@ -121,6 +121,17 @@
                 <v-col sm="4">
                     <v-text-field dense label="纳税人识别号" v-model="data.brandCompany.taxNumber"></v-text-field>
                 </v-col>
+                <v-col sm="2">
+                    <v-text-field v-model="data.signDate"
+                                  label="合同签署日期" dense hide-details
+                                  readonly v-bind="attrs" v-on="on"></v-text-field>
+                </v-col>
+                <v-col sm="3">
+                    <v-text-field dense label="承租方证照名称" v-model="data.certificateName"></v-text-field>
+                </v-col>
+                <v-col sm="3">
+                    <v-text-field dense label="承租方证照号码" v-model="data.certificateCode"></v-text-field>
+                </v-col>
             </v-row>
 
             <v-row class="mr-0">
@@ -145,7 +156,7 @@
                                     {{ formatCycleItems(item) }}
                                 </template>
                                 <template v-slot:item.monthBill="{item}">
-                                    {{ item.monthBill ? '否' : '是' }}
+                                    {{ item.monthBill ? '是' : '否' }}
                                 </template>
                                 <template v-slot:item.payType="{item}">
                                     {{ formatPayType(item) }}
@@ -252,7 +263,10 @@
                 yearRental: null,
                 endDatetime: null,
                 kjType: [{money: 0}],
-                type: 0
+                type: 0,
+                signDate:null,
+                certificateName:null,
+                certificateCode:null
             },
             payTypes: [
                 {text: '年付方式', value: 0},
@@ -392,7 +406,10 @@
                     yearRental: null,
                     endDatetime: null,
                     kjType: [{money: 0}],
-                    type: 0
+                    type: 0,
+                    signDate:null,
+                    certificateName:null,
+                    certificateCode:null
                 }
             },
 

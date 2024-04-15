@@ -315,7 +315,10 @@ export default {
       }
     },
     apply: {
-      handler() {
+      handler(val, old) {
+        if (val && old && val.id === old.id) {
+          return;
+        }
         this.setData(this.apply)
       },
       deep: true
@@ -540,7 +543,7 @@ export default {
       }
     },
     setData(d) {
-      let apply = Object.assign({}, d, true)
+      let apply = Object.assign({}, d)
       if (apply == null || apply.id == null) {
         this.reset()
         return;

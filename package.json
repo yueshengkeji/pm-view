@@ -1,6 +1,6 @@
 {
   "name": "pm2-desktop",
-  "version": "0.3.152",
+  "version": "0.3.153",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

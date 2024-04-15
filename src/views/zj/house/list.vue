@@ -50,6 +50,7 @@
           <v-text-field v-model="data.type" label="品类"></v-text-field>
           <v-text-field v-model="data.acreage" label="面积" type="number"></v-text-field>
           <v-text-field v-model="data.money" label="每月单价" type="number"></v-text-field>
+          <v-text-field v-model="data.wyMoney" label="每月物业单价" type="number"></v-text-field>
           <v-text-field v-model="data.remark" label="备注"></v-text-field>
         </v-form>
         <v-card-actions>
@@ -162,6 +163,7 @@ export default {
     },
     insertYt() {
       let valid = this.$refs['houseForm'].validate()
+      console.log('this.data',this.data)
       if (valid) {
         if (this.data.id != null) {
           update(this.data).then(() => {
