@@ -13,50 +13,50 @@
           <v-select dense :items="payTypes" label="付租方式" v-model="data.payType"></v-select>
         </v-col>
         <v-col sm="2">
-          <v-menu v-model="menu6" transition="scale-transition" offset-y :close-on-content-click="false"
+          <v-menu v-model="menu6" transition="scale-transition" offset-y :close-on-content-click="false" ref="menu6"
                   min-width="auto">
             <template v-slot:activator="{ on, attrs }">
               <v-text-field v-model="data.startDatetime"
                             :rules="rules.startDatetime" label="合同开始日期" dense hide-details
                             readonly v-bind="attrs" v-on="on"></v-text-field>
             </template>
-            <v-date-picker v-model="data.startDatetime" no-title scrollable></v-date-picker>
+            <v-date-picker v-model="data.startDatetime" no-title scrollable @change="$refs.menu6.save()"></v-date-picker>
           </v-menu>
         </v-col>
         <v-col sm="2">
           <v-menu v-model="menu4" transition="scale-transition" offset-y :close-on-content-click="false"
-                  min-width="auto">
+                  min-width="auto" ref="menu4">
             <template v-slot:activator="{ on, attrs }">
               <v-text-field v-model="data.endDatetime" :rules="rules.endDatetime" label="截止日期" dense
                             hide-details
                             readonly v-bind="attrs" v-on="on"></v-text-field>
             </template>
-            <v-date-picker v-model="data.endDatetime" no-title scrollable></v-date-picker>
+            <v-date-picker v-model="data.endDatetime" no-title scrollable @change="$refs.menu4.save()"></v-date-picker>
           </v-menu>
         </v-col>
 
 
         <v-col sm="2">
-          <v-menu v-model="menu7" transition="scale-transition" offset-y
-                  min-width="auto">
+          <v-menu v-model="menu7" transition="scale-transition" offset-y :close-on-content-click="false"
+                  min-width="auto" ref="menu7">
             <template v-slot:activator="{ on, attrs }">
               <v-text-field v-model="data.planDate" :rules="rules.planDate" label="计划进场日期" dense
                             hide-details
                             readonly v-bind="attrs" v-on="on"></v-text-field>
             </template>
-            <v-date-picker v-model="data.planDate" no-title scrollable></v-date-picker>
+            <v-date-picker v-model="data.planDate" no-title scrollable @change="$refs.menu7.save()"></v-date-picker>
           </v-menu>
         </v-col>
 
         <v-col sm="2">
-          <v-menu v-model="menu8" transition="scale-transition" offset-y
-                  min-width="auto">
+          <v-menu v-model="menu8" transition="scale-transition" offset-y :close-on-content-click="false"
+                  min-width="auto" ref="menu8">
             <template v-slot:activator="{ on, attrs }">
               <v-text-field v-model="data.openDate" :rules="rules.openDate" label="开业日期" dense
                             hide-details
                             readonly v-bind="attrs" v-on="on"></v-text-field>
             </template>
-            <v-date-picker v-model="data.openDate" no-title scrollable></v-date-picker>
+            <v-date-picker v-model="data.openDate" no-title scrollable @change="$refs.menu8.save()"></v-date-picker>
           </v-menu>
         </v-col>
 
@@ -159,7 +159,7 @@
                             :rules="rules.signDate" label="合同签署日期" dense hide-details
                             readonly v-bind="attrs" v-on="on"></v-text-field>
             </template>
-            <v-date-picker v-model="data.signDate" no-title scrollable></v-date-picker>
+            <v-date-picker v-model="data.signDate" no-title scrollable @change="$refs.menu9.save()"></v-date-picker>
           </v-menu>
         </v-col>
         <v-col sm="3">
@@ -268,7 +268,7 @@
             </v-col>
             <v-col cols="6">
               <v-menu v-model="menu" transition="scale-transition" offset-y
-                      min-width="auto">
+                      min-width="auto" :close-on-content-click="false" ref="menu">
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field v-model="t.startDate"
                                 :rules="rules.startDate"
@@ -277,12 +277,12 @@
                                 v-bind="attrs"
                                 v-on="on"></v-text-field>
                 </template>
-                <v-date-picker v-model="t.startDate" no-title scrollable></v-date-picker>
+                <v-date-picker v-model="t.startDate" no-title scrollable @change="$refs.menu.save()"></v-date-picker>
               </v-menu>
             </v-col>
             <v-col cols="6">
               <v-menu v-model="menu2" transition="scale-transition" offset-y
-                      min-width="auto">
+                      min-width="auto" :close-on-content-click="false" ref="menu2">
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field v-model="t.endDate"
                                 :rules="rules.endDate"
@@ -291,7 +291,7 @@
                                 v-bind="attrs"
                                 v-on="on"></v-text-field>
                 </template>
-                <v-date-picker v-model="t.endDate" no-title scrollable></v-date-picker>
+                <v-date-picker v-model="t.endDate" no-title scrollable @change="$refs.menu2.save()"></v-date-picker>
               </v-menu>
             </v-col>
             <v-col cols="3">
@@ -331,8 +331,8 @@
               <v-text-field v-model="t.payDay" label="缴款日*" :rules="rules.payDay"></v-text-field>
             </v-col>
             <v-col cols="6">
-              <v-menu v-model="menu3" transition="scale-transition" offset-y
-                      min-width="auto">
+              <v-menu v-model="menu3" transition="scale-transition" offset-y :close-on-content-click="false"
+                      min-width="auto" ref="menu3">
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field v-model="t.firstStartDate"
                                 label="首期开始日期"
@@ -342,12 +342,12 @@
                                 v-bind="attrs"
                                 v-on="on"></v-text-field>
                 </template>
-                <v-date-picker v-model="t.firstStartDate" no-title scrollable></v-date-picker>
+                <v-date-picker v-model="t.firstStartDate" no-title scrollable @change="$refs.menu3.save()"></v-date-picker>
               </v-menu>
             </v-col>
             <v-col cols="6">
-              <v-menu v-model="menu5" transition="scale-transition" offset-y
-                      min-width="auto">
+              <v-menu v-model="menu5" transition="scale-transition" offset-y :close-on-content-click="false"
+                      min-width="auto" ref="menu5">
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field v-model="t.firstEndDate"
                                 label="截止日期"
@@ -357,7 +357,7 @@
                                 v-bind="attrs"
                                 v-on="on"></v-text-field>
                 </template>
-                <v-date-picker v-model="t.firstEndDate" no-title scrollable></v-date-picker>
+                <v-date-picker v-model="t.firstEndDate" no-title scrollable @change="$refs.menu5.save()"></v-date-picker>
               </v-menu>
             </v-col>
             <v-col cols="6">
