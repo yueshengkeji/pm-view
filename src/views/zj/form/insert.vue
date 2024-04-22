@@ -20,7 +20,8 @@
                             :rules="rules.startDatetime" label="合同开始日期" dense hide-details
                             readonly v-bind="attrs" v-on="on"></v-text-field>
             </template>
-            <v-date-picker v-model="data.startDatetime" no-title scrollable @change="$refs.menu6.save()"></v-date-picker>
+            <v-date-picker v-model="data.startDatetime" no-title scrollable
+                           @change="$refs.menu6.save()"></v-date-picker>
           </v-menu>
         </v-col>
         <v-col sm="2">
@@ -312,16 +313,19 @@
             <v-col cols="3">
               <v-select v-model="t.unit" :items="unitItems" label="计费单位*" :rules="rules.unit"></v-select>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="3">
               <v-select v-model="t.payCycle" :items="cycleItems" label="支付周期*"
                         :rules="rules.payCycle"></v-select>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="3">
               <v-radio-group v-model="t.monthBill" label="是否自然月账单*"
                              style="margin-top: -30px">
                 <v-radio :value="false" label="否"></v-radio>
                 <v-radio :value="true" label="是"></v-radio>
               </v-radio-group>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" label="优惠阶段抵扣金额" v-model="t.disMoney" :disabled="t.type != 'regularPreferential'"></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-select v-model="t.payType" :items="payTypeItems" label="付款方式*"
@@ -342,7 +346,8 @@
                                 v-bind="attrs"
                                 v-on="on"></v-text-field>
                 </template>
-                <v-date-picker v-model="t.firstStartDate" no-title scrollable @change="$refs.menu3.save()"></v-date-picker>
+                <v-date-picker v-model="t.firstStartDate" no-title scrollable
+                               @change="$refs.menu3.save()"></v-date-picker>
               </v-menu>
             </v-col>
             <v-col cols="6">
@@ -357,7 +362,8 @@
                                 v-bind="attrs"
                                 v-on="on"></v-text-field>
                 </template>
-                <v-date-picker v-model="t.firstEndDate" no-title scrollable @change="$refs.menu5.save()"></v-date-picker>
+                <v-date-picker v-model="t.firstEndDate" no-title scrollable
+                               @change="$refs.menu5.save()"></v-date-picker>
               </v-menu>
             </v-col>
             <v-col cols="6">
@@ -394,9 +400,11 @@
             <v-radio :value="true" label="是"></v-radio>
             <v-radio :value="false" label="否"></v-radio>
           </v-radio-group>
-          <v-text-field v-if="bzj.type == '履约保证金' && bzj.payAll == false" :rules="bzjRules.requiredProperty" label="租金月数" type="number"
+          <v-text-field v-if="bzj.type == '履约保证金' && bzj.payAll == false" :rules="bzjRules.requiredProperty"
+                        label="租金月数" type="number"
                         v-model="bzj.zjMonth"></v-text-field>
-          <v-text-field v-if="bzj.type == '履约保证金' && bzj.payAll == false" :rules="bzjRules.requiredProperty" label="管理费月数" type="number"
+          <v-text-field v-if="bzj.type == '履约保证金' && bzj.payAll == false" :rules="bzjRules.requiredProperty"
+                        label="管理费月数" type="number"
                         v-model="bzj.wgMonth"></v-text-field>
           <v-menu v-model="bzjMenu" transition="scale-transition" offset-y>
             <template v-slot:activator="{ on, attrs }">
@@ -661,7 +669,8 @@ export default {
       priceType: null,
       money: null,
       price: null,
-      fixPercent: null
+      fixPercent: null,
+      disMoney: null,
     },
     bzjItems: [],
 
@@ -963,7 +972,8 @@ export default {
         priceType: null,
         money: money,
         price: price,
-        fixPercent: null
+        fixPercent: null,
+        disMoney: null
       }, {})
     },
     filesHandler() {
