@@ -332,8 +332,15 @@
               <v-select v-model="t.payType" :items="payTypeItems" label="付款方式*"
                         :rules="rules.payType"></v-select>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="2">
               <v-text-field v-model="t.payDay" label="缴款日*" :rules="rules.payDay"></v-text-field>
+            </v-col>
+            <v-col cols="4">
+              <v-radio-group style="margin-top: -30px" v-model="t.billType" label="账单类型" title="账单生成类型：下期=到达每月账单日，生成下一个对应的‘月/季度’账单；本期=到达每月账单日，生成本月应收账单；上期=到达每月账单日，生成上一个‘月/季度’账单（适合扣点提成类型的合同账单）">
+                <v-radio :value="0" label="下期" title="下期=到达每月账单日，生成下一个对应的‘月/季度’账单"></v-radio>
+                <v-radio :value="1" label="本期" title="本期=到达每月账单日，生成本月应收账单；"></v-radio>
+                <v-radio :value="2" label="上期" title="上期=到达每月账单日，生成上一个‘月/季度’账单（适合扣点提成类型的合同账单）"></v-radio>
+              </v-radio-group>
             </v-col>
             <v-col cols="6">
               <v-menu v-model="menu3" transition="scale-transition" offset-y :close-on-content-click="false"
@@ -672,6 +679,7 @@ export default {
       price: null,
       fixPercent: null,
       disMoney: null,
+      billType:0
     },
     bzjItems: [],
 
@@ -1001,7 +1009,8 @@ export default {
         money: m.money,
         price: m.price,
         fixPercent: null,
-        disMoney: null
+        disMoney: null,
+        billType:0
       }, {})
     },
     filesHandler() {
