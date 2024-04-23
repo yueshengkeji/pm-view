@@ -10,6 +10,9 @@ export function downloadList(param) {
 export function listAll(param) {
     return request.get("workArticle/list", {params: param})
 }
+export function exportExcel(param) {
+    return request.get("workArticle/exportByStorage", {params: param})
+}
 
 export function loadById(id) {
     return request.get(`workArticle/${id}`)

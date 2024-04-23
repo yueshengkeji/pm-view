@@ -1,6 +1,9 @@
 <template>
   <div>
     <v-row>
+      <v-col sm="2">
+        <v-btn outlined small @click="exportHandler" :loading="loading">导出</v-btn>
+      </v-col>
       <v-spacer></v-spacer>
       <v-col sm="2">
         <v-text-field label="库存最小值"
@@ -18,6 +21,7 @@
     </v-row>
 
     <v-data-table :headers="headers"
+                  :loading="loading"
                   sort-desc
                   sort-by="po20101"
                   :options.sync="options"
@@ -41,11 +45,12 @@
 </template>
 
 <script>
-import {loadMater} from '@/api/workMaterial'
+import {loadMater,exportExcel} from '@/api/workMaterial'
 
 export default {
   name: "workMater-index",
   data: () => ({
+    loading:false,
     items: [],
     headers: [
       {
@@ -97,6 +102,16 @@ export default {
     WorkMaterPutIndex: () => import("@/views/workMaterial/put.vue")
   },
   methods: {
+    exportHandler(){
+      this.loading = true
+      this.query = Object.assign({}, this.options)
+      this.query.sortBy = this.query.sortBy[0]
+      this.query.sortDesc = this.query.sortDesc[0] ? 'desc' : 'asc'
+      this.query.itemsPerPage = 5000
+      exportExcel(this.query).then(f=>{
+        this.downloadFile(f)
+      }).finally(this.loading=false)
+    },
     putDetailHandler(item) {
       this.putHistoryId = item.id
       this.putDialog = true

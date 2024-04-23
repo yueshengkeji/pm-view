@@ -235,7 +235,7 @@ exports.install = (Vue, store) => {
                 StartTime = new Date(StartTime);
                 EndTime = new Date(EndTime);
             }
-            if(StartTime.getTime() > EndTime.getTime()){
+            if (StartTime.getTime() > EndTime.getTime()) {
                 return 0
             }
 
@@ -530,8 +530,8 @@ exports.install = (Vue, store) => {
                     var firstDayOfLastYear = new Date(lastYear.getFullYear(), 0, 1);
                     // 获取去年的最后一天
                     var lastDayOfLastYear = new Date(lastYear.getFullYear(), 11, 31);
-                    date.start = Vue.prototype.dateFormat(firstDayOfLastYear,'YYYY-mm-dd')
-                    date.end = Vue.prototype.dateFormat(lastDayOfLastYear,'YYYY-mm-dd')
+                    date.start = Vue.prototype.dateFormat(firstDayOfLastYear, 'YYYY-mm-dd')
+                    date.end = Vue.prototype.dateFormat(lastDayOfLastYear, 'YYYY-mm-dd')
                     break
                 case "所有":     //所有
                     date.start = null
@@ -677,7 +677,7 @@ exports.install = (Vue, store) => {
             store.state.showTooltip.snackbarMsg = msg
             store.state.showTooltip.snackbar = true
         },
-        Vue.prototype.switchMonth = (year,month) => {
+        Vue.prototype.switchMonth = (year, month) => {
             let date = new Date();
             date.setFullYear(year)
             date.setDate(28);
@@ -775,26 +775,27 @@ exports.install = (Vue, store) => {
                 return false
             }
 
-        }, Vue.prototype.dateIsMonth = (date) => {
-        // 创建一个日期对象
-        let dateToCheck = new Date(date); // 如果要检查的日期不是当前日期，可以将其替换为你要检查的日期
+        },
+        Vue.prototype.dateIsMonth = (date) => {
+            // 创建一个日期对象
+            let dateToCheck = new Date(date); // 如果要检查的日期不是当前日期，可以将其替换为你要检查的日期
 
 // 获取当前年份和月份
-        let currentYear = new Date().getFullYear();
-        let currentMonth = new Date().getMonth() + 1; // 月份从0开始，所以需要加1
+            let currentYear = new Date().getFullYear();
+            let currentMonth = new Date().getMonth() + 1; // 月份从0开始，所以需要加1
 
 // 获取要检查日期的年份和月份
-        let yearToCheck = dateToCheck.getFullYear();
-        let monthToCheck = dateToCheck.getMonth() + 1;
+            let yearToCheck = dateToCheck.getFullYear();
+            let monthToCheck = dateToCheck.getMonth() + 1;
 
 // 判断是否在本月内
-        if (currentYear === yearToCheck && currentMonth === monthToCheck) {
-            return true
-        } else {
-            return false
-        }
+            if (currentYear === yearToCheck && currentMonth === monthToCheck) {
+                return true
+            } else {
+                return false
+            }
 
-    },
+        },
         Vue.prototype.getFrameName = (approve) => {
             if (approve.message) {
                 switch (approve.message.frameCoding) {
@@ -860,5 +861,19 @@ exports.install = (Vue, store) => {
                         return ""
                 }
             }
+        },
+        Vue.prototype.getDaysInMonth = (date) => {
+            let d= new Date(date)
+            return Vue.prototype.getDaysInMonth(d.getFullYear(),d.getMonth()+1)
+        },
+        Vue.prototype.getDaysInMonth = (year, month) => {
+            // 构造指定年月的第一天
+            let firstDayOfMonth = new Date(year, month - 1, 1);
+            // 构造下一个月的第一天
+            let firstDayOfNextMonth = new Date(year, month, 1);
+            // 计算两个日期之间的毫秒数差
+            let millisecondsPerDay = 1000 * 60 * 60 * 24;
+            let daysInMonth = (firstDayOfNextMonth - firstDayOfMonth) / millisecondsPerDay;
+            return daysInMonth;
         }
 }

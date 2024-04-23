@@ -117,7 +117,8 @@ export default {
       handler(val) {
         let idx = 0;
         val.forEach(item => {
-          if (this.data.materOutList[idx] == null) {
+          let id = item.id
+          if (this.materMap[id] == null) {
             let t = {
               index: idx,
               sum: 1,
@@ -131,6 +132,7 @@ export default {
             t.taxMoney = t.sum * t.taxPrice
             t.storageSum = isNaN(t.storageSum) ? 0 : t.storageSum
             this.data.materOutList.push(t)
+            this.materMap[id] = t
           }
 
           idx++
@@ -141,6 +143,7 @@ export default {
     }
   },
   data: () => ({
+    materMap:[],
     menu: false,
     data: null,
     headers: [
@@ -157,8 +160,8 @@ export default {
   }),
   created() {
     this.showSaveBtn = this.$route.params.s == '1'
-    this.reset();
-    this.loadData();
+    this.reset()
+    this.loadData()
     this.loadMaterList()
   },
   methods: {
@@ -182,7 +185,12 @@ export default {
       })
     },
     deleteMater(deleteItem) {
-      this.selectList.splice(deleteItem.index, 1)
+      this.data.materOutList.forEach((item,idx)=>{
+        if(item.material.id == deleteItem.material.id){
+          delete this.materMap[item.material.id]
+          this.data.materOutList.splice(idx,1)
+        }
+      })
     },
     sumHandler(item) {
       if (item.sum) {

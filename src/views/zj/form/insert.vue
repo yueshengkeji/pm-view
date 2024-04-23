@@ -296,7 +296,7 @@
               </v-menu>
             </v-col>
             <v-col cols="3">
-              <v-select v-model="t.type" :items="typeItems" label="计费方式*"></v-select>
+              <v-select v-model="t.type" :items="typeItems" label="计费方式*" @change="typeChangeHandler"></v-select>
             </v-col>
             <v-col cols="3">
               <v-text-field type="number" v-model="t.money" label="金额*"
@@ -325,7 +325,8 @@
               </v-radio-group>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="number" label="优惠阶段抵扣金额" v-model="t.disMoney" :disabled="t.type != 'regularPreferential'"></v-text-field>
+              <v-text-field type="number" label="优惠阶段抵扣金额" v-model="t.disMoney"
+                            :disabled="t.type != 'regularPreferential'"></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-select v-model="t.payType" :items="payTypeItems" label="付款方式*"
@@ -546,7 +547,7 @@ export default {
     bzjMenu2: false,
     bzjMenu3: false,
     bzjRules: {
-      money: [v => !!v || '请输入金额', v => (!!v && v.length < 11) || '金额字符太长'],
+      money: [v => !!v || '请输入金额', v => (!!v && (v + '').length < 11) || '金额字符太长'],
       type: [v => !!v || '请选择或手动输入类型', v => (!!v) || '金额类型过长'],
       datetime: [v => !!v || '请选择时间'],
       requiredProperty: [v => !!v || '必填项']
@@ -754,6 +755,26 @@ export default {
     }
   },
   methods: {
+    typeChangeHandler() {
+      if (this.t.type == 'regularPreferential') {
+        // this.updatePreDisMoney()
+      }
+    },
+    // updatePreDisMoney(){
+    //
+    //   // let m = this.getMoney()
+    //   // if(this.t.startDate && this.t.endDate){
+    //   //   let day = this.dayDiff(this.t.startDate,this.t.endDate)
+    //   //   let offsetMonth = this.getMonth(this.t.startDate,this.t.endDate)
+    //   //   let rep = this.t.startDate.substring(5,7)
+    //   //   offsetMonth.forEach(month=>{
+    //   //     month = this.parse0(month)
+    //   //     this.t.startDate.replace()
+    //   //   })
+    //   //   console.log("优惠天数",day)
+    //   //   this.getDaysInMonth(this.t)
+    //   // }
+    // },
     closeFrameHandler(isClose) {
       if (!isClose) {
         this.frameId = null
@@ -924,6 +945,19 @@ export default {
         this.bzjDialog = true
       }
     },
+    getMoney() {
+      let money = 0
+      let price = 0
+      if (this.data.houses && this.data.houses.length > 0) {
+        this.data.houses.forEach(item => {
+          if (item.money) {
+            price += item.money
+            money += item.money * item.acreage
+          }
+        })
+      }
+      return {money: money, price: price}
+    },
     resetMoneyType() {
       let startDate = null
       let endDate = null
@@ -933,13 +967,7 @@ export default {
       if (this.data.endDatetime) {
         endDate = this.data.endDatetime
       }
-      let money = null
-      let price = null
-      if (this.data.houses && this.data.houses.length > 0) {
-        price = this.data.houses[0].money
-        money = this.data.houses[0].money * this.data.houses[0].acreage
-      }
-
+      let m = this.getMoney()
       let payCycle = null
       if (this.data.payType == 1) {
         payCycle = 'quarter'
@@ -970,8 +998,8 @@ export default {
         firstEndDate: null,
         firstMoney: null,
         priceType: null,
-        money: money,
-        price: price,
+        money: m.money,
+        price: m.price,
         fixPercent: null,
         disMoney: null
       }, {})
