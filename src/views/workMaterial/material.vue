@@ -54,28 +54,36 @@ export default {
     items: [],
     headers: [
       {
+        text: "最后入库单号",
+        value: 'put.articlePut.name'
+      },
+      {
+        text: "最后购置部门",
+        value: 'put.section.name'
+      },
+      {
         text: "材料名称",
-        value: 'name'
+        value: 'material.name'
       },
       {
         text: "型号",
-        value: 'model'
+        value: 'material.model'
       },
       {
         text: "库存数量",
-        value: 'storageSum'
+        value: 'material.storageSum'
       },
       {
         text: "领用总数",
-        value: 'outSum'
+        value: 'material.outSum'
       },
       {
         text: "入库总数",
-        value: 'putSum'
+        value: 'material.putSum'
       },
       {
         text: "单位",
-        value: 'unit.name'
+        value: 'material.unit.name'
       },
       {
         text: "操作",
