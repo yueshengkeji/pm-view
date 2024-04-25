@@ -33,7 +33,7 @@
 
       <v-col offset="6" cols class="text-right">
         <v-btn outlined small class="mr-1" @click="dialog = true">新增</v-btn>
-        <v-btn outlined small class="mr-1" @click="loadPayNotify">催缴通知</v-btn>
+        <v-btn outlined small class="mr-1" @click="loadPayNotify" :loading="loading">催缴通知</v-btn>
         <v-btn outlined small class="mr-1" disabled>开票</v-btn>
         <v-btn outlined small @click="exportHandler">导出</v-btn>
       </v-col>
@@ -46,6 +46,7 @@
     <v-tabs-items v-model="tab">
       <v-tab-item key="zl">
         <v-data-table :items="data.rows"
+                      :loading="loading"
                       :options.sync="options"
                       :headers="headers"
                       :server-items-length="data.total">
@@ -68,6 +69,7 @@
       </v-tab-item>
       <v-tab-item key="bzj">
         <v-data-table :items="data2.rows"
+                      :loading="loading"
                       :options.sync="options2"
                       :headers="headers2"
                       :server-items-length="data2.total">
@@ -120,6 +122,7 @@ export default {
   name: "bill-list",
   components: {PayNotify, BillInsert},
   data: () => ({
+    loading: false,
     tab: null,
     printObj: {
       id: "printCon",
@@ -208,9 +211,9 @@ export default {
       this.dialog = true
     },
     closeHandler() {
-      if(this.tab == 0){
+      if (this.tab == 0) {
         this.list()
-      }else{
+      } else {
         this.listBzj()
       }
       this.item = null
@@ -263,6 +266,7 @@ export default {
       }
     },
     loadPayNotify() {
+      this.loading = true
       this.tempNotifyMap = []
       this.notifyList = []
 
@@ -291,7 +295,10 @@ export default {
           }
 
         })
-      }).finally(() => this.payNotifyDialog = true)
+      }).finally(() => {
+        this.payNotifyDialog = true
+        window.setTimeout(() => this.loading = false, 2000)
+      })
     },
     exportHandler() {
       let q
