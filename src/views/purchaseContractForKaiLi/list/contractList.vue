@@ -164,8 +164,9 @@
         <v-btn x-small color="error" @click="deleteContract(item)" style="margin-right: 1px">删除</v-btn>
         <v-btn x-small color="primary" @click="showDetail(item)" style="margin-right: 1px">明细</v-btn>
         <v-btn x-small v-if="item.state == 1" @click="loseContract(item)"
-               style="background-color: #ff9800;border-color:#ff9800;color: #FFFFFF">作废
+               style="margin-right: 1px;background-color: #ff9800;border-color:#ff9800;color: #FFFFFF">作废
         </v-btn>
+        <v-btn x-small @click="showReceiptDialog(item)">收票登记</v-btn>
         <!--                <v-btn x-small color="#f0ad4e" v-if="item.state == 2" disabled>已作废</v-btn>-->
       </template>
       <template v-slot:item.name="{ item }">
@@ -258,6 +259,64 @@
         <contract-type></contract-type>
       </v-card>
     </v-dialog>
+    <!--收票登记-->
+    <v-dialog v-model="contractReceiptDialog" width="60%">
+      <v-card>
+        <add-contract-receipt :contract-item="contractItem" @getList="listContractReceipt"></add-contract-receipt>
+        <v-data-table :items="contractReceiptList" :headers="contractReceiptHeader" hide-default-footer>
+          <template v-slot:item.collectTime="{item}">
+            <v-chip link @click="showMenu($event,item)">{{ item.collectTime }}</v-chip>
+          </template>
+          <template v-slot:item.stateStr="{item}">
+            <v-chip v-if="item.state == 0" color="red" link @click="showSate(item)">{{item.stateStr}}</v-chip>
+            <v-chip v-if="item.state == 1" color="green" link @click="showSate(item)">{{item.stateStr}}</v-chip>
+            <v-chip v-if="item.state == 9" color="grey" link @click="showSate(item)">{{item.stateStr}}</v-chip>
+          </template>
+          <template v-slot:item.action="{item}">
+            <v-btn @click="filesHandler(item)" small>查看附件</v-btn>
+          </template>
+        </v-data-table>
+        <v-menu ref="dateMenu2"
+                v-model="dateMenu2"
+                :close-on-content-click="false"
+                offset-y
+                absolute
+                :position-y="y"
+                :position-x="x"
+        >
+          <v-date-picker
+              @change="updateDate"
+              v-model="collectTime"
+              no-title
+              @input="dateMenu2 = false"
+          ></v-date-picker>
+        </v-menu>
+      </v-card>
+    </v-dialog>
+    <!-- 附件 -->
+    <v-dialog v-model="filePreviewDialog" width="60%">
+      <file-preview :filesItem="files"></file-preview>
+    </v-dialog>
+    <!-- 状态 -->
+    <v-dialog v-model="stateDialog" width="40%">
+      <v-card>
+        <v-col sm="12">
+          <v-radio-group v-model="stateItem" label="确认收票" @change="updateState" mandatory row>
+            <v-radio :value="0" label="未收票"></v-radio>
+            <v-radio :value="1" label="已收票"></v-radio>
+            <v-radio :value="9" label="作废"></v-radio>
+          </v-radio-group>
+        </v-col>
+      </v-card>
+
+    </v-dialog>
+    <!--消息框-->
+    <v-snackbar v-model="showSnackbarDialog"
+                :timeout="timeout"
+                :centered="true"
+    >
+      {{ msgStr }}
+    </v-snackbar>
   </v-card>
 </template>
 <script>
@@ -268,6 +327,9 @@ import ContractDetails from "../components/contractDetails";
 import {getConfig} from "../../../api/systemConfig";
 import contractType from "@/components/contractType"
 import selectCompany from '../../company/select.vue'
+import addContractReceipt from "../contractReceipt/components/addContractReceipt";
+import {list,update,getContractReceiptFiles} from "../../../api/contractReceipt";
+
 export default {
   name: "purchase_contract_for_kaiLi",
   components: {
@@ -275,7 +337,9 @@ export default {
     addContract,
     instanceDetail,
     contractType,
-    selectCompany
+    selectCompany,
+    addContractReceipt,
+    filePreview:() => import('@/components/filePreview.vue')
   },
   data: () => ({
     priceMenu: false,
@@ -332,11 +396,11 @@ export default {
     searchTime: null,
     searchTimeItems: ["所有", "本月", "上月", "半年", "本年"],
     searchContractType: null,
-    searchContractTypeItems: ["所有合同", "子公司1合同", "子公司2合同"],
+    searchContractTypeItems: ["所有合同", "默认合同", "其他合同"],
 
-    snackbar: false,
+    showSnackbarDialog: false,
     timeout: 2000,
-    textMsg: null,
+    msgStr: null,
 
     item: {id: null},
 
@@ -353,6 +417,34 @@ export default {
     },
     searchCompany:null,
 
+    //收票登记
+    contractItem:null,
+    contractReceiptDialog:false,
+    contractReceiptList:[],
+    contractReceiptHeader:[
+      {text: '合同名称', value: 'contract.name', sortable: false},
+      {text: '乙方', value: 'company.name', sortable: false},
+      {text: '金额(￥)', value: 'money', sortable: false},
+      {text: '收票类型', value: 'advanceFlagStr', sortable: false},
+      {text: '预收时间', value: 'advanceTime', sortable: false},
+      {text: '收票时间', value: 'collectTime', sortable: false},
+      {text: '收票状态', value: 'stateStr', sortable: false},
+      {text: '登记人', value: 'staff.name', sortable: false},
+      {text: '操作', value: 'action', sortable: false},
+    ],
+    thanClickItem:null,
+    dateMenu2:false,
+    x:0,
+    y:0,
+    collectTime:null,
+
+    files:[],
+    filePreviewDialog:false,
+    ftpFolder: null,
+    serverHost: '',
+
+    stateDialog:false,
+    stateItem:null,
   }),
 
   watch: {
@@ -402,11 +494,11 @@ export default {
         if (this.searchContractType == "所有合同") {
           this.queryContract.partyA = null
           this.loadContract()
-        } else if (this.searchContractType == "子公司2合同") {
-          this.queryContract.partyA = 'AasfdE1'
-          this.loadContract()
         } else if (this.searchContractType == "默认合同") {
-          this.queryContract.partyA = '2CC3FF'
+          this.queryContract.partyA = 'AB345ED1-0CBF-4210-87D6-E783E3EC3DA1'
+          this.loadContract()
+        } else if (this.searchContractType == "其他合同") {
+          this.queryContract.partyA = '229CAD0E-7AAA-48CE-A3AF-8C97994CC3FF'
           this.loadContract()
         }
       },
@@ -422,7 +514,14 @@ export default {
       } else {
         alert("未配置编码为‘ROLE_NAME’的参数,配置该参数值得角色可强制删除已审核的单据,只有具备管理员角色的用户可以删除")
       }
+    })
 
+    getConfig("FTP_SERVER_PATH").then(result => {
+      if (result.id != null) {
+        this.serverHost = result.value
+      } else {
+        console.log('服务器未配置文件上传路径')
+      }
     })
   },
 
@@ -439,6 +538,90 @@ export default {
   },
 
   methods: {
+    showReceiptDialog(item){
+      this.contractItem = item
+      this.contractReceiptDialog = true
+      this.listContractReceipt()
+    },
+    listContractReceipt(){
+      list({pageNum:1,pageSize:100,contractId:this.contractItem.id}).then(res => {
+        this.contractReceiptList = res.rows
+      })
+    },
+    showMenu(e, item) {
+      console.log(e)
+      this.thanClickItem = item
+      e.preventDefault()
+      this.dateMenu2 = false
+      this.x = e.clientX
+      this.y = e.clientY
+      this.$nextTick(() => {
+        this.collectTime = item.collectTime == null ? '':item.collectTime
+        this.dateMenu2 = true
+      })
+    },
+    updateDate(){
+      if (this.thanClickItem) {
+        this.thanClickItem.collectTime = this.collectTime
+        update(this.thanClickItem).then(() => {
+          this.listContractReceipt()
+        })
+      }
+    },
+    filesHandler(item) {
+      this.files = []
+      getContractReceiptFiles({id:item.id}).then(res => {
+        res.forEach(item => {
+          this.files.push(item)
+        })
+        this.fileSuffix(this.files)
+        this.filePreviewDialog = true
+      })
+
+    },
+    fileSuffix(files) {
+      files.forEach(f => {
+        let name = f.showPath;
+        let suffix = '';
+        let index = name.lastIndexOf(".");
+        index = index == -1 ? f.length : index + 1;
+        suffix = f.showPath.substring(index, f.length);
+        f.suffix = suffix.toLowerCase();
+        f.downloadPath = decodeURIComponent(f.showPath);
+        if ((this.$vuetify.breakpoint.xs || this.$vuetify.breakpoint.sm)
+            && window.location.protocol == 'https:') {
+
+          if (f.suffix == 'pdf') {
+            if (f.pdfImgPath != null && f.pdfImgPath.length > 0) {
+              f.pdfImg = true
+              let paths = [];
+              f.pdfImgPath.forEach(path => {
+                paths.push(this.ftpFolder + "/" + encodeURIComponent(path))
+              })
+              f.pdfImgPath = paths
+            }
+          } else {
+            f.showPath = this.ftpFolder + "/" + f.downloadPath
+          }
+
+        } else {
+          //直接从配置的文件服务器预览
+          f.showPath = this.serverHost + f.downloadPath
+        }
+      });
+    },
+    showSate(item){
+      this.thanClickItem = item
+      this.stateItem = this.thanClickItem.state
+      this.stateDialog = true
+    },
+    updateState(){
+      this.thanClickItem.state = this.stateItem
+      update(this.thanClickItem).then(() => {
+        this.listContractReceipt()
+      })
+    },
+
     downloadExcel() {
       this.queryContract.pageSize = 500
       this.queryContract.pageNumber = 1

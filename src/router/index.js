@@ -327,6 +327,12 @@ const routes = [
         meta: {title: "项目成本清单"},
         component: () => import(`../views/plan/history.vue`)
     },
+    {
+        path: '/purchaseContractForKaiLi/contractReceipt/components/contractReceiptDetail/:id',
+        name: 'contractReceiptDetail',
+        meta: '采购收票确认',
+        component: () => import('../views/purchaseContractForKaiLi/contractReceipt/components/contractReceiptDetail')
+    },
 ]
 
 const router = new VueRouter({
