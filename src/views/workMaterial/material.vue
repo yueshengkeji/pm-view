@@ -55,7 +55,7 @@ export default {
     headers: [
       {
         text: "最后入库单号",
-        value: 'put.articlePut.name'
+        value: 'put.putNumber'
       },
       {
         text: "最后购置部门",
