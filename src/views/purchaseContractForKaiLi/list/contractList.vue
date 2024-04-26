@@ -161,10 +161,10 @@
         <span :style="item.colorStyle">{{ item.state | strState }}</span>
       </template>
       <template v-slot:item.actions="{item}">
-        <v-btn x-small color="error" @click="deleteContract(item)" style="margin-right: 1px">删除</v-btn>
-        <v-btn x-small color="primary" @click="showDetail(item)" style="margin-right: 1px">明细</v-btn>
-        <v-btn x-small v-if="item.state == 1" @click="loseContract(item)"
-               style="margin-right: 1px;background-color: #ff9800;border-color:#ff9800;color: #FFFFFF">作废
+        <v-btn x-small color="error" @click="deleteContract(item)" class="mr-1">删除</v-btn>
+        <v-btn x-small color="primary" @click="showDetail(item)" class="mr-1">明细</v-btn>
+        <v-btn x-small v-if="item.state == 1" @click="loseContract(item)" class="mr-1"
+               style="background-color: #ff9800;border-color:#ff9800;color: #FFFFFF">作废
         </v-btn>
         <v-btn x-small @click="showReceiptDialog(item)">收票登记</v-btn>
         <!--                <v-btn x-small color="#f0ad4e" v-if="item.state == 2" disabled>已作废</v-btn>-->
@@ -260,20 +260,25 @@
       </v-card>
     </v-dialog>
     <!--收票登记-->
-    <v-dialog v-model="contractReceiptDialog" width="60%">
+    <v-dialog v-model="contractReceiptDialog" width="80%">
       <v-card>
         <add-contract-receipt :contract-item="contractItem" @getList="listContractReceipt"></add-contract-receipt>
-        <v-data-table :items="contractReceiptList" :headers="contractReceiptHeader" hide-default-footer>
+        <v-data-table :items="contractReceiptList"
+                      :headers="contractReceiptHeader"
+                      hide-default-footer>
+          <template v-slot:item.type="{item}">
+            {{item.type == 0 ? '专票' : '普票'}}
+          </template>
           <template v-slot:item.collectTime="{item}">
-            <v-chip link @click="showMenu($event,item)">{{ item.collectTime }}</v-chip>
+            <v-chip small outlined link @click="showMenu($event,item)">{{ subDate(item.collectTime,0,10) }}</v-chip>
           </template>
           <template v-slot:item.stateStr="{item}">
-            <v-chip v-if="item.state == 0" color="red" link @click="showSate(item)">{{item.stateStr}}</v-chip>
-            <v-chip v-if="item.state == 1" color="green" link @click="showSate(item)">{{item.stateStr}}</v-chip>
-            <v-chip v-if="item.state == 9" color="grey" link @click="showSate(item)">{{item.stateStr}}</v-chip>
+            <v-chip outlined small v-if="item.state == 0" color="red" link @click="showSate(item)">{{item.stateStr}}</v-chip>
+            <v-chip outlined small v-if="item.state == 1" color="green" link @click="showSate(item)">{{item.stateStr}}</v-chip>
+            <v-chip outlined small v-if="item.state == 9" color="grey" link @click="showSate(item)">{{item.stateStr}}</v-chip>
           </template>
           <template v-slot:item.action="{item}">
-            <v-btn @click="filesHandler(item)" small>查看附件</v-btn>
+            <v-btn @click="filesHandler(item)" small outlined>查看附件</v-btn>
           </template>
         </v-data-table>
         <v-menu ref="dateMenu2"
@@ -425,10 +430,11 @@ export default {
       {text: '合同名称', value: 'contract.name', sortable: false},
       {text: '乙方', value: 'company.name', sortable: false},
       {text: '金额(￥)', value: 'money', sortable: false},
-      {text: '收票类型', value: 'advanceFlagStr', sortable: false},
+      {text: '类型', value: 'type', sortable: false},
+      {text: '预收', value: 'advanceFlagStr', sortable: false},
       {text: '预收时间', value: 'advanceTime', sortable: false},
       {text: '收票时间', value: 'collectTime', sortable: false},
-      {text: '收票状态', value: 'stateStr', sortable: false},
+      {text: '到票', value: 'stateStr', sortable: false},
       {text: '登记人', value: 'staff.name', sortable: false},
       {text: '操作', value: 'action', sortable: false},
     ],

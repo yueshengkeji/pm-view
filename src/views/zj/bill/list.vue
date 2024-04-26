@@ -123,7 +123,7 @@ export default {
   components: {PayNotify, BillInsert},
   data: () => ({
     loading: false,
-    tab: null,
+    tab: 0,
     printObj: {
       id: "printCon",
       popTitle: '打印',
@@ -205,7 +205,6 @@ export default {
     notifyList: []
   }),
   methods: {
-
     editHandler(item) {
       this.item = item
       this.dialog = true
@@ -340,13 +339,14 @@ export default {
     },
     options: {
       handler() {
+        console.log("options handler ",this.options)
         this.list()
       },
       deep: true
     },
   },
   created() {
-    this.list()
+
   }
 }
 </script>
