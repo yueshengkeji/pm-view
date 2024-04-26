@@ -4,6 +4,7 @@
       <v-row>
         <v-col sm="6" v-if="contractItem == null">
           <v-autocomplete label="合同名称"
+                          @change="contractChangeHandler"
                           v-model="contractReceipt.contract"
                           :items="contractList"
                           :search-input.sync="searchContract"
@@ -13,6 +14,7 @@
         <v-col sm="6" v-if="contractItem == null">
           <v-autocomplete label="开票单位"
                           v-model="contractReceipt.company"
+                          @change="companyHandler"
                           :items="companyList"
                           :search-input.sync="searchCompany"
                           :rules="[v => !!v || '请填写单位']"
@@ -122,6 +124,8 @@ export default {
     if (this.contractItem != null) {
       this.contractReceipt.company = this.contractItem.partyB
       this.contractReceipt.contract = this.contractItem
+    } else {
+      this.listContract()
     }
   },
   watch: {
@@ -137,7 +141,7 @@ export default {
     },
 
     searchContract(val) {
-      getContract({searchText: val}).then(result => this.contractList = result.rows)
+      this.listContract(val)
     },
     searchCompany(val) {
       searchCompany(val).then(result => this.companyList = result)
@@ -145,7 +149,22 @@ export default {
   },
 
   methods: {
-    startFlow(r){
+    listContract(val) {
+      let q = {searchText: val}
+      if (this.contractReceipt.company) {
+        q.partyB = this.contractReceipt.company.id
+      }
+      getContract(q).then(result => this.contractList = result.rows)
+    },
+    companyHandler() {
+      this.listContract()
+    },
+    contractChangeHandler() {
+      if (this.contractReceipt.contract) {
+        this.contractReceipt.company = this.contractReceipt.contract.partyB
+      }
+    },
+    startFlow(r) {
       if (r && r.id && r.state == 1) {
         this.$refs.flow.startFlow({
           title: r.company.name + '-收票登记:' + r.money,
@@ -180,6 +199,7 @@ export default {
       } else {
         this.$refs.form.reset()
       }
+      this.listContract()
     },
 
     fileChangeHandler({files}) {

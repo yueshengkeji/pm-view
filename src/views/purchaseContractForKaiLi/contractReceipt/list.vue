@@ -3,8 +3,8 @@
     <v-row>
       <v-col sm="1">
         <div style="display: flex">
-          <v-btn small @click="downloadExcel" class="mr-1">导出</v-btn>
-          <v-btn small @click="addDialog = true">新增</v-btn>
+          <v-btn small @click="addDialog = true" color="primary" class="mr-1">新增</v-btn>
+          <v-btn small @click="downloadExcel">导出</v-btn>
         </div>
 
       </v-col>
@@ -40,7 +40,7 @@
 
       </v-col>
       <v-col sm="3">
-        <v-btn class="mr-1" small color="primary" @click="listContractReceipt">搜索</v-btn>
+        <v-btn class="mr-1" small @click="listContractReceipt">搜索</v-btn>
         <v-btn small @click="reset">重置</v-btn>
       </v-col>
     </v-row>
@@ -101,7 +101,7 @@
       </v-card>
     </v-dialog>
     <!-- 新增 -->
-    <v-dialog v-model="addDialog" width="40%">
+    <v-dialog v-model="addDialog" width="80%">
       <v-card>
         <add-contract-receipt @getList="closeDialog"></add-contract-receipt>
       </v-card>
