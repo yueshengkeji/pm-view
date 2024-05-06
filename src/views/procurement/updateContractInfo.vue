@@ -7,7 +7,7 @@
                       :items.sync="companyList"
                       :rules="[v => !!v || '请指定供应单位']"
                       :loading="loading"
-                      return-object
+                      return-objectd
                       item-text="name"
                       item-value="id"
                       label="供应单位"></v-autocomplete>

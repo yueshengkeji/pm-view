@@ -325,8 +325,7 @@
               </v-radio-group>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="number" label="优惠阶段抵扣金额" v-model="t.disMoney"
-                            :disabled="t.type != 'regularPreferential'"></v-text-field>
+              <v-text-field type="number" label="每期折扣" v-model="t.disMoney" disabled></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-select v-model="t.payType" :items="payTypeItems" label="付款方式*"
@@ -524,9 +523,6 @@ import EasyFlow from "@/components/easyflow/easyFlow.vue";
 import FileUpload from "@/components/fileUpload.vue";
 import SelectCompany from "@/views/company/select.vue";
 import {list} from '@/api/yetai'
-// import {selectContractWordRecordByContractId} from "../../../api/contractWordModel";
-// import {saveAs} from "file-saver"
-// import htmlDocx from "html-docx-js/dist/html-docx"
 
 export default {
   name: "zj-insert",
@@ -651,6 +647,8 @@ export default {
       {value: 'month', text: '月付'},
       {value: 'towMonth', text: '两月付'},
       {value: 'quarter', text: '季付'},
+      {value: 'halfYear', text: '半年付'},
+      {value: 'year', text: '年付'},
       {value: 'one', text: '一次性付清'},
       {value: 'final', text: '固定扣点'},
     ],
@@ -865,6 +863,9 @@ export default {
 
     editMoneyHandler(item) {
       this.update = true
+      if(item.money){
+        item.money = item.money + ""
+      }
       this.t = item
       this.moneyTypeDialog = true
     },
@@ -1010,7 +1011,7 @@ export default {
         price: m.price,
         fixPercent: null,
         disMoney: null,
-        billType:0
+        billType: 0
       }, {})
     },
     filesHandler() {

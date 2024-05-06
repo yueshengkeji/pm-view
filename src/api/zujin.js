@@ -147,6 +147,12 @@ export function updateTerm(term){
         data:term
     })
 }
+export function listTermByConcat(concat){
+    return request({
+        url:`term/byConcat/${concat}`,
+        method:'get',
+    })
+}
 export function deleteTerm(id){
     return request({
         url:`term/${id}`,

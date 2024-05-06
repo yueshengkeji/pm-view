@@ -38,10 +38,10 @@
                           return-object
                           multiple
                           :search-input.sync="searchMater"
-                          item-text="name"
+                          item-text="material.name"
                           :items.sync="items">
             <template v-slot:item="data">
-              <div>{{ data.item.name + data.item.model + '(' + data.item.unit.name + ')' }}</div>
+              <div>{{ data.item.material.name + data.item.material.model + '(' + data.item.material.unit.name + ')' }}</div>
             </template>
           </v-autocomplete>
         </v-col>
@@ -116,7 +116,8 @@ export default {
     selectList: {
       handler(val) {
         let idx = 0;
-        val.forEach(item => {
+        val.forEach(val => {
+          let item = val.material
           let id = item.id
           if (this.materMap[id] == null) {
             let t = {
@@ -143,7 +144,7 @@ export default {
     }
   },
   data: () => ({
-    materMap:[],
+    materMap: [],
     menu: false,
     data: null,
     headers: [
@@ -185,10 +186,10 @@ export default {
       })
     },
     deleteMater(deleteItem) {
-      this.data.materOutList.forEach((item,idx)=>{
-        if(item.material.id == deleteItem.material.id){
+      this.data.materOutList.forEach((item, idx) => {
+        if (item.material.id == deleteItem.material.id) {
           delete this.materMap[item.material.id]
-          this.data.materOutList.splice(idx,1)
+          this.data.materOutList.splice(idx, 1)
         }
       })
     },
@@ -201,7 +202,13 @@ export default {
       this.items = []
       loadMater({searchText: val, type: 1}).then(result => {
         if (result.rows.length > 0) {
+          result.rows.forEach(item => {
+            if (item.material.unit == null) {
+              item.material.unit = {name: '个'}
+            }
+          })
           this.items = result.rows
+          console.log("items",this.items)
         } else {
           if (val != null) {
             this.items.push({id: "-1", name: val, model: '', unit: {name: '个'}, planPrice: 0, outSum: 0, putSum: 0})

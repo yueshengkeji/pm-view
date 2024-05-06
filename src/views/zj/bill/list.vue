@@ -50,6 +50,9 @@
                       :options.sync="options"
                       :headers="headers"
                       :server-items-length="data.total">
+          <template v-slot:item.brand="{item}">
+            <v-chip small outlined @click="showTermHandler($event,item)">{{ item.brand }}</v-chip>
+          </template>
           <template v-slot:item.state="{item}">
             {{ formatState(item.state) }}
           </template>
@@ -73,6 +76,9 @@
                       :options.sync="options2"
                       :headers="headers2"
                       :server-items-length="data2.total">
+          <template v-slot:item.brand="{item}">
+            <v-chip small outlined @click="showTermHandler($event,item)">{{ item.brand }}</v-chip>
+          </template>
           <template v-slot:item.state="{item}">
             {{ formatState(item.state) }}
           </template>
@@ -89,8 +95,11 @@
             <v-btn x-small outlined @click="editHandler(item)">财务复核</v-btn>
           </template>
         </v-data-table>
+
+
       </v-tab-item>
     </v-tabs-items>
+    <abs-menu :headers="termHeaders" :items="termItems" ref="absMenu" :loading="termLoading"></abs-menu>
 
     <v-dialog v-model="dialog">
       <bill-insert @close="closeHandler" v-model="item"></bill-insert>
@@ -114,14 +123,33 @@
 </template>
 
 <script>
-import {getBillList, exportBill} from '@/api/zujin'
+import {getBillList, exportBill, listTermByConcat} from '@/api/zujin'
 import BillInsert from "@/views/zj/bill/insert.vue";
 import PayNotify from "@/views/zj/bill/payNotify.vue";
+import AbsMenu from "@/components/menu/absMenu.vue";
 
 export default {
   name: "bill-list",
-  components: {PayNotify, BillInsert},
+  components: {AbsMenu, PayNotify, BillInsert},
   data: () => ({
+    termLoading: false,
+    termHeaders: [
+      {value: 'name', text: '费用名称'},
+      {value: 'startDate', text: '开始日期'},
+      {value: 'endDate', text: '截止日期'},
+      {value: 'type', text: '计费方式'},
+      {value: 'unit', text: '计费单位'},
+      {value: 'money', text: '金额'},
+      {value: 'payCycle', text: '支付周期'},
+      {value: 'monthBill', text: '是否自然月账单'},
+      {value: 'payType', text: '付款方式'},
+      {value: 'payDay', text: '缴款日'},
+      {value: 'firstStartDate', text: '首期开始日期'},
+      {value: 'firstEndDate', text: '首期截止日期'},
+      {value: 'firstMoney', text: '首期金额'},
+      {value: 'priceType', text: '计价方式'},
+    ],
+    termItems: [],
     loading: false,
     tab: 0,
     printObj: {
@@ -150,7 +178,7 @@ export default {
       concatType: null,
       state: null,
     },
-    options: {type: 'regular'},
+    options: {type: 'regular,compare,commission'},
     options2: {type: 'bzj'},
     data: {
       rows: [],
@@ -202,9 +230,42 @@ export default {
     payNotifyDialog: false,
 
     tempNotifyMap: [],
-    notifyList: []
+    notifyList: [],
+
+    typeMap: {
+      'regular': '固定金额',
+      'regularPreferential': '固定租金(优惠阶段)',
+      'commission': '提成租金',
+      'compare': '提成固定较高租金',
+      'month': '每月',
+      'one': '一次性付费',
+      'day': '固定日期',
+    },
+    payMap: {
+      'month': '月付',
+      'towMonth': '两月付',
+      'quarter': '季付',
+      'one': '一次性付清',
+      'final': '固定扣点',
+    }
   }),
   methods: {
+    showTermHandler(e, item) {
+      this.termLoading = true
+      this.$refs.absMenu.showTolMenu(e)
+      listTermByConcat(item.concatId).then(res => {
+        res.forEach(item => {
+          item.type = this.typeMap[item.type]
+          item.payCycle = this.payMap[item.payCycle]
+          item.payType = this.typeMap[item.payType]
+          item.unit = this.typeMap[item.unit]
+          item.monthBill = item.monthBill ? '是' : '否'
+          item.priceType = '按平米计费'
+        })
+        this.termItems = res
+        this.termLoading = false
+      })
+    },
     editHandler(item) {
       this.item = item
       this.dialog = true
@@ -339,7 +400,7 @@ export default {
     },
     options: {
       handler() {
-        console.log("options handler ",this.options)
+        console.log("options handler ", this.options)
         this.list()
       },
       deep: true
