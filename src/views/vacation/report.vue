@@ -5,7 +5,7 @@
         <v-col cols="1">
           <v-btn outlined @click="exportExcel" small>导出</v-btn>
         </v-col>
-        <v-col lg="6" cols="12">
+        <v-col lg="4" cols="12">
           <v-row dense>
             <v-col cols="6">
               <v-menu v-model="menu"
@@ -17,6 +17,7 @@
                       min-width="auto">
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field
+                      dense
                       v-model="startDate"
                       label="数据开始日期"
                       prepend-icon="mdi-calendar"
@@ -27,6 +28,7 @@
                   ></v-text-field>
                 </template>
                 <v-date-picker v-model="startDate"
+                               @change="dateChange"
                                @input="$refs.menu.save()"></v-date-picker>
               </v-menu>
             </v-col>
@@ -40,6 +42,7 @@
                       min-width="auto">
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field
+                      dense
                       v-model="endDate"
                       label="数据截止日期"
                       prepend-icon="mdi-calendar"
@@ -49,6 +52,7 @@
                   ></v-text-field>
                 </template>
                 <v-date-picker v-model="endDate"
+                               @change="dateChange"
                                @input="$refs.menu2.save()"></v-date-picker>
               </v-menu>
             </v-col>
@@ -125,8 +129,7 @@ export default {
   },
   watch: {
     query: {
-      handler(val, val2) {
-        console.log("handler,val,val2", val.end, val2.end)
+      handler() {
         this.loadData();
       },
       deep: true
@@ -137,13 +140,16 @@ export default {
     this.startDate = this.getMonthFirst(new Date())
     this.endDate = this.getMonthEnd(new Date())
     this.query = {
-      start: this.startDate,
-      end: this.endDate,
+      start: null,
+      end: null,
       searchText: null,
       state: 1
     }
   },
   methods: {
+    dateChange(){
+      this.loadData()
+    },
     exportExcel() {
       vacationApi.exportExcel(this.getQuery()).then(result => {
         let a = document.createElement("a");
@@ -174,14 +180,14 @@ export default {
       q.sortOrder = "desc"
       q.pageSize = q.itemsPerPage === -1 ? 9999 : q.itemsPerPage
       q.pageNumber = q.page
-      q.start += " 00:00:00"
-      q.end += " 23:59:59"
+      q.start = this.startDate + " 00:00:00"
+      q.end = this.endDate + " 23:59:59"
       q.sortBy = null
       q.sortDesc = null
       return q
     },
     loadData() {
-      let day = this.dayDiff(this.query.start, this.query.end)
+      let day = this.dayDiff(this.startDate, this.endDate)
       if (day > 0 && day <= 92) {
         let q = this.getQuery()
         this.vacationLoading = true;
