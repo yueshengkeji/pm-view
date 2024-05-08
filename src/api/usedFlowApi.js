@@ -60,3 +60,11 @@ export function reNotify(message){
         data:message
     })
 }
+
+export function updatePrint(msg){
+    return request({
+        url:'/usedFlowInstance/updatePrint',
+        method:'post',
+        data:msg
+    })
+}
