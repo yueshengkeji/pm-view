@@ -11,6 +11,12 @@
                   v-if="showAll"
                   label="我的" class="float-right" style="margin-top: 0px;"></v-switch>
       </v-col>
+      <v-col lg="1">
+        <v-text-field dense placeholder="最低金额" v-model="queryParam.minMoney" @keyup.enter="list"></v-text-field>
+      </v-col>
+      <v-col lg="1">
+        <v-text-field dense placeholder="最高金额范围" v-model="queryParam.maxMoney" @keyup.enter="list"></v-text-field>
+      </v-col>
       <v-col md="1" cols="12">
         <v-menu ref="menu" v-model="menu" :close-on-content-click="false">
           <template v-slot:activator="{attrs,on}">
@@ -69,7 +75,8 @@
           <v-spacer></v-spacer>
           <v-btn @click="payDialog = false">关闭</v-btn>
           <v-btn color="primary" @click="updatePay" :loading='subLoading' v-if="pay.id != null">保存</v-btn>
-          <v-btn color="primary" @click="savePay" :loading='subLoading'>{{pay.id == null ? '提交' : '重新审批'}}</v-btn>
+          <v-btn color="primary" @click="savePay" :loading='subLoading'>{{ pay.id == null ? '提交' : '重新审批' }}
+          </v-btn>
         </v-card-actions>
       </v-card>
 
@@ -115,7 +122,9 @@ export default {
       searchText: null,
       startDate: null,
       endDate: null,
-      ifMine: true
+      ifMine: true,
+      minMoney: null,
+      maxMoney: null
     },
     menu: false,
     menu2: false,
@@ -124,8 +133,8 @@ export default {
     },
     applyMoney: 0,
     payMoney: 0,
-    subLoading:false,
-    flowFlag:true
+    subLoading: false,
+    flowFlag: true
   }),
   watch: {
     options: {
@@ -150,8 +159,8 @@ export default {
   },
   created() {
 
-    getConfig("PRO_PAY_ALL").then(result=>{
-      if(result && this.$store.state.user.roles.indexOf(result.value) != -1){
+    getConfig("PRO_PAY_ALL").then(result => {
+      if (result && this.$store.state.user.roles.indexOf(result.value) != -1) {
         this.showAll = true
       }
     })
@@ -222,14 +231,14 @@ export default {
       this.list()
       this.getSumMoney()
     },
-    updatePay(){
+    updatePay() {
       this.flowFlag = false
       this.savePay()
     },
     savePay() {
       this.subLoading = true
       this.$refs.otherPay.save().then((result) => {
-        if(this.flowFlag){
+        if (this.flowFlag) {
           this.$refs.otherPay.$refs.flow.startFlow({
             title: result.title + '-付款申请',
             content: result.remark,
@@ -241,12 +250,12 @@ export default {
             this.payDialog = false
             this.subLoading = false
           })
-        }else{
+        } else {
           this.list()
           this.payDialog = false
           this.subLoading = false
         }
-      }).finally(()=>this.flowFlag = true)
+      }).finally(() => this.flowFlag = true)
     },
     list() {
       this.queryParam.page = this.options.page
@@ -258,20 +267,30 @@ export default {
       } else if (this.queryParam.sortBy == "company.name") {
         this.queryParam.sortBy = "company_id"
       }
+      this.setMoneyFilter()
+
       list(this.queryParam).then(result => {
         this.items = result.rows
         this.total = result.total
       })
     },
+    setMoneyFilter(){
+      this.queryParam.maxMoney = this.queryParam.maxMoney == null ? 0 : this.queryParam.maxMoney
+      this.queryParam.minMoney = this.queryParam.minMoney == null ? 0 : this.queryParam.minMoney
+      if(this.queryParam.maxMoney == 0 && this.queryParam.minMoney == 0){
+        this.queryParam.maxMoney = null
+        this.queryParam.minMoney = null
+      }
+    },
     exportEX() {
       this.exportLoading = true;
+      this.setMoneyFilter()
 
       exportList(this.queryParam).then(result => {
         let a = document.createElement("a")
         a.download = result
         a.href = result
         a.click()
-        console.log(a)
       }).finally(() => {
         this.exportLoading = false;
       })

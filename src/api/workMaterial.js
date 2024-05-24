@@ -34,6 +34,10 @@ export function loadMater(query) {
 export function insert(data) {
     return request.put(`workArticle`, data)
 }
-export function deleteWorkMaterial(id,materId) {
-    return request.delete(`workArticle/${id}/${materId}`)
+export function deleteWorkMaterial(id,materId,forceDel) {
+    if(forceDel){
+        return request.delete(`workArticle/${id}/${materId}?forceDel=${forceDel}`)
+    }else{
+        return request.delete(`workArticle/${id}/${materId}`)
+    }
 }

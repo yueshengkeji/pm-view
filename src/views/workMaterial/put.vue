@@ -79,6 +79,10 @@
                   :server-items-length="query.total"
                   :items="items">
 
+      <template v-slot:item.action="{item}">
+        <v-btn x-small color="error" outlined @click="deleteHandler(item)">删除</v-btn>
+      </template>
+
     </v-data-table>
 
     <v-dialog v-model="detailDialog">
@@ -101,7 +105,7 @@
 </template>
 
 <script>
-import {insert, list} from '@/api/workMaterialPut'
+import {delHandler, insert, list} from '@/api/workMaterialPut'
 import excelExport from '@/utils/excel-export'
 
 export default {
@@ -162,6 +166,10 @@ export default {
         text: "备注",
         value: 'remark'
       },
+      {
+        text: "操作",
+        value: 'action'
+      },
 
     ],
     query: {total: 0},
@@ -195,6 +203,13 @@ export default {
     materId:String
   },
   methods: {
+    deleteHandler(item){
+      this.confirm("确定删除"+item.material.name+"入库信息？").then(()=>{
+        delHandler(item.id).then(()=>{
+          this.list()
+        })
+      })
+    },
     downloadModule() {
       excelExport([
         {key: 'index', title: '序号'},

@@ -54,6 +54,9 @@
                   :options.sync="options"
                   :server-items-length="total"
                   :items.sync="items">
+      <template v-slot:item.action="{item}">
+        <v-btn x-small color="error" outlined @click="deleteHandler(item)">删除</v-btn>
+      </template>
     </v-data-table>
 
     <v-dialog v-model="detailDialog">
@@ -72,7 +75,7 @@
 </template>
 
 <script>
-import {downloadList, listAll} from '@/api/workMaterial'
+import {deleteWorkMaterial, downloadList, listAll} from '@/api/workMaterial'
 import {getStaff} from '@/api/staff'
 import {getSections} from '@/api/section'
 
@@ -143,6 +146,10 @@ export default {
         text: "备注",
         value: 'out.remark',
         sortable: false,
+      },{
+        text: "操作",
+        value: 'action',
+        sortable: false,
       },
     ],
     total: 0,
@@ -185,6 +192,12 @@ export default {
     this.options.date = [this.formatTimer(this.getMonthFirst(new Date())), this.formatTimer(new Date())]
   },
   methods: {
+    deleteHandler(item){
+      console.log(item)
+      this.confirm("确定删除该条出库记录？库存将自动退回").then(()=>{
+        deleteWorkMaterial(item.out.id,item.materOut.id,true).then(this.list)
+      })
+    },
     downloadExcel() {
       this.btnLoading = true
       this.setQuery()

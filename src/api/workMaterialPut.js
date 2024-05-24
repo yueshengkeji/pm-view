@@ -6,3 +6,6 @@ export function list(param) {
 export function insert(data) {
     return request.put("workArticlePut",data)
 }
+export function delHandler(id){
+    return request.delete(`workArticlePut/delete/${id}`)
+}
