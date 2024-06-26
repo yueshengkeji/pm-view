@@ -42,6 +42,7 @@
     <v-tabs v-model="tab">
       <v-tab key="zl">合同应收账单</v-tab>
       <v-tab key="bzj">押金账单</v-tab>
+      <v-tab key="tgf">推广费账单</v-tab>
     </v-tabs>
     <v-tabs-items v-model="tab">
       <v-tab-item key="zl">
@@ -76,6 +77,34 @@
                       :options.sync="options2"
                       :headers="headers2"
                       :server-items-length="data2.total">
+          <template v-slot:item.brand="{item}">
+            <v-chip small outlined @click="showTermHandler($event,item)">{{ item.brand }}</v-chip>
+          </template>
+          <template v-slot:item.state="{item}">
+            {{ formatState(item.state) }}
+          </template>
+          <template v-slot:item.concatType="{item}">
+            {{ formatConcat(item.concatType) }}
+          </template>
+          <template v-slot:item.invoiceState="{item}">
+            {{ formatInvoiceState(item.invoiceState) }}
+          </template>
+          <template v-slot:item.arrearageDay="{item}">
+            <div v-if="item.arrearageDay > 0">{{ item.arrearageDay }}</div>
+          </template>
+          <template v-slot:item.action="{item}">
+            <v-btn x-small outlined @click="editHandler(item)">财务复核</v-btn>
+          </template>
+        </v-data-table>
+
+
+      </v-tab-item>
+      <v-tab-item key="tgf">
+        <v-data-table :items="data3.rows"
+                      :loading="loading"
+                      :options.sync="options3"
+                      :headers="headers3"
+                      :server-items-length="data3.total">
           <template v-slot:item.brand="{item}">
             <v-chip small outlined @click="showTermHandler($event,item)">{{ item.brand }}</v-chip>
           </template>
@@ -180,11 +209,16 @@ export default {
     },
     options: {type: 'regular,compare,commission'},
     options2: {type: 'bzj'},
+    options3: {type: 'tgf'},
     data: {
       rows: [],
       total: 0
     },
     data2: {
+      rows: [],
+      total: 0
+    },
+    data3:{
       rows: [],
       total: 0
     },
@@ -208,6 +242,25 @@ export default {
       {text: '操作', value: 'action'}
     ],
     headers2: [
+      {text: '状态', value: 'state'},
+      {text: '欠费天数', value: 'arrearageDay'},
+      {text: '铺位号', value: 'room'},
+      {text: '楼层', value: 'floor'},
+      {text: '品牌', value: 'brand'},
+      {text: '费用名称', value: 'name'},
+      {text: '应收日期', value: 'payEndDate'},
+      {text: '区间开始日期', value: 'startDate'},
+      {text: '区间截止日期', value: 'endDate'},
+      {text: '应收金额', value: 'money'},
+      {text: '已收金额', value: 'payMoney'},
+      {text: '已退金额', value: 'backMoney'},
+      {text: '调整后金额', value: 'sjMoney'},
+      {text: '欠费金额', value: 'arrearage'},
+      {text: '合同类型', value: 'concatType'},
+      {text: '开票状态', value: 'invoiceState'},
+      {text: '操作', value: 'action'}
+    ],
+    headers3: [
       {text: '状态', value: 'state'},
       {text: '欠费天数', value: 'arrearageDay'},
       {text: '铺位号', value: 'room'},
@@ -273,7 +326,9 @@ export default {
     closeHandler() {
       if (this.tab == 0) {
         this.list()
-      } else {
+      } else if (this.tab == 2){
+        this.listTgf()
+      }else {
         this.listBzj()
       }
       this.item = null
@@ -294,6 +349,13 @@ export default {
       q = Object.assign(q, this.query)
       getBillList(q).then((r) => {
         this.data2 = r
+      })
+    },
+    listTgf() {
+      let q = Object.assign({}, this.options3)
+      q = Object.assign(q, this.query)
+      getBillList(q).then((r) => {
+        this.data3 = r
       })
     },
     formatConcat(state) {
@@ -318,10 +380,10 @@ export default {
     },
     formatInvoiceState(state) {
       switch (state) {
-        case '1':
+        case 1:
           return '已开票'
         default:
-        case '0':
+        case 0:
           return '未开票'
       }
     },
@@ -364,6 +426,8 @@ export default {
       let q
       if (this.tab == 0) {
         q = Object.assign({}, this.options)
+      } else if (this.tab == 2) {
+        q = Object.assign({}, this.options3)
       } else {
         q = Object.assign({}, this.options2)
       }
@@ -378,6 +442,8 @@ export default {
     tab() {
       if (this.tab == 0) {
         this.list()
+      } else if (this.tab == 2) {
+        this.listTgf()
       } else {
         this.listBzj()
       }
@@ -386,9 +452,17 @@ export default {
       handler() {
         if (this.tab == 0) {
           this.list()
+        } else if (this.tab == 2) {
+          this.listTgf()
         } else {
           this.listBzj()
         }
+      },
+      deep: true
+    },
+    options3: {
+      handler() {
+        this.listTgf()
       },
       deep: true
     },

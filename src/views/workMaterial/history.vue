@@ -147,6 +147,10 @@ export default {
         value: 'out.remark',
         sortable: false,
       },{
+        text: "标签",
+        value: 'materOut.material.tag',
+        sortable: false,
+      },{
         text: "操作",
         value: 'action',
         sortable: false,

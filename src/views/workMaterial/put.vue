@@ -15,10 +15,14 @@
           </template>
           <v-list>
             <v-list-item>
-              <v-list-item-title><v-btn @click="downloadModule">下载简要模板</v-btn></v-list-item-title>
+              <v-list-item-title>
+                <v-btn @click="downloadModule">下载简要模板</v-btn>
+              </v-list-item-title>
             </v-list-item>
             <v-list-item>
-              <v-list-item-title><v-btn @click="downloadModuleV2">下载明细模板</v-btn></v-list-item-title>
+              <v-list-item-title>
+                <v-btn @click="downloadModuleV2">下载明细模板</v-btn>
+              </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -94,6 +98,8 @@
         </v-data-table>
         <v-card-actions>
           <v-spacer></v-spacer>
+          <easy-flow coding="1320293" ref="materialImportFlow" defaultFlowName="分类入库"></easy-flow>
+          <v-btn @click="importMaterial">导入材料</v-btn>
           <v-chip class="mr-1">{{ msg }}，合计：{{ sums }}个耗材，{{ moneys }}元，{{ importArray.length }}个种类</v-chip>
           <v-btn @click="detailDialog = false">关闭</v-btn>
         </v-card-actions>
@@ -107,12 +113,14 @@
 <script>
 import {delHandler, insert, list} from '@/api/workMaterialPut'
 import excelExport from '@/utils/excel-export'
+import easyFlow from '@/components/easyflow/easyFlow'
+
 
 export default {
   name: "workMaterPut-index",
-  components: {},
+  components: {easyFlow},
   data: () => ({
-    menu:false,
+    menu: false,
     loading: false,
     menu1: false,
     menu2: false,
@@ -167,6 +175,10 @@ export default {
         value: 'remark'
       },
       {
+        text: "标签",
+        value: 'material.tag'
+      },
+      {
         text: "操作",
         value: 'action'
       },
@@ -195,17 +207,20 @@ export default {
         this.list()
       }
     },
-    materId(){
+    materId() {
       this.list()
     }
   },
-  props:{
-    materId:String
+  props: {
+    materId: String
   },
   methods: {
-    deleteHandler(item){
-      this.confirm("确定删除"+item.material.name+"入库信息？").then(()=>{
-        delHandler(item.id).then(()=>{
+    importMaterial(){
+      this.$refs.excelUpload.click()
+    },
+    deleteHandler(item) {
+      this.confirm("确定删除" + item.material.name + "入库信息？").then(() => {
+        delHandler(item.id).then(() => {
           this.list()
         })
       })
@@ -236,6 +251,7 @@ export default {
         {key: 'putNumber', title: '入库单号'},
         {key: 'section', title: '购置部门'},
         {key: 'remark', title: '备注'},
+        {key: 'tag', title: '标签(工程物业=EP,行政=A,企划=P)'},
       ], [
         {
           index: '',
@@ -249,7 +265,8 @@ export default {
           planPrice: "",
           putNumber: "",
           section: "",
-          remark: ""
+          remark: "",
+          tag: "",
         },
       ], "办公用品导入模板-明细版.xlsx");
     },
@@ -260,6 +277,11 @@ export default {
       this.query.sortDesc = this.query.sortDesc[0]
       this.query.materId = this.materId
       list(this.query).then(result => {
+        result.rows.forEach(item=>{
+          if(item.folderObj == null){
+            item.folderObj = {name:null}
+          }
+        })
         this.items = result.rows
         this.query.total = result.total
       }).finally(() => this.loading = false)
@@ -267,7 +289,7 @@ export default {
     exportMater() {
       this.importArray = new Array()
       this.detailDialog = true
-      this.$refs.excelUpload.click()
+      // this.$refs.excelUpload.click()
     },
     implUserExcel(e) {
       import("xlsx").then(xlsx => {
@@ -284,8 +306,9 @@ export default {
             let worksheet = workbook.Sheets[name]
             let jsonData = xlsx.utils.sheet_to_json(worksheet)
             let columnCount = jsonData[0] ? Object.keys(jsonData[0]).length : 0
-            if (columnCount == 7) {
-              let newMater = xlsx.utils.sheet_to_json(worksheet, {header: ["series", "name", "model", "storageSum", "unitName", "planPrice", "money"]})
+            if (columnCount == 6) {
+              let newMater = xlsx.utils.sheet_to_json(worksheet, {header: ["series", "name", "model", "storageSum", "unitName", "planPrice"]})
+              console.log(":newMater",newMater)
               for (let x = 1; x < newMater.length; x++) {
                 await new Promise((resolve, reject) => {
                   window.setTimeout((j) => {
@@ -315,7 +338,7 @@ export default {
                 })
               }
             } else {
-              let newMater = xlsx.utils.sheet_to_json(worksheet, {header: ["series", "date", "name", "folder", "brand", "model", "unitName", "storageSum", "planPrice", "putNumber", "section", "remark"]})
+              let newMater = xlsx.utils.sheet_to_json(worksheet, {header: ["series", "date", "name", "folder", "brand", "model", "unitName", "storageSum", "planPrice", "putNumber", "section", "remark", "tag"]})
               for (let x = 1; x < newMater.length; x++) {
                 await new Promise((resolve, reject) => {
                   window.setTimeout((j) => {
@@ -331,7 +354,7 @@ export default {
                           date: m.date,
                           putNumber: m.putNumber,
                           section: {name: m.section},
-                          remark:m.remark
+                          remark: m.remark,
                         }
                         r.material.folderObj = {name: m.folder}
                         r.sum = parseFloat(r.sum)
@@ -364,6 +387,8 @@ export default {
           //读取数据
           reader.readAsBinaryString(e.target.files[0])
         }
+
+
       })
 
     },
@@ -377,6 +402,13 @@ export default {
       insert(data).then(result => {
         if (result.id) {
           this.msg = "导入成功"
+          this.$refs['materialImportFlow'].startFlow({
+            title: result.name,
+            content: '',
+            frameId: result.id,
+            frameCoding: 1320293,
+            frameColumn: 'po20201'
+          }).then()
         }
       }).finally(() => {
         this.loading = false

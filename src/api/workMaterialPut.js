@@ -9,3 +9,6 @@ export function insert(data) {
 export function delHandler(id){
     return request.delete(`workArticlePut/delete/${id}`)
 }
+export function getById(data) {
+    return request.get('workArticlePut/getById',{params:data})
+}

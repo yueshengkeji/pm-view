@@ -35,10 +35,10 @@
           </v-radio-group>
         </v-col>
         <v-col md="3">
-          <v-text-field label="判断条件表达式" v-model="data.po02019"></v-text-field>
+          <select-staff label="搜索审批人" @change="insertStaffHeader" v-model="searchStaff"></select-staff>
         </v-col>
         <v-col md="2">
-          <v-autocomplete label="从职务中添加"
+          <v-autocomplete label="搜索职务"
                           item-text="name"
                           return-object
                           @change="insertDutyHeader"
@@ -51,7 +51,7 @@
                           :search-input.sync="searchRole"
                           return-object
                           @change="insertRoleHeader"
-                          label="从角色中添加"></v-autocomplete>
+                          label="搜索角色"></v-autocomplete>
         </v-col>
         <v-col md="2">
           <v-text-field label="序号" v-model="data.serial"></v-text-field>
@@ -60,10 +60,13 @@
           <v-btn @click="insertDeptHeader" class="mr-1" small title="发起人所属部门主管审批">部门主管</v-btn>
           <v-btn @click="insertParentDutyHeader" class="mr-1" small title="根据（发起人）的上级职务迭代审批人">上级领导
           </v-btn>
-          <v-btn @click="insertStaffHeader" small title="根据（发起人）的上级职务迭代审批人">发起人</v-btn>
+          <v-btn @click="insertStartStaffHeader" small title="根据（发起人）的上级职务迭代审批人">发起人</v-btn>
         </v-col>
         <v-col>
-                <v-text-field label="动态代理代码(非开发人员请勿随意更改,会导致系统异常)" v-model="data.invokeName"></v-text-field>
+          <v-text-field label="判断条件表达式" v-model="data.po02019"></v-text-field>
+        </v-col>
+        <v-col>
+          <v-text-field label="动态代理代码(非开发人员请勿随意更改,会导致系统异常)" v-model="data.invokeName"></v-text-field>
         </v-col>
       </v-row>
       <v-row dense>
@@ -130,10 +133,13 @@
 import {getDuty} from '@/api/duty'
 import {searchRoles} from '@/api/role'
 import {deleteJudge, deletePerson} from '@/api/course'
+import SelectStaff from "@/views/user/select.vue";
 
 export default {
   name: "editCourse",
+  components: {SelectStaff},
   data: () => ({
+    searchStaff:null,
     parentList: [],
     data: null,
     personHeader: [
@@ -242,7 +248,21 @@ export default {
       }
       this.judgeDialog = true
     },
+    insertStaffHeader() {
+      if(this.searchStaff){
+        this.data.personList.push({
+          courseId: this.data.id,
+          flowId: this.data.flowId,
+          name: this.searchStaff.name,
+          persons: '',
+          serial: this.data.personList.length + 1,
+          staffId: this.searchStaff.id,
+          staffType: 2,
+          type: 0,
+        })
+      }
 
+    },
     insertDeptHeader() {
       this.data.personList.push({
         courseId: this.data.id,
@@ -255,7 +275,7 @@ export default {
         type: 0,
       })
     },
-    insertStaffHeader() {
+    insertStartStaffHeader() {
       this.data.personList.push({
         courseId: this.data.id,
         flowId: this.data.flowId,

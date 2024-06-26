@@ -146,6 +146,8 @@ export default {
   },
   methods: {
     setAutoData(data) {
+      this.companyList = []
+      this.projectList = []
       if (data.company) {
         this.companyList.push(data.company)
       }

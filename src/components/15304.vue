@@ -166,8 +166,9 @@
                 <v-icon left x-small>
                   mdi-lead-pencil
                 </v-icon>
-                {{ props.item.remark }}
-
+                <div class="text-no-wrap text-truncate" style="width: 100px" :title="props.item.remark">
+                  {{ props.item.remark }}
+                </div>
                 <template v-slot:input>
                   <div class="mt-4 title">
                     追加备注
@@ -191,6 +192,16 @@
             </template>
             <template v-slot:item.applySum="{item}">
               <a href="###" @click="applyHistoryHandler(item)">{{ item.applySum }}</a>
+            </template>
+
+            <template v-slot:item.cnfParam="{item}">
+              <div class="text-no-wrap text-truncate" style="width: 70px" :title="item.cnfParam">
+                {{item.cnfParam}}
+              </div>
+            </template>
+
+            <template v-slot:item.ySum="{item}">
+              <a target="_blank" :href="'/procurement/apply/materialProHistory/'+item.major">{{item.ySum}}</a>
             </template>
           </v-data-table>
         </v-col>
@@ -364,12 +375,13 @@ export default {
     editRow: null,
     headers: [
       {text: "序号", value: 'index'},
-      {text: "材料名称", value: 'name', width: '20%'},
-      {text: "型号", value: 'model', width: '15%'},
+      {text: "材料名称", value: 'name', width: '200px'},
+      {text: "型号", value: 'model', width: '150px'},
+      {text: "参数", value: 'cnfParam', width: '50px'},
       {text: "单位", value: 'unit.name'},
       {text: "品牌", value: 'brand', width: '100px'},
       {text: "申请数", value: 'sum'},
-      {text: "备注", value: 'remark', width: '15%'},
+      {text: "备注", value: 'remark', width: '100px'},
       {text: "已采购", value: 'ySum'},
     ],
     selectItems: [],

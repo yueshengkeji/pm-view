@@ -24,7 +24,7 @@
           <td class="border-black">开户行</td>
           <td class="border-black">账户</td>
         </tr>
-        <tr v-for="item in billList" :key="item.id">
+        <tr v-for="item in billList" :key="item.id" @dblclick="delHandler(item)">
           <td class="border-black">{{ item.name }}</td>
           <td class="border-black">{{ item.money }}</td>
           <td class="border-black">{{ item.startDate }}-{{ item.endDate }}</td>
@@ -51,6 +51,7 @@
 
 <script>
 import {getConfig} from '@/api/systemConfig'
+
 export default {
   name: "payNotify",
   props: {
@@ -71,9 +72,20 @@ export default {
     date: null,
   }),
   methods: {
+    delHandler(item) {
+      console.log("item", item)
+      for (let i = 0; i < this.billList.length; i++) {
+        let t = this.billList[i]
+        if (t.id == item.id) {
+          this.billList.splice(i, 1)
+          break;
+        }
+      }
+    },
     setCount() {
       this.payMoney = 0
       this.billList.forEach(val => {
+        val.money = (val.arrearage && val.arrearage > 0) ? val.arrearage : val.money
         this.payMoney += val.sjMoney || val.money
       })
       this.payMoney = this.payMoney.toFixed(2)
@@ -81,7 +93,7 @@ export default {
     }
   },
   created() {
-    getConfig("NOTIFY_T").then(result=>{
+    getConfig("NOTIFY_T").then(result => {
       this.title = result ? result.value : ''
     })
     this.date = this.dateFormat(new Date(), 'YYYY-mm-dd')

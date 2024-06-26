@@ -79,20 +79,21 @@
               {{ item.acreage }}
             </td>
             <td class="text-start">
-              {{ item.yearRental }}
+              {{ item.ysMoney }}
             </td>
             <td class="text-start">
-              {{ item.ysMoney }}
+              {{ item.yearRental }}
             </td>
             <td class="text-start">
               {{ item.cwMoney }}
             </td>
             <td class="text-start">
-              {{ item.kjType[0].series }}
+              {{ item.sjMoney }}
             </td>
             <td class="text-start">
-              {{ item.kjType[0].money }}
+              {{ item.kjType[0].series }}
             </td>
+
             <td class="text-start">
               <v-btn x-small @click="detail($event, { item: item })">明细</v-btn>
               <v-btn v-if="showDelete" class="ml-1" color="error" x-small @click="deleteItem(item)">删除
@@ -129,19 +130,19 @@
               {{ item.acreage }}
             </td>
             <td class="text-start">
-              {{ item.yearRental }}
+              {{ item.ysMoney }}
             </td>
             <td class="text-start">
-              {{ item.ysMoney }}
+              {{ item.yearRental }}
             </td>
             <td class="text-start">
               {{ item.cwMoney }}
             </td>
             <td class="text-start">
-              {{ item.kjType[0].series }}
+              {{ item.sjMoney }}
             </td>
             <td class="text-start">
-              {{ item.kjType[0].money }}
+              {{ item.kjType[0].series }}
             </td>
             <td class="text-start">
               <v-btn x-small @click="detail($event, { item: item })">明细</v-btn>
@@ -180,19 +181,19 @@
               {{ item.acreage }}
             </td>
             <td class="text-start">
-              {{ item.yearRental }}
+              {{ item.ysMoney }}
             </td>
             <td class="text-start">
-              {{ item.ysMoney }}
+              {{ item.yearRental }}
             </td>
             <td class="text-start">
               {{ item.cwMoney }}
             </td>
             <td class="text-start">
-              {{ item.kjType[0].series }}
+              {{ item.sjMoney }}
             </td>
             <td class="text-start">
-              {{ item.kjType[0].money }}
+              {{ item.kjType[0].series }}
             </td>
             <td class="text-start">
               <v-btn x-small @click="detail($event, { item: item })">明细</v-btn>
@@ -294,6 +295,7 @@ import addProZujinEnd from "./proZujinEnd/components/addProZujinEnd";
 
 
 import contractWordModel from "./components/contractWordModel";
+import {deleteMsg, getMessageByFrameId} from "@/api/usedFlowApi";
 
 export default {
   components: {
@@ -347,11 +349,11 @@ export default {
       {text: '业态', value: 'yt.name'},
       {text: '商铺位置', value: 'houses'},
       {text: '面积²', value: 'acreage'},
-      {text: '应收租金', value: 'yearRental'},
-      {text: '目前应收', value: 'ysMoney'},
+      {text: '应收金额', value: 'ysMoney'},
+      {text: '调整金额', value: 'yearRental'},
       {text: '财务已收', value: 'cwMoney'},
+      {text: '欠费金额', value: 'sjMoney'},
       {text: '会计科目', value: 'kjType[0].series'},
-      {text: '科目余额', value: 'kjType[0].money'},
       {text: '操作', value: 'action', width: '11%'},
     ],
     items: [],
@@ -980,6 +982,13 @@ export default {
         this.deleteDialog = false
       }).catch(e => {
         console.log(e)
+      })
+
+      getMessageByFrameId(this.item.id).then(res=>{
+        if(res && res.id && res.state != 2){
+          //取消流程审批
+          deleteMsg(res.id)
+        }
       })
     },
     deleteItem(item) {

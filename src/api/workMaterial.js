@@ -34,10 +34,23 @@ export function loadMater(query) {
 export function insert(data) {
     return request.put(`workArticle`, data)
 }
+export function updateMaterial(m) {
+    return request.post(`workArticlePut/updateMaterial`, m)
+}
 export function deleteWorkMaterial(id,materId,forceDel) {
     if(forceDel){
         return request.delete(`workArticle/${id}/${materId}?forceDel=${forceDel}`)
     }else{
         return request.delete(`workArticle/${id}/${materId}`)
     }
+}
+
+export function folderList(parent){
+    return request.get('workArticlePut/folderList',{params:{parent:parent}})
+}
+export function updateFolder(data){
+    return request.post('workArticlePut/updateFolder',data)
+}
+export function insertFolder(data){
+    return request.put('workArticlePut/insertFolder',data)
 }

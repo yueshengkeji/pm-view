@@ -356,6 +356,7 @@
       <v-card class="pa-3">
         <v-card-title>请选择{{ notifyType }}人姓名</v-card-title>
         <v-data-table :items="notify.staffList"
+                      v-model="selectStaffList"
                       show-select
                       hide-default-footer
                       :search="notify.searchName"
@@ -416,7 +417,6 @@ import {flowCourseInstance} from '@/api/course'
 import ZoomObject from "@/utils/zoom"
 import axios from 'axios'
 import {updatePrint} from "@/api/usedFlowApi";
-
 export default {
   name: "instance-detail",
   data: () => ({
@@ -487,7 +487,8 @@ export default {
     notifyType: null,
     ftpFolder: null,
     dialogWidth: null,
-    consentFlag:false
+    consentFlag:false,
+    selectStaffList:[]
   }),
   props: {
     approve: {
@@ -825,11 +826,11 @@ export default {
     },
     printApprove() {
       //记录更新打印次数
-      if(this.instaceMsg.printCount == null){
+      if (this.instaceMsg.printCount == null) {
         this.instaceMsg.printCount = 0
       }
       this.instaceMsg.printCount += 1
-      updatePrint({id:this.instaceMsg.id,printCount:this.instaceMsg.printCount})
+      updatePrint({id: this.instaceMsg.id, printCount: this.instaceMsg.printCount})
       let t = () => new Promise(resolve => {
         try {
           resolve(require(`@/components/print/${this.instaceMsg.frameCoding}.vue`))
@@ -869,6 +870,7 @@ export default {
       this.notify.show = true
     },
     appendApprove() {
+      this.selectStaffList = []
       this.notifyType = '加签'
       this.notify.show = true
     },
@@ -1208,7 +1210,10 @@ export default {
               f.pdfImg = true
               let paths = [];
               f.pdfImgPath.forEach(path => {
-                paths.push(this.ftpFolder + "/" + encodeURIComponent(path))
+                path = path.replaceAll("\\", "/")
+                path = encodeURIComponent(path)
+                path = path.replace("%2F", "/")
+                paths.push(this.ftpFolder + "/" + path)
               })
               f.pdfImgPath = paths
             }

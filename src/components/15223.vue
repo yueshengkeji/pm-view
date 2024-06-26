@@ -41,7 +41,10 @@
                           item-text="material.name"
                           :items.sync="items">
             <template v-slot:item="data">
-              <div>{{ data.item.material.name + data.item.material.model + '(' + data.item.material.unit.name + ')' }}</div>
+              <div>{{
+                  data.item.material.name + data.item.material.model + '(' + data.item.material.unit.name + ')'
+                }}
+              </div>
             </template>
           </v-autocomplete>
         </v-col>
@@ -167,7 +170,7 @@ export default {
   },
   methods: {
     save() {
-      return insert(this.data.materOutList).then(result => {
+      return insert(this.data).then(result => {
         if (result.id != null) {
           //发起流程
           this.$refs.flow.startFlow({
@@ -208,7 +211,7 @@ export default {
             }
           })
           this.items = result.rows
-          console.log("items",this.items)
+          console.log("items", this.items)
         } else {
           if (val != null) {
             this.items.push({id: "-1", name: val, model: '', unit: {name: '个'}, planPrice: 0, outSum: 0, putSum: 0})

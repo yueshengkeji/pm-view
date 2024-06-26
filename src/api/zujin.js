@@ -159,6 +159,12 @@ export function deleteTerm(id){
         method:'delete',
     })
 }
+export function genNext(concatId){
+    return request({
+        url:`term/genNext/${concatId}`,
+        method:'post',
+    })
+}
 export function getBillList(param)
 {
     return request({

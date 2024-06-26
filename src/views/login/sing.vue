@@ -163,7 +163,7 @@ export default {
                     this.toWxBind(result.userId)
                   });
             } else {
-              if (code == undefined || code == null) {
+              if (code != undefined) {
                 this.toWxBind()
               } else {
                 this.loadingMsg = "未查询到微信用户与企业绑定，请先关注企业微信智慧平台公众号再绑定"

@@ -25,10 +25,12 @@
 
     <v-dialog v-model="addExpenseDialog" width="60%" :fullscreen="mobileFlag">
       <v-card>
+        <v-btn outlined fab fixed color="error" x-small @click="addCancel" v-if="mobileFlag" right style="top:10px;right: 10px"><v-icon>mdi-close</v-icon></v-btn>
         <add ref="addExpense" :data="updateData"></add>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary"
+                 v-if="!mobileFlag"
                  :block="mobileFlag"
                  :loading="loading"
                  @click="saveHandler" title="保存不发起流程,如果此单据之前已经发起审批，将撤回">
@@ -36,7 +38,7 @@
           </v-btn>
           <v-btn color="primary" :block="mobileFlag" :loading="loading" @click="addSubmit" title="保存并发起流程">提交
           </v-btn>
-          <v-btn :block="mobileFlag" @click="addCancel">取消</v-btn>
+          <v-btn v-if="!mobileFlag" @click="addCancel">取消</v-btn>
         </v-card-actions>
 
       </v-card>

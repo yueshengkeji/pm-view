@@ -221,6 +221,18 @@
                 </v-btn>
               </div>
             </template>
+
+            <template v-slot:item.cnfParam="{item}">
+              <v-tooltip bottom min-width="800" max-width="800">
+                <template v-slot:activator="{ on, attrs }">
+                  <div v-bind="attrs" v-on="on" :class="item.isSelected ? 'red--text' : ''"
+                       class="text-no-wrap text-truncate" style="width: 70px">
+                    {{ item.cnfParam }}
+                  </div>
+                </template>
+                <div v-html="item.cnfParam"></div>
+              </v-tooltip>
+            </template>
           </v-data-table>
         </v-col>
       </v-row>
@@ -344,6 +356,7 @@ export default {
     headers: [
       {text: "材料名称", value: 'name', width: '20%'},
       {text: "型号", value: 'model', width: '15%'},
+      {text: "参数", value: 'cnfParam', width: '70px'},
       {text: "单位", value: 'unit.name'},
       {text: "品牌", value: 'brand', width: '100px'},
       {text: "申请数量", value: 'sum'},
@@ -543,7 +556,7 @@ export default {
       }
     },
     setData(d) {
-      let apply = Object.assign({}, d)
+      let apply = Object.assign({}, d, true)
       if (apply == null || apply.id == null) {
         this.reset()
         return;

@@ -251,8 +251,9 @@
         <v-radio label="租赁合同" :value="0"></v-radio>
         <v-radio label="物管合同" :value="1"></v-radio>
       </v-radio-group>
+
+      <v-btn @click="genNextHandler" :loading="genLoading" :disabled="offGen">生成下一期账单</v-btn>
       <v-btn @click="printContractWord">打印</v-btn>
-      <!--      <v-btn @click="exportWord">导出word</v-btn>-->
       <v-btn @click="insertZujin" color="primary" :loading="loading">确定</v-btn>
       <v-btn @click="saveData" :loading="loading">仅保存数据</v-btn>
       <v-btn @click="filesHandler">查看附件</v-btn>
@@ -335,10 +336,12 @@
               <v-text-field v-model="t.payDay" label="缴款日*" :rules="rules.payDay"></v-text-field>
             </v-col>
             <v-col cols="4">
-              <v-radio-group style="margin-top: -30px" v-model="t.billType" label="账单类型" title="账单生成类型：下期=到达每月账单日，生成下一个对应的‘月/季度’账单；本期=到达每月账单日，生成本月应收账单；上期=到达每月账单日，生成上一个‘月/季度’账单（适合扣点提成类型的合同账单）">
+              <v-radio-group style="margin-top: -30px" v-model="t.billType" label="账单类型"
+                             title="账单生成类型：下期=到达每月账单日，生成下一个对应的‘月/季度’账单；本期=到达每月账单日，生成本月应收账单；上期=到达每月账单日，生成上一个‘月/季度’账单（适合扣点提成类型的合同账单）">
                 <v-radio :value="0" label="下期" title="下期=到达每月账单日，生成下一个对应的‘月/季度’账单"></v-radio>
                 <v-radio :value="1" label="本期" title="本期=到达每月账单日，生成本月应收账单；"></v-radio>
-                <v-radio :value="2" label="上期" title="上期=到达每月账单日，生成上一个‘月/季度’账单（适合扣点提成类型的合同账单）"></v-radio>
+                <v-radio :value="2" label="上期"
+                         title="上期=到达每月账单日，生成上一个‘月/季度’账单（适合扣点提成类型的合同账单）"></v-radio>
               </v-radio-group>
             </v-col>
             <v-col cols="6">
@@ -495,6 +498,17 @@
               <v-text-field type="number" v-model="tgfItem.otherBar" label="其他单价(元/次)*"
                             :rules="[v => !!v || '请输入其他单价']"></v-text-field>
             </v-col>
+            <v-col cols="4">
+              <v-menu v-model="bzjMenu4" transition="scale-transition" offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field v-model="tgfItem.payEndDate" :rules="bzjRules.datetime" label="缴费截止日期*" readonly
+                                v-bind="attrs"
+                                v-on="on"></v-text-field>
+                </template>
+                <v-date-picker @change="bzjMenu4 = false" v-model="tgfItem.payEndDate" no-title
+                               scrollable></v-date-picker>
+              </v-menu>
+            </v-col>
           </v-row>
         </v-form>
         <v-card-actions>
@@ -517,7 +531,16 @@
 
 <script>
 import {houseList} from '@/api/house'
-import {insertZujin, updateZujin, queryById, updateTerm, deleteTerm, deleteBzj, deletePromotion} from "@/api/zujin";
+import {
+  insertZujin,
+  updateZujin,
+  queryById,
+  updateTerm,
+  deleteTerm,
+  deleteBzj,
+  deletePromotion,
+  genNext
+} from "@/api/zujin";
 import {insertContractWordRecord} from "@/api/contractWordModel";
 import EasyFlow from "@/components/easyflow/easyFlow.vue";
 import FileUpload from "@/components/fileUpload.vue";
@@ -549,6 +572,7 @@ export default {
     bzjMenu: false,
     bzjMenu2: false,
     bzjMenu3: false,
+    bzjMenu4: false,
     bzjRules: {
       money: [v => !!v || '请输入金额', v => (!!v && (v + '').length < 11) || '金额字符太长'],
       type: [v => !!v || '请选择或手动输入类型', v => (!!v) || '金额类型过长'],
@@ -677,7 +701,7 @@ export default {
       price: null,
       fixPercent: null,
       disMoney: null,
-      billType:0
+      billType: 0
     },
     bzjItems: [],
 
@@ -700,6 +724,7 @@ export default {
       {value: 'firstBar', text: '头条单价(元/次)'},
       {value: 'secondBar', text: '次条单价(元/次)'},
       {value: 'otherBar', text: '其他单价(元/次)'},
+      {value: 'payEndDate', text: '截止缴费日期'},
       {value: 'action', text: '操作'}
     ],
     tgfItem: {
@@ -714,8 +739,11 @@ export default {
       firstBar: null,
       secondBar: null,
       otherBar: null,
+      payEndDate: null
     },
-    frameId: null
+    frameId: null,
+    genLoading: false,
+    offGen: false,
   }),
   props: {
     type: {
@@ -863,7 +891,7 @@ export default {
 
     editMoneyHandler(item) {
       this.update = true
-      if(item.money){
+      if (item.money) {
         item.money = item.money + ""
       }
       this.t = item
@@ -938,7 +966,8 @@ export default {
           liquidatedDamages: null,
           firstBar: null,
           secondBar: null,
-          otherBar: null
+          otherBar: null,
+          payEndDate: null,
         }
       } else {
         this.bzj = Object.assign({
@@ -1041,8 +1070,10 @@ export default {
 
         this.data.termList = this.zlItems
         this.data.bzjList = this.bzjItems
+        this.data.tgfItems = this.tgfItems
         if (this.data.id != null) {
           if (!this.offEdit) {
+            console.log('iftgfEx',this.data)
             updateZujin(this.data).then(() => {
               insertContractWordRecord(this.data)
             }).finally(() => {
@@ -1068,6 +1099,13 @@ export default {
           })
         }
       }
+    },
+    genNextHandler() {
+      this.genLoading = true
+      genNext(this.data.id).then(() => {
+        this.message("操作成功")
+        this.offGen = true
+      }).finally(() => this.genLoading = false)
     },
     printContractWord() {
       this.contractId = this.data.id + ""
@@ -1119,6 +1157,7 @@ export default {
         this.data.companyTypeId = this.data.yt.id
         this.data.termList = this.zlItems
         this.data.bzjList = this.bzjItems
+        this.data.tgfItems = this.tgfItems
         if (this.data.id != null) {
           if (!this.offEdit) {
             updateZujin(this.data).then((result) => {
