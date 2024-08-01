@@ -197,7 +197,9 @@
 
             if (this.$store.state.user.sectionName.indexOf("市场") !== -1) {
                 this.defaultFlowName = "02.请假申请（市场部）"
-            }  else {
+            } else if (this.$store.state.user.sectionName.indexOf("产品研发") !== -1) {
+                this.defaultFlowName = "请假申请（开丽）"
+            } else {
                 this.defaultFlowName = "01.请假申请"
             }
 

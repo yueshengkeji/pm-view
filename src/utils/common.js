@@ -270,7 +270,17 @@ exports.install = (Vue, store) => {
                 let remainder = days % 7;
                 // 工时向下取整的除数
                 let divisor = Math.floor(days / 7);
-                let weekendDay = 2 * divisor;
+                let weekendDay = 0;
+                let weekType = Vue.prototype.getWeekType()
+                for (let a = 0;a < divisor; a++){
+                    if (weekType === '单周'){
+                        weekendDay = weekendDay + 1
+                        weekType = '双周'
+                    }else if (weekType === '双周'){
+                        weekendDay = weekendDay + 2
+                        weekType = '单周'
+                    }
+                }
 
                 // 起始日期的星期，星期取值有（1,2,3,4,5,6,0）
                 let nextDay = StartTime.getDay();
@@ -288,7 +298,11 @@ exports.install = (Vue, store) => {
                     }
                     // 周六日
                     if (nextDay == 0 || nextDay == 6) {
-                        weekendDay = weekendDay + 1;
+                        if (nextDay == 6 && weekType === '单周'){
+                            weekendDay = weekendDay + 0;
+                        }else {
+                            weekendDay = weekendDay + 1;
+                        }
                     }
                 }
                 workDayVal = days - weekendDay - 2;
@@ -875,5 +889,28 @@ exports.install = (Vue, store) => {
             let millisecondsPerDay = 1000 * 60 * 60 * 24;
             let daysInMonth = (firstDayOfNextMonth - firstDayOfMonth) / millisecondsPerDay;
             return daysInMonth;
+        },
+        Vue.prototype.getWeekType = () => {
+            const today = new Date();
+            const currentDayOfWeek = today.getDay(); // 0 表示星期日，1-6 表示星期一到星期六
+            const currentDayOfMonth = today.getDate();
+            const daysSinceStartOfWeek = currentDayOfWeek ? currentDayOfWeek : 7;
+
+            // 假设每周的开始是星期一，如果今天是星期日，则看作下周的开始
+            if (currentDayOfWeek === 0) {
+                today.setDate(currentDayOfMonth - daysSinceStartOfWeek + 1); // 调整为星期一
+            }
+
+            const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+            const daysSinceYearStart = (today - firstDayOfYear) / 86400000; // 天数
+            const weekOfYear = Math.ceil((daysSinceYearStart + firstDayOfYear.getDay() + 1) / 7);
+
+            // 如果是第一周并且是1月1号，则默认为双周
+            if (weekOfYear === 1 && today.getMonth() === 0) {
+                return '双周';
+            }
+
+            // 根据周次判断是单周还是双周
+            return weekOfYear % 2 === 0 ? '双周' : '单周';
         }
 }

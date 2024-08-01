@@ -249,7 +249,7 @@ const routes = [
         meta: '询价单',
         component: () => import('../views/procurement/quote/quote')
     }, {
-        path: '/equipmentToRepair/components/detailView:id',
+        path: '/equipmentToRepair/detailView:id',
         name: 'detailView',
         meta: '设备送修通知详情',
         component: () => import('../views/equipmentToRepair/components/detailView')

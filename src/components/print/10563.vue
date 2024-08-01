@@ -31,8 +31,8 @@
               <tr v-for="(item) in payment.details" :key="item.id">
                 <td class="border-black">{{ item.contract.name }}</td>
                 <td class="border-black">{{ item.contract.price }}</td>
-                <td class="border-black">{{ item.contract.yetPay }}</td>
-                <td class="border-black">{{ item.applyMoney }}</td>
+                <td class="border-black" style="color:#93deff">{{ item.contract.yetPay }}</td>
+                <td class="border-black" style="color:red">{{ item.applyMoney }}</td>
                 <td class="border-black">{{ item.paymentType.name }}</td>
                 <td class="border-black">{{ item.remark }}</td>
                 <td class="border-black">{{ item.contract.projects[0].name }}</td>
@@ -42,8 +42,8 @@
               <tr>
                 <td style="width: 15%;">合计</td>
                 <td style="width:10%;">{{ price }}</td>
-                <td style="width:10%;">{{ yetMoneys }}</td>
-                <td style="width:15%;">{{ applyMoney }}</td>
+                <td style="width:10%;color: #93deff">{{ yetMoneys }}</td>
+                <td style="width:15%;color: red">{{ applyMoney }}</td>
                 <td></td>
                 <td></td>
                 <td></td>

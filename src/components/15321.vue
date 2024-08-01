@@ -65,7 +65,8 @@
         </v-col>
         <v-col sm="3">
           <v-btn :disabled="data.approveState == 1" small @click="showOutListHandler" class="mr-1" color="success">出库单</v-btn>
-          <v-btn :disabled="data.approveState == 1" small @click="selectMaterHandler">选择材料</v-btn>
+          <v-btn :disabled="data.approveState == 1" small @click="selectMaterHandler" class="mr-1">选择材料</v-btn>
+          <v-chip small>金额合计：{{sumMoney}}</v-chip>
         </v-col>
         <v-col cols="12">
           <v-data-table :headers="materHeaders"
@@ -192,6 +193,7 @@ export default {
     ],
     temp: [],
     outListDialog: false,
+    sumMoney:0
   }),
   created() {
     if (this.frameId) {
@@ -232,6 +234,20 @@ export default {
     },
     frameId() {
       this.loadById(this.frameId)
+    },
+    "data.maters":{
+      handler(){
+        this.sumMoney = 0
+        if(this.data.maters){
+          let temp = 0
+          this.data.maters.forEach(item=>{
+            temp += parseFloat(item.money)
+          })
+
+          this.sumMoney = temp.toFixed(2)
+        }
+      },
+      deep: true
     }
   },
   props: {
@@ -398,7 +414,6 @@ export default {
         out: {id: ''},
         approveState: 0
       }
-      console.log("reset",this.data)
       if (this.$refs.outBackForm) {
         this.$refs.outBackForm.resetValidation()
       }

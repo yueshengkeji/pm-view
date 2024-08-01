@@ -112,7 +112,7 @@
 <script>
 import {exportOutHistory, getOutHistory} from '@/api/material'
 import {getById, search} from '@/api/project'
-import {getOutByNumber, outMaterList, getOutHistoryMoney} from '@/api/outMater'
+import {getOutByNumber, getOutHistoryMoney, outMaterList} from '@/api/outMater'
 
 export default {
   name: "out-report",
@@ -275,6 +275,7 @@ export default {
         p.projectsId = p.projectsId.join(",")
       }
       p.materialId = this.materialId
+      p.pn = null
       getOutHistory(p).then(data => {
         data.rows.forEach((item, idx) => {
           item.index = idx + 1

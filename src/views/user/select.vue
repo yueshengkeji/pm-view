@@ -8,6 +8,7 @@
                         item-value="id"
                         return-object
                         :search-input.sync="searchStaff"
+                        @click:clear="clearData"
                         v-model="data"></v-autocomplete>
     </div>
 </template>
@@ -63,6 +64,9 @@
                     this.list.push(this.staff)
                 }
                 this.data = this.staff
+            },
+            clearData(){
+                this.data = null
             }
         }
     }
