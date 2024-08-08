@@ -189,7 +189,7 @@ export default {
     item: null,
     menu: false,
     date: [],
-    moneyTypes: ["租金", "管理费", "推广服务费", "二清管理费", "装修管理费"],
+    moneyTypes: ["租金", "管理费", "多经场地费","场地保证金","推广服务费", "二清管理费", "装修管理费"],
     stateItems: [
       {value: '1', text: '已支付'},
       {value: 'wait', text: '待支付'},
@@ -351,7 +351,7 @@ export default {
         this.data2 = r
       })
     },
-    listTgf() {
+    listTgf(){
       let q = Object.assign({}, this.options3)
       q = Object.assign(q, this.query)
       getBillList(q).then((r) => {
@@ -426,9 +426,9 @@ export default {
       let q
       if (this.tab == 0) {
         q = Object.assign({}, this.options)
-      } else if (this.tab == 2) {
+      } else if (this.tab == 2){
         q = Object.assign({}, this.options3)
-      } else {
+      }else {
         q = Object.assign({}, this.options2)
       }
       q = Object.assign(q, this.query)
@@ -452,9 +452,9 @@ export default {
       handler() {
         if (this.tab == 0) {
           this.list()
-        } else if (this.tab == 2) {
+        }else if (this.tab == 2){
           this.listTgf()
-        } else {
+        }else {
           this.listBzj()
         }
       },

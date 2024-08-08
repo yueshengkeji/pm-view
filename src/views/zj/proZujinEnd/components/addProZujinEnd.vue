@@ -223,6 +223,8 @@
                 this.proZujinEndItem.proZujin = this.zujinItem
                 return insert(this.proZujinEndItem).then(res => {
                     this.zujinItem.endFlag = 1
+                    this.zujinItem.type = 9
+                    this.zujinItem.houses = []
                     updateZujin(this.zujinItem)
                     insertProZujinEnd(res)
                     this.$refs.easyFlow.startFlow({

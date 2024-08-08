@@ -250,12 +250,13 @@
       >
         <v-radio label="租赁合同" :value="0"></v-radio>
         <v-radio label="物管合同" :value="1"></v-radio>
+        <v-radio disabled="true" label="作废" :value="9"></v-radio>
       </v-radio-group>
 
-      <v-btn @click="genNextHandler" :loading="genLoading" :disabled="offGen">生成下一期账单</v-btn>
-      <v-btn @click="printContractWord">打印</v-btn>
-      <v-btn @click="insertZujin" color="primary" :loading="loading">确定</v-btn>
-      <v-btn @click="saveData" :loading="loading">仅保存数据</v-btn>
+      <v-btn :disabled="data.type == 9 || offGen" @click="genNextHandler" :loading="genLoading" >生成下一期账单</v-btn>
+      <v-btn :disabled="data.type == 9" @click="printContractWord">打印</v-btn>
+      <v-btn :disabled="data.type == 9" @click="insertZujin" color="primary" :loading="loading">确定</v-btn>
+      <v-btn :disabled="data.type == 9" @click="saveData" :loading="loading">仅保存数据</v-btn>
       <v-btn @click="filesHandler">查看附件</v-btn>
       <v-btn @click="$emit('close')">取消</v-btn>
     </v-card-actions>
@@ -817,7 +818,9 @@ export default {
     loadById(id) {
       if (id) {
         queryById(id).then(result => {
-          if (result.houses.length > 0) {
+            console.log('result2',result)
+
+            if (result.houses.length > 0) {
             result.houses.forEach(item => {
               item.temp = item.pwNumber + ":" + item.acreage
               this.houseList.push(item)
@@ -826,7 +829,11 @@ export default {
           if (!result.brandCompany) {
             result.brandCompany = {name: '-'}
           }
-          this.data = result
+            console.log('result1',result)
+
+            this.data = result
+            console.log('data',this.data)
+            console.log('result',result)
           result.termList.forEach((val, idx) => {
             val.idx = idx
           })

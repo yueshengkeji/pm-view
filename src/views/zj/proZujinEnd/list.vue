@@ -22,9 +22,9 @@
         >
             <template v-slot:item.action="item">
                 <v-btn x-small @click="detail($event, item)">明细</v-btn>
-                <v-btn class="ml-1" color="error" x-small @click="deleteItem(item)">
-                    删除
-                </v-btn>
+<!--                <v-btn class="ml-1" color="error" x-small @click="deleteItem(item)">-->
+<!--                    删除-->
+<!--                </v-btn>-->
             </template>
         </v-data-table>
 

@@ -22,7 +22,8 @@
         >
             <template v-slot:item.action="item">
                 <v-btn x-small @click="detail($event, item)">明细</v-btn>
-                <v-btn class="ml-1" color="error" x-small @click="deleteItem(item)">
+                <v-btn :disabled="item.item.type == 9" x-small @click="cancelPlaceUseContract(item)">合同作废</v-btn>
+                <v-btn :disabled="item.item.type == 9" class="ml-1" color="error" x-small @click="deleteItem(item)">
                     删除
                 </v-btn>
             </template>
@@ -52,9 +53,9 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn @click="printContractWord">打印</v-btn>
-                    <v-btn @click="saveData">仅保存数据</v-btn>
-                    <v-btn @click="filesHandler">查看附件</v-btn>
-                    <v-btn color="primary" @click="submitUpdate">确定</v-btn>
+                    <v-btn :disabled="item.type == 9" @click="saveData">仅保存数据</v-btn>
+                    <v-btn :disabled="item.type == 9" @click="filesHandler">查看附件</v-btn>
+                    <v-btn :disabled="item.type == 9" color="primary" @click="submitUpdate">确定</v-btn>
                     <v-btn @click="updateDialog=false">取消</v-btn>
                 </v-card-actions>
             </v-card>
@@ -92,7 +93,7 @@
     </div>
 </template>
 <script>
-    import {list,deleteById} from "../../../api/placeUseContract";
+    import {list,deleteById,update} from "../../../api/placeUseContract";
     import addPlaceContract from "./components/addPlaceContract";
     import updatePlaceContract from "./components/updatePlaceContract";
     import contractWordModel from "../components/contractWordModel";
@@ -128,7 +129,9 @@
             addDialog: false,
             //详情更新
             updateDialog:false,
-            item:null,
+            item:{
+                type:9
+            },
             //删除
             deleteDialog:false,
             //打印
@@ -181,6 +184,19 @@
                 this.$nextTick(() => {
                     this.item = row.item
                     console.log(this.item)
+                })
+            },
+            cancelPlaceUseContract(item){
+                console.log('item1',item)
+                let updateItem = item.item
+                this.confirm("确定作废该合同?").then(() => {
+                    console.log('updateItem',updateItem)
+                    updateItem.type = 9
+                    update(updateItem).then(res => {
+                        if (res > 0){
+                            this.loadContractList()
+                        }
+                    })
                 })
             },
             submitUpdate(){

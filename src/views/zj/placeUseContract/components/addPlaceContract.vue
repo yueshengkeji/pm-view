@@ -65,7 +65,7 @@
                     <v-text-field label="场地用途" v-model="placeUseContractItem.placeUseFor"></v-text-field>
                 </v-col>
                 <v-col md="2">
-                    <v-text-field type="number" label="场地费标准(含税)" v-model="placeUseContractItem.price"></v-text-field>
+                    <v-text-field type="number" label="场地费标准(含税 元/月)" v-model="placeUseContractItem.price"></v-text-field>
                 </v-col>
                 <v-col md="2">
                     <v-text-field type="number" label="场地费总额(含税)" v-model="placeUseContractItem.money"></v-text-field>

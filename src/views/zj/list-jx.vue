@@ -88,15 +88,22 @@
               {{ item.cwMoney }}
             </td>
             <td class="text-start">
-              {{ item.sjMoney }}
-            </td>
+                          {{ item.sjMoney }}
+                        </td>
             <td class="text-start">
               {{ item.kjType[0].series }}
             </td>
+              <td class="text-start">
+                  {{ item.startDatetime }}
+              </td>
+              <td class="text-start">
+                  {{ item.endDatetime }}
+              </td>
 
             <td class="text-start">
               <v-btn x-small @click="detail($event, { item: item })">明细</v-btn>
-              <v-btn v-if="showDelete" class="ml-1" color="error" x-small @click="deleteItem(item)">删除
+                <v-btn :disabled="item.type == 9" x-small @click="stopContract(item)" class="ml-1">合同终止</v-btn>
+              <v-btn v-if="showDelete" :disabled="item.type == 9" class="ml-1" color="error" x-small @click="deleteItem(item)">删除
               </v-btn>
             </td>
           </tr>
@@ -130,7 +137,7 @@
               {{ item.acreage }}
             </td>
             <td class="text-start">
-              {{ item.ysMoney }}
+                          {{ item.ysMoney }}
             </td>
             <td class="text-start">
               {{ item.yearRental }}
@@ -144,9 +151,16 @@
             <td class="text-start">
               {{ item.kjType[0].series }}
             </td>
+              <td class="text-start">
+                  {{ item.startDatetime }}
+              </td>
+              <td class="text-start">
+                  {{ item.endDatetime }}
+              </td>
             <td class="text-start">
               <v-btn x-small @click="detail($event, { item: item })">明细</v-btn>
-              <v-btn v-if="showDelete" class="ml-1" color="error" x-small @click="deleteItem(item)">
+                <v-btn :disabled="item.type == 9" x-small @click="stopContract(item)" class="ml-1">合同终止</v-btn>
+              <v-btn v-if="showDelete" :disabled="item.type == 9" class="ml-1" color="error" x-small @click="deleteItem(item)">
                 删除
               </v-btn>
             </td>
@@ -195,10 +209,16 @@
             <td class="text-start">
               {{ item.kjType[0].series }}
             </td>
+              <td class="text-start">
+                  {{ item.startDatetime }}
+              </td>
+              <td class="text-start">
+                  {{ item.endDatetime }}
+              </td>
             <td class="text-start">
               <v-btn x-small @click="detail($event, { item: item })">明细</v-btn>
-              <v-btn :disabled="item.endFlag == 1" x-small @click="stopContract(item)" class="ml-1">合同终止</v-btn>
-              <v-btn v-if="showDelete" class="ml-1" color="error" x-small @click="deleteItem(item)">
+              <v-btn :disabled="item.type == 9" x-small @click="stopContract(item)" class="ml-1">合同终止</v-btn>
+              <v-btn v-if="showDelete" :disabled="item.type == 9" class="ml-1" color="error" x-small @click="deleteItem(item)">
                 删除
               </v-btn>
             </td>
@@ -354,6 +374,8 @@ export default {
       {text: '财务已收', value: 'cwMoney'},
       {text: '欠费金额', value: 'sjMoney'},
       {text: '会计科目', value: 'kjType[0].series'},
+      {text: '开始日期', value: 'startDatetime'},
+      {text: '截止日期', value: 'endDatetime'},
       {text: '操作', value: 'action', width: '11%'},
     ],
     items: [],
