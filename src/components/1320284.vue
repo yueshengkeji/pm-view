@@ -21,9 +21,12 @@
           </v-col>
         </v-row>
         <v-row>
-            <v-col>
-                <v-text-field readonly v-model="expense.remark" label="备注"></v-text-field>
+          <v-col cols="12">
+            <v-text-field readonly v-model="expense.title" label="摘要"></v-text-field>
             </v-col>
+          <v-col cols="12">
+            <v-text-field readonly v-model="expense.remark" label="备注"></v-text-field>
+          </v-col>
         </v-row>
         <v-data-table
                 hide-default-footer
@@ -36,10 +39,10 @@
 
 </template>
 <script>
-    import {selectById} from "../api/expense";
+import {selectById} from "../api/expense";
 
-    export default {
-        name:'1320284',
+export default {
+        name:'expense',
         props:{
             frameId: String,
         },

@@ -34,6 +34,10 @@
                 <td class="border text-center" width="70%">{{ data.staff.openBlank +'-'+data.staff.bankNumber}}</td>
               </tr>
               <tr>
+                <td class="border text-center" width="30%">摘要</td>
+                <td class="border text-center" width="70%">{{ data.title }}</td>
+              </tr>
+              <tr>
                 <td class="border text-center" width="30%">备注</td>
                 <td class="border text-center" width="70%">{{ data.remark }}</td>
               </tr>

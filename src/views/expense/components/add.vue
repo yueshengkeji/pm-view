@@ -62,6 +62,9 @@
                       :rules="rules.coursesSelectRule"
           ></v-combobox>
         </v-col>
+        <v-col cols="12" xs="2">
+          <v-text-field label="摘要" v-model="expense.title" :rules="[v => !!v || '请填写摘要信息']"></v-text-field>
+        </v-col>
       </v-row>
       <v-row>
         <v-col>
@@ -100,7 +103,7 @@
 import fileUpload from "../../../components/fileUpload";
 import easyFlow from "../../../components/easyflow/easyFlow";
 import {search} from "../../../api/project";
-import {queryAll, selectById, insert, update, deleteFile} from "../../../api/expense";
+import {deleteFile, insert, queryAll, selectById, update} from "../../../api/expense";
 
 export default {
   name: 'add',
@@ -109,6 +112,7 @@ export default {
     localProjects: [],
     expense: {
       id: null,
+      title: null,
       project: null,
       projectId: null,
       totalMoney: 0,
@@ -323,7 +327,7 @@ export default {
               if (startFlow) {
                 //to do 流程
                 this.$refs['expenseFlow'].startFlow({
-                  title: res.project + "报销",
+                  title: res.title || res.project + "报销",
                   content: res.remark || '',
                   frameId: res.id,
                   frameCoding: 1320284,
@@ -374,6 +378,7 @@ export default {
     reset() {
       this.expense = {
         id: null,
+        title: null,
         project: null,
         projectId: null,
         totalMoney: null,

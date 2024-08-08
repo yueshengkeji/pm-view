@@ -169,7 +169,7 @@
                 </v-btn>
                 <v-btn @click="recall"
                        :small="small"
-                       :disabled="operate || approve.approveState != 3"
+                       :disabled="operate"
                        v-if="!operate || approve.approveState == 3"
                        class="mr-1">
                   撤回
@@ -398,16 +398,18 @@
 
 <script>
 import {
+  appendApprove,
   appendConsent,
   breakFlow,
+  breakToCourse,
   consent,
+  getApproveRecord,
+  getApproveSteps,
   getMessageByFrameId,
   notify,
   recall,
-  getApproveSteps,
-  selectPersonConsent,
-  appendApprove,
-  getApproveRecord, breakToCourse, saveContent
+  saveContent,
+  selectPersonConsent
 } from '@/api/approve'
 import {getStaff} from '@/api/staff'
 import {getFiles} from '@/api/files'
@@ -417,6 +419,7 @@ import {flowCourseInstance} from '@/api/course'
 import ZoomObject from "@/utils/zoom"
 import axios from 'axios'
 import {updatePrint} from "@/api/usedFlowApi";
+
 export default {
   name: "instance-detail",
   data: () => ({
@@ -826,11 +829,11 @@ export default {
     },
     printApprove() {
       //记录更新打印次数
-      if (this.instaceMsg.printCount == null) {
+      if(this.instaceMsg.printCount == null){
         this.instaceMsg.printCount = 0
       }
       this.instaceMsg.printCount += 1
-      updatePrint({id: this.instaceMsg.id, printCount: this.instaceMsg.printCount})
+      updatePrint({id:this.instaceMsg.id,printCount:this.instaceMsg.printCount})
       let t = () => new Promise(resolve => {
         try {
           resolve(require(`@/components/print/${this.instaceMsg.frameCoding}.vue`))
@@ -1210,9 +1213,9 @@ export default {
               f.pdfImg = true
               let paths = [];
               f.pdfImgPath.forEach(path => {
-                path = path.replaceAll("\\", "/")
+                path = path.replaceAll("\\","/")
                 path = encodeURIComponent(path)
-                path = path.replace("%2F", "/")
+                path = path.replace("%2F","/")
                 paths.push(this.ftpFolder + "/" + path)
               })
               f.pdfImgPath = paths

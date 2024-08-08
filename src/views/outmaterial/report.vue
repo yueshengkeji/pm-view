@@ -310,6 +310,7 @@ export default {
       }
       p.materialId = this.materialId
       p.showPrice = this.showPrice
+      p.pn = null
 
       exportOutHistory(p).then((filePath) => {
         let a = document.createElement("a");
