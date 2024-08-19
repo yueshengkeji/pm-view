@@ -468,7 +468,9 @@ export default {
     },
     loadPayMoney() {
       getPayMoney(this.year).then(moneys => {
-        this.payMoneys = moneys.money;
+        if (moneys) {
+          this.payMoneys = moneys.money;
+        }
       })
     },
     toPayment() {

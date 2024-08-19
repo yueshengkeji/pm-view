@@ -6,6 +6,14 @@ export function list(query) {
 export function insertPay(data) {
     return request.put("/otherPay", data)
 }
+
+export function insertBatchPay(data) {
+    return request.put("/otherPay/batch", data)
+}
+
+export function updateBatchPay(data) {
+    return request.post("/otherPay/batch", data)
+}
 export function deletePay(id) {
     return request.delete(`/otherPay/${id}`)
 }
@@ -14,6 +22,10 @@ export function updatePay(data) {
 }
 export function getById(id) {
     return request.get(`/otherPay/${id}`)
+}
+
+export function getBatchById(id) {
+    return request.get(`/otherPay/batch/${id}`)
 }
 export function getPayType(id) {
     return request.get(`/otherPay/payType/${id}`)

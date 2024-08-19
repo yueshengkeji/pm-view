@@ -6,7 +6,8 @@
       </v-col>
       <v-col lg="2">
         <v-btn color="primary" @click="insertHandler" small>新增</v-btn>
-        <v-btn @click="exportEX" style="margin-left: 5px" :loading="exportLoading" small>导出</v-btn>
+        <v-btn @click="batchPayHandler" class="ml-1" small>批量付款</v-btn>
+        <v-btn @click="exportEX" class="ml-1" :loading="exportLoading" small>导出</v-btn>
         <v-switch v-model="queryParam.ifMine"
                   v-if="showAll"
                   label="我的" class="float-right" style="margin-top: 0px;"></v-switch>
@@ -82,21 +83,39 @@
 
     </v-dialog>
 
-    <instance-detail :frame="detailPay.id" :close="closeDetail"></instance-detail>
+    <v-dialog width="80%" :fullscreen="$vuetify.breakpoint.xs" v-model="payBatchDialog">
+      <v-card>
+        <add-batch-pay v-model="pay" ref="otherBatchPay" :pay-type="queryParam.tagName"
+                       :flow-name="flowName"></add-batch-pay>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="payBatchDialog = false">关闭</v-btn>
+          <v-btn @click="addCompanyHandler">增加单位</v-btn>
+          <v-btn color="primary" @click="saveBatchPay" :loading='subLoading'>{{
+              pay.id == null ? '提交' : '重新审批'
+            }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+
+    </v-dialog>
+
+    <instance-detail :frame="detailPayId" :close="closeDetail"></instance-detail>
   </div>
 </template>
 
 <script>
 import addPay from '@/components/132029.vue'
 import instanceDetail from '@/components/easyflow/instance-detail'
-import {deletePay, getPayType, getSumMoney, list, exportList} from '@/api/otherPay'
+import {deletePay, exportList, getPayType, getSumMoney, list} from '@/api/otherPay'
 import {getConfig} from '@/api/systemConfig'
 
 export default {
   name: "list",
   components: {
     addPay,
-    instanceDetail
+    instanceDetail,
+    addBatchPay: () => import('@/components/1320295.vue')
   },
   data: () => ({
     showAll: false,
@@ -134,7 +153,9 @@ export default {
     applyMoney: 0,
     payMoney: 0,
     subLoading: false,
-    flowFlag: true
+    flowFlag: true,
+    payBatchDialog: false,
+    detailPayId: null
   }),
   watch: {
     options: {
@@ -179,6 +200,10 @@ export default {
     }
   },
   methods: {
+    batchPayHandler() {
+      this.payDialog = false
+      this.payBatchDialog = true
+    },
     getSumMoney() {
       getSumMoney({
         startDate: this.queryParam.startDate,
@@ -209,15 +234,21 @@ export default {
     },
     detail(item) {
       this.detailPay = item
+      this.detailPayId = item.batchId || item.id
     },
     closeDetail() {
       this.detailPay = {
         id: null
       }
+      this.detailPayId = null
     },
     editPay(item) {
       this.pay = item
-      this.payDialog = true
+      if (item.batchId) {
+        this.payBatchDialog = true
+      } else {
+        this.payDialog = true
+      }
     },
     deleteHandler(item) {
       this.confirm("确定删除" + item.title + "?").then(() => {
@@ -255,7 +286,32 @@ export default {
           this.payDialog = false
           this.subLoading = false
         }
-      }).finally(() => this.flowFlag = true)
+      }).finally(() => this.flowFlag = true, this.subLoading = false)
+    },
+    addCompanyHandler() {
+      this.$refs.otherBatchPay.addCompany()
+    },
+    saveBatchPay() {
+      this.subLoading = true
+      this.$refs.otherBatchPay.save().then((result) => {
+        if (this.flowFlag) {
+          this.$refs.otherBatchPay.$refs.flow.startFlow({
+            title: result.title + '-付款申请',
+            content: result.remark || '',
+            frameId: result.id,
+            frameCoding: 1320295,
+            frameColumn: 'id'
+          }).then(() => {
+            this.list()
+            this.payBatchDialog = false
+            this.subLoading = false
+          })
+        } else {
+          this.list()
+          this.payBatchDialog = false
+          this.subLoading = false
+        }
+      }).finally(() => this.flowFlag = true, this.subLoading = false)
     },
     list() {
       this.queryParam.page = this.options.page
@@ -274,10 +330,10 @@ export default {
         this.total = result.total
       })
     },
-    setMoneyFilter(){
+    setMoneyFilter() {
       this.queryParam.maxMoney = this.queryParam.maxMoney == null ? 0 : this.queryParam.maxMoney
       this.queryParam.minMoney = this.queryParam.minMoney == null ? 0 : this.queryParam.minMoney
-      if(this.queryParam.maxMoney == 0 && this.queryParam.minMoney == 0){
+      if (this.queryParam.maxMoney == 0 && this.queryParam.minMoney == 0) {
         this.queryParam.maxMoney = null
         this.queryParam.minMoney = null
       }
