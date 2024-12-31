@@ -93,7 +93,7 @@
                                   v-model="proZujinEndItem.qualityBzj"></v-text-field>
                 </v-col>
                 <v-col md="2">
-                    <v-text-field type="number" label="质量时长/月"
+                    <v-text-field type="number" label="质量保证金时长/月"
                                   v-model="proZujinEndItem.qualityTime"></v-text-field>
                 </v-col>
 
@@ -111,7 +111,7 @@
     import {insert} from "../../../../api/proZujinEnd";
     import EasyFlow from "@/components/easyflow/easyFlow.vue";
     import FileUpload from "@/components/fileUpload.vue";
-    import {updateZujin} from "../../../../api/zujin";
+    // import {updateZujin} from "../../../../api/zujin";
     import {queryById} from "../../../../api/zujin";
     import {insertProZujinEnd} from "../../../../api/contractWordModel";
 
@@ -147,7 +147,8 @@
                 files: '',
                 type: 4,
                 proZujin: null,
-                qualityTime: 3
+                qualityTime: 3,
+                state:0
             },
             menu1: false,
             menu2: false,
@@ -222,10 +223,10 @@
             submitAdd() {
                 this.proZujinEndItem.proZujin = this.zujinItem
                 return insert(this.proZujinEndItem).then(res => {
-                    this.zujinItem.endFlag = 1
-                    this.zujinItem.type = 9
-                    this.zujinItem.houses = []
-                    updateZujin(this.zujinItem)
+                    // this.zujinItem.endFlag = 1
+                    // this.zujinItem.type = 9
+                    // this.zujinItem.houses = []
+                    // updateZujin(this.zujinItem)
                     insertProZujinEnd(res)
                     this.$refs.easyFlow.startFlow({
                         title: res.partB + "合同审批",

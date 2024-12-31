@@ -140,6 +140,7 @@
 
                 </v-dialog>
                 <v-btn @click="consent"
+                       v-if="!operate && approve.approveState <= 3"
                        :loading="consentLoading"
                        :small="small"
                        :block="$vuetify.breakpoint.xs"
@@ -148,6 +149,8 @@
                        :class="$vuetify.breakpoint.xs ? 'mb-3' : ''"
                        color="primary" style="color: #FFFFFF !important;">
                   {{ consentStr }}
+                </v-btn>
+                <v-btn v-else-if="approve && approve.approveState > 3" @click="appendConsent" class="mr-1">补充信息
                 </v-btn>
                 <v-btn @click="appendApprove"
                        :small="small"

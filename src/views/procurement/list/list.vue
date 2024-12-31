@@ -183,7 +183,11 @@
             <div>{{ item.staff.name }}</div>
           </td>
           <td>
-            <div style="width: 50px" class="text-decoration-underline" v-if="item.putState == 4"
+            <div style="width: 50px" class="text-decoration-underline" v-if="item.putState == 5"
+                 title="订单材料有退货">
+              退货
+            </div>
+            <div style="width: 50px" class="text-decoration-underline" v-else-if="item.putState == 4"
                  title="订单材料已经完全入库"
                  @click="flowDetail(item)">
               已入库
@@ -437,7 +441,7 @@
 </template>
 
 <script>
-import {deletePro, exportExcel, listPro, setPutAll, updateDownloadState, loadTotal} from '@/api/procurement'
+import {deletePro, exportExcel, listPro, loadTotal, setPutAll, updateDownloadState} from '@/api/procurement'
 import {getProSign, putProMaterial} from '@/api/put'
 import storageManager from "../../storage/storageManager"
 import {getMessageByFrameId} from "@/api/usedFlowApi"

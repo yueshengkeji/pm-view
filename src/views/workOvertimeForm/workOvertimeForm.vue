@@ -220,7 +220,6 @@
                            md="4">
                       <easy-flow coding="1320276"
                                  ref="overtimeFlow"
-                                 defaultFlowName="加班申请单"
                       ></easy-flow>
                     </v-col>
                   </v-row>
@@ -355,7 +354,22 @@
         loading-text="Loading... Please wait"
         class="elevation-1"
     >
+      <template v-slot:item.approve="{item}">
+        <div>{{ item.approve == 0 ? '审批中' : '已审批' }}</div>
+      </template>
       <template v-slot:item.actions="{item}">
+        <v-icon
+            x-small
+            @click="detailHandler(item)"
+        >
+          明细
+        </v-icon>
+        <v-icon
+            small
+            @click="editHandler(item)"
+        >
+          mdi-lead-pencil
+        </v-icon>
         <v-icon
             small
             @click="deleteItem(item)"
@@ -365,6 +379,8 @@
 
       </template>
     </v-data-table>
+
+    <instance-detail :frame="frameId"></instance-detail>
   </v-card>
 </template>
 
@@ -375,8 +391,12 @@ import easyFlow from '@/components/easyflow/easyFlow'
 
 export default {
   name: "workOvertimeForm",
-  components: {easyFlow},
+  components: {
+    instanceDetail: () => import('@/components/easyflow/instance-detail.vue')
+    , easyFlow
+  },
   data: () => ({
+    frameId: null,
     menu5Flag: true,
     loading: false,
     options: {},
@@ -401,6 +421,7 @@ export default {
       {text: '开始', value: 'begin', sortable: false,},
       {text: '截止', value: 'end', sortable: false},
       {text: '事由', value: 'remark', sortable: false},
+      {text: '审批状态', value: 'approve', sortable: false},
       {text: '操作', value: 'actions', sortable: false},
     ],
     desserts: [],
@@ -546,6 +567,9 @@ export default {
     },
   },
   methods: {
+    detailHandler(item) {
+      this.frameId = item.id
+    },
     difference(startTime, endTime) {
       var dateBegin = Date.parse(startTime);
       var dateEnd = Date.parse(endTime);
@@ -665,25 +689,37 @@ export default {
     },
 
     saveInsert() {
-      let valid = this.$refs['workOvertimeFormItem'].validate();
-      if (valid) {
-        this.loading = true
-        workOvertimeApi.insertOvertime(this.editedItem).then(result => {
-          this.closeInsert()
-          if (result != null) {
-            this.loadOvertime()
-
-            console.log(result.staff.name)
-            this.$refs['overtimeFlow'].startFlow({
-              title: result.staff.name + "加班申请单",
-              content: '',
-              frameId: result.id,
-              frameCoding: 1320276,
-              frameColumn: 'id'
-            }).then()
-          }
+      if (this.editedItem.id) {
+        this.$refs['overtimeFlow'].startFlow({
+          title: this.editedItem.staff.name + "加班申请单",
+          content: '',
+          frameId: this.editedItem.id,
+          frameCoding: 1320276,
+          frameColumn: 'id'
         }).finally(() => this.loading = false)
+      } else {
+        let valid = this.$refs['workOvertimeFormItem'].validate();
+        if (valid) {
+          this.loading = true
+          workOvertimeApi.insertOvertime(this.editedItem).then(result => {
+            this.closeInsert()
+            if (result != null) {
+              this.loadOvertime()
+
+              console.log(result.staff.name)
+              this.$refs['overtimeFlow'].startFlow({
+                title: result.staff.name + "加班申请单",
+                content: '',
+                frameId: result.id,
+                frameCoding: 1320276,
+                frameColumn: 'id'
+              }).then()
+            }
+          }).finally(() => this.loading = false)
+        }
       }
+
+
     },
 
     closeInsert() {
@@ -693,6 +729,18 @@ export default {
       })
     },
 
+    editHandler(item) {
+      if (item.approve == 1) {
+        this.message("已审批，禁止修改")
+        return
+      }
+      if (item.overtimeEnd == null) {
+        item.overtimeEnd = item.end.substring(0, 9)
+        item.end = item.end.substring(10, 15)
+      }
+      this.editedItem = Object.assign({}, item)
+      this.dialogNew = true
+    },
     deleteItem(item) {
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true

@@ -9,7 +9,8 @@
             </v-col>
             <v-spacer></v-spacer>
             <div style="display: flex">
-              <v-btn style="margin-top: 10px;margin-right: 10px" @click="showPayment">合同付款</v-btn>
+              <v-btn class="mr-1" @click="saveContract()">保存</v-btn>
+              <v-btn class="mr-1" @click="showPayment">合同付款</v-btn>
               <v-btn icon style="margin-top: 10px;margin-right: 10px" @click="closeContractDialog">
                 <v-icon>mdi-close</v-icon>
               </v-btn>
@@ -78,7 +79,6 @@
             <v-text-field
                 v-model="contract.yetPay"
                 label="已付款"
-                readonly
             ></v-text-field>
           </v-col>
           <v-col md="1">
@@ -106,11 +106,11 @@
           <template v-slot:item.payment.approveStatus="{item}">
             <span>{{ item.payment.approveStatus | formatStatus }}</span>
           </template>
-            <template v-slot:item.action="{ item }">
-                <v-btn x-small class="ml-1" @click="detail(item.payment)">明细</v-btn>
-            </template>
+          <template v-slot:item.action="{ item }">
+            <v-btn x-small class="ml-1" @click="detail(item.payment)">明细</v-btn>
+          </template>
         </v-data-table>
-          <instance-detail :frame="item.id" :close="close"></instance-detail>
+        <instance-detail :frame="item.id" :close="close"></instance-detail>
       </v-card>
     </v-dialog>
     <v-dialog v-model="paymentDialog" width="80%">
@@ -138,7 +138,7 @@
   </div>
 </template>
 <script>
-import {getProjectByContract, getDetailByContractId, loadById} from "../../../api/contract";
+import {getDetailByContractId, getProjectByContract, loadById, updateYetPayMoney} from "../../../api/contract";
 import {getProByContract} from "../../../api/procurement";
 import addPayment from '@/components/10563'
 import {insert} from "../../../api/payment";
@@ -204,7 +204,7 @@ export default {
     show: false,
     msg: "",
 
-      item:{id:null}
+    item: {id: null}
   }),
 
   watch: {
@@ -253,13 +253,22 @@ export default {
   },
 
   methods: {
-      detail(item) {
-          console.log('item',item)
-          this.item = item;
-      },
-      close() {
-          this.item = {id: null}
-      },
+    saveContract() {
+      //保存合同修改
+      console.log("saveContract", this.contract)
+      updateYetPayMoney(this.contract).then(() => {
+        this.message("操作成功")
+        this.contractDialog = false
+        this.$emit("update")
+      })
+    },
+    detail(item) {
+      console.log('item', item)
+      this.item = item;
+    },
+    close() {
+      this.item = {id: null}
+    },
     getProjectByContract() {
       getProjectByContract({contractId: this.contractId}).then(res => {
         this.projects = res
@@ -335,7 +344,7 @@ export default {
     },
 
     dataChange(data, type) {
-      console.log("dataChange",data,type)
+      console.log("dataChange", data, type)
       if (type == "data") {
         // console.log('here')
         this.updateItem = data

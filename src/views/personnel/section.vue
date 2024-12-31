@@ -52,6 +52,8 @@
                           item-value="id"></v-autocomplete>
           <v-autocomplete :search-input.sync="searchSection" label="上级部门" v-model="item.parentid"
                           :items="selectSection" item-text="name" item-value="id"></v-autocomplete>
+          <v-text-field label="部门编码" title="对应着办公用品查看数据的权限标签值"
+                        v-model="item.coding"></v-text-field>
         </v-form>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -102,6 +104,7 @@ export default {
       {text: '上级部门', value: 'parent.name'},
       {text: '部门经理', value: 'managerName'},
       {text: '部门总监', value: 'assistManagerName'},
+      {text: '编码', value: 'coding'},
       {text: '操作', value: 'action'},
     ],
     item: null,
@@ -196,7 +199,8 @@ export default {
         address: null,
         remark: null,
         assistManager: '',
-        assistManagerName: ''
+        assistManagerName: '',
+        coding: ''
       }
       this.selectSection = [];
       this.users = [];

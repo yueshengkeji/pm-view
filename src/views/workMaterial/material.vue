@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import {loadMater, exportExcel, folderList, updateMaterial} from '@/api/workMaterial'
+import {exportExcel, folderList, loadMater, updateMaterial} from '@/api/workMaterial'
 import WorkMaterFolderList from "@/views/workMaterial/folderList.vue";
 
 export default {
@@ -186,10 +186,7 @@ export default {
       this.folderDialog = true
     },
     exportHandler() {
-      this.loading = true
-      this.query = Object.assign({}, this.options)
-      this.query.sortBy = this.query.sortBy[0]
-      this.query.sortDesc = this.query.sortDesc[0] ? 'desc' : 'asc'
+      this.setQuery()
       this.query.itemsPerPage = 5000
       exportExcel(this.query).then(f => {
         this.downloadFile(f)
@@ -199,11 +196,19 @@ export default {
       this.putHistoryId = item.id
       this.putDialog = true
     },
-    list() {
+    setQuery() {
       this.loading = true
-      this.query = Object.assign({}, this.options)
-      this.query.sortBy = this.query.sortBy[0]
-      this.query.sortDesc = this.query.sortDesc[0] ? 'desc' : 'asc'
+      this.query.page = this.options.page
+      this.query.itemsPerPage = this.options.itemsPerPage
+      this.query.sortBy = this.options.sortBy[0]
+      this.query.sortDesc = this.options.sortDesc[0] ? 'desc' : 'asc'
+      this.query.tag = this.$store.state.user.sectionCoding
+      if (this.query.tag == "") {
+        this.query.tag = null
+      }
+    },
+    list() {
+      this.setQuery()
       loadMater(this.query).then(result => {
         result.rows.forEach(item=>{
           if(item.material.folderObj == null){

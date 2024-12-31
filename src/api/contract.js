@@ -102,3 +102,7 @@ export function exportExcel(data) {
         params:data
     })
 }
+
+export function updateYetPayMoney(data) {
+    return request.put('/contract/updateYetPayMoney', data)
+}

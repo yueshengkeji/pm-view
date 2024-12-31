@@ -16,6 +16,17 @@
         <v-col lg="4" cols="12" v-if="frameId == null">
           <easy-flow coding="132029" ref="flow" :default-flow-name="flowName"></easy-flow>
         </v-col>
+          <v-col lg="4" cols="12">
+              <v-autocomplete
+                      v-model="data.companyPay"
+                      :search-input.sync="searchCompanyPay"
+                      :items="companyPayList"
+                      return-object
+                      item-text="name"
+                      item-value="id"
+                      label="付款单位">
+              </v-autocomplete>
+          </v-col>
         <v-col lg="4" cols="12">
           <v-autocomplete :rules="rules.company"
                           :search-input.sync="searchCompany"
@@ -79,6 +90,8 @@ export default {
     companyList: [],
     data: null,
     searchCompany: null,
+      searchCompanyPay:null,
+      companyPayList:[],
   }),
   props: {
     pay: Object,
@@ -110,6 +123,14 @@ export default {
         }
       })
     },
+      searchCompanyPay(val) {
+          listCompany(val).then(result => {
+              this.companyPayList = result
+              if (result.length <= 0) {
+                  this.companyPayList.push({id: '', name: val})
+              }
+          })
+      },
     data: {
       handler() {
         this.$emit("change", this.data)
@@ -148,6 +169,9 @@ export default {
     setAutoData(data) {
       this.companyList = []
       this.projectList = []
+      if (data.companyPay) {
+        this.companyPayList.push(data.companyPay)
+      }
       if (data.company) {
         this.companyList.push(data.company)
       }
@@ -192,6 +216,10 @@ export default {
           name: null,
           bankNumber: null
         },
+          companyPay:{
+              name:null,
+              id:null
+          },
         payMoney: null,
         payTypeTag: this.payType,
         fileId: []

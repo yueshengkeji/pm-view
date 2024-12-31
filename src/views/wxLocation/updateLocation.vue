@@ -79,9 +79,9 @@
 <script>
 
 import {getConfig, wxConfig} from '@/api/systemConfig'
-import {getTicket, getSha1, getAddressName, getRoutes} from '@/api/weixin'
+import {getAddressName, getRoutes, getSha1, getTicket} from '@/api/weixin'
 import {upload, uploadByBase64} from '@/api/files'
-import {update, getById} from '@/api/outCarHistory'
+import {getById, update} from '@/api/outCarHistory'
 
 export default {
   name: "updateLocation",
@@ -139,6 +139,7 @@ export default {
       deep: true
     },
   },
+
   created() {
     this.sourceImg = localStorage.getItem("sourceImg") == "true"
     this.showTooltip = this.isIOS()
@@ -146,8 +147,7 @@ export default {
       if (result && result.id) {
         getConfig("FTP_SERVER_PATH").then(result2 => {
           if (result2.id) {
-            this.prevImg = result2.value + result.startImg
-            this.prevImg2 = result2.value + result.endImg
+            this.setImgPath(result, result2)
           }
         })
         this.data = result
@@ -163,6 +163,19 @@ export default {
     }).catch(this.error)
   },
   methods: {
+  setImgPath(d, conf) {
+      if (window.location.protocol == 'https:') {
+        let prevImg = d.startImg.replace("\\", "/")
+        this.prevImg = '/api/files/downloadFile?filePath=' + encodeURIComponent(prevImg) + "&downloadFile=t"
+        if(d.endImg){
+            let prevImg2 = d.endImg.replace("\\", "/")
+            this.prevImg2 = '/api/files/downloadFile?filePath=' + encodeURIComponent(prevImg2) + "&downloadFile=t"
+        }
+      } else {
+        this.prevImg = conf.value + d.startImg
+        this.prevImg2 = conf.value + d.endImg
+      }
+    },
     prevImgHandler() {
       this.prevImgDialog = true
     },

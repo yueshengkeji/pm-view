@@ -143,6 +143,7 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
+          <v-checkbox label="需要用印" v-model="article.form.article.useSeal" class="mr-1"></v-checkbox>
           <v-btn @click="addArticle" color="primary">提交</v-btn>
           <v-btn class="ml-1" @click="article.show = false">取消</v-btn>
         </v-card-actions>
@@ -182,7 +183,7 @@
                               :rules="[v => !!v || '请输入目录名称']"></v-text-field>
               </v-col>
               <v-col sm="4" cols="12">
-                <v-chip small>菜单路径：{{menuUrl}}</v-chip>
+                <v-chip small>菜单路径：{{ menuUrl }}</v-chip>
               </v-col>
               <v-col cols="12">
                 <vue-ueditor-wrap forceInit @ready="readyEdit2" v-model="folderModule"
@@ -225,7 +226,7 @@ import easyFlow from '@/components/easyflow/easyFlow'
 
 import VueUeditorWrap from "vue-ueditor-wrap";
 import instanceDetail from "@/components/easyflow/instance-detail";
-import {getMessageByFrameId, backFLowMessage} from "@/api/approve";
+import {backFLowMessage, getMessageByFrameId} from "@/api/approve";
 import fileUpload from "../../components/fileUpload";
 
 export default {
@@ -270,7 +271,8 @@ export default {
           title: null,
           content: '',
           folder: {name: null},
-          remark: ''
+          remark: '',
+          useSeal: null
         },
         attachs: [],
         onUpFile: '',
@@ -324,7 +326,7 @@ export default {
     editContentFlag: false,
     editContent: null,
     defaultFlowName: null,
-    menuUrl:null,
+    menuUrl: null,
   }),
   props: {
     folderId: String,
@@ -444,11 +446,11 @@ export default {
       //
       let length = this.thisFolder.rootId.length
       let temp = []
-      for (let x = 0;x < length;x = x + 8){
-        temp.push(this.thisFolder.rootId.substring(x,x + 8))
+      for (let x = 0; x < length; x = x + 8) {
+        temp.push(this.thisFolder.rootId.substring(x, x + 8))
       }
-      console.log(this.thisFolder,length,temp)
-      this.menuUrl = `article/index/`+encodeURIComponent(temp.join(';'))
+      console.log(this.thisFolder, length, temp)
+      this.menuUrl = `article/index/` + encodeURIComponent(temp.join(';'))
     },
     resetFolder(parent) {
       this.thisFolder = {
@@ -492,10 +494,13 @@ export default {
       this.article.form.flow = flow;
     },
     editArticle(event, row) {
-      this.reset();
+      this.reset()
       this.defaultFlowName = this.thisFolder.name
       row = row.item || row
       row.remark = row.remark || ''
+      if (row.useSeal == null) {
+        row.useSeal = false
+      }
       this.article.form.article = row
       getContent(row.id).then(content => {
         try {
@@ -688,7 +693,7 @@ export default {
           htmlWord = htmlWord.replace(/0.5px/g, '1px');
         }
         window.setTimeout(() => {
-          if(this.article.editor){
+          if (this.article.editor) {
             this.article.editor.execCommand('cleardoc');
             this.article.editor.execCommand('inserthtml', htmlWord);
           }
@@ -724,6 +729,7 @@ export default {
         content: '',
         folder: {name: null},
         remark: '',
+        useSeal: null
       }
 
       if (this.$refs.articleForm) {

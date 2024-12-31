@@ -91,6 +91,7 @@
         <!--                出库材料列表-->
         <v-col cols="12">
           <v-data-table :items.sync="data.materOuts"
+                        height="500px"
                         hide-default-footer
                         :headers="headers">
             <template v-slot:item.index="{item,index}">

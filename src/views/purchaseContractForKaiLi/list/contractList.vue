@@ -236,7 +236,8 @@
     <!--明细-->
     <instance-detail :frame="item.id" :close="close"></instance-detail>
     <!--合同详情-->
-    <contract-details :id="contractId" :closeShowContract="closeShowContract"></contract-details>
+    <contract-details :id="contractId" :closeShowContract="closeShowContract"
+                      @update="updateContractHandler"></contract-details>
     <!--操作确认-->
     <v-dialog v-model="actionConfirmDialog" width="500px">
       <v-card>
@@ -333,7 +334,7 @@ import {getConfig} from "../../../api/systemConfig";
 import contractType from "@/components/contractType"
 import selectCompany from '../../company/select.vue'
 import addContractReceipt from "../contractReceipt/components/addContractReceipt";
-import {list,update,getContractReceiptFiles} from "../../../api/contractReceipt";
+import {getContractReceiptFiles, list, update} from "../../../api/contractReceipt";
 
 export default {
   name: "purchase_contract_for_kaiLi",
@@ -817,6 +818,10 @@ export default {
 
     showContract(e, data) {
       this.contractId = data.item.id
+    },
+    updateContractHandler() {
+      this.closeShowContract()
+      this.loadContract()
     },
     closeShowContract() {
       this.contractId = null

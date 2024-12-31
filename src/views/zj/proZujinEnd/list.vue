@@ -20,6 +20,9 @@
                 @dblclick:row="detail"
                 class="elevation-1"
         >
+            <template v-slot:item.state="{item}">
+                {{ formatState(item.state) }}
+            </template>
             <template v-slot:item.action="item">
                 <v-btn x-small @click="detail($event, item)">明细</v-btn>
 <!--                <v-btn class="ml-1" color="error" x-small @click="deleteItem(item)">-->
@@ -116,6 +119,7 @@
                 {text: '房屋归还日期', value: 'returnHouseDate'},
                 {text: '所有费用支付截止日期', value: 'otherPayDate'},
                 {text: '登记人', value: 'recordStaff.name'},
+                {text: '审核状态', value: 'state'},
                 {text: '操作', value: 'action'},
             ],
 
@@ -246,6 +250,17 @@
                     this.btnLoading = false
                     this.modelPrintDialog = false
                 })
+            },
+            formatState(state) {
+                switch (state) {
+                    case 1:
+                        return '已审核'
+                    case 0:
+                        return '未审核'
+                    default:
+                        return '已审核'
+
+                }
             },
         }
     }

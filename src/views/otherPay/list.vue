@@ -122,7 +122,8 @@ export default {
     exportLoading: false,
     payDialog: false,
     headers: [
-      {text: '付款单位', value: 'company.name'},
+      {text: '收款单位', value: 'company.name'},
+      {text: '付款单位', value: 'companyPay.name'},
       {text: '标题', value: 'title'},
       {text: '付款金额', value: 'payMoney'},
       {text: '申请时间', value: 'datetime'},

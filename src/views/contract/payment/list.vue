@@ -16,7 +16,7 @@
                 <v-btn @click="addPayment" color="primary" small @input="changeYear">
                   新增付款单
                 </v-btn>
-                <v-btn small class="ml-1" title="单次最大导出2000条数据" @click="exportHandler">导出</v-btn>
+                <v-btn small class="ml-1" title="单次最大导出2000条数据" @click="exportDialogHandler">导出</v-btn>
               </v-col>
               <v-col lg="1" md="2">
                 <v-select label="审核状态" dense @change="list" v-model="queryParam.approveStatus"
@@ -51,7 +51,8 @@
 
           </template>
           <template v-slot:item.approveStatus="{ item }">
-            <div v-if="item.courseName == '已审核'" style="height: 30px;width: 100px;" class="text-truncate text-decoration-underline">
+            <div v-if="item.courseName == '已审核'" style="height: 30px;width: 100px;"
+                 class="text-truncate text-decoration-underline">
               <v-icon color="green">mdi-check</v-icon>
             </div>
             <div v-else style="height: 30px;width: 100px;" class="text-truncate text-decoration-underline">
@@ -109,11 +110,59 @@
     <v-dialog v-model="showData" width="50%" style="min-height: 90%;">
       <payment-data></payment-data>
     </v-dialog>
+
+    <v-dialog v-model="exportDialog" width="30%">
+      <v-card class="pa-3">
+        <v-row>
+          <v-col>
+            <v-menu v-model="exportMenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    ref="exportMenu"
+                    min-width="auto">
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field v-model="exportParam.startDate"
+                              label="开始时间"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"></v-text-field>
+              </template>
+              <v-date-picker v-model="exportParam.startDate" no-title @change="$refs.exportMenu.save()"
+                             scrollable></v-date-picker>
+            </v-menu>
+          </v-col>
+          <v-col>
+            <v-menu v-model="exportMenu2"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    ref="exportMenu2"
+                    min-width="auto">
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field v-model="exportParam.endDate"
+                              label="开始时间"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"></v-text-field>
+              </template>
+              <v-date-picker v-model="exportParam.endDate" no-title @change="$refs.exportMenu2.save()"
+                             scrollable></v-date-picker>
+            </v-menu>
+          </v-col>
+        </v-row>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="exportDialog = false">取消</v-btn>
+          <v-btn @click="exportHandler" color="primary" :loading="exportLoading">下载</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import {deletePay, getDetail, getPayMoney, insert, list, exportExcel} from '@/api/payment'
+import {deletePay, exportExcel, getDetail, getPayMoney, insert, list} from '@/api/payment'
 import instanceDetail from '@/components/easyflow/instance-detail'
 import addPayment from '@/components/10563'
 import paymentData from '@/components/companyPayMoney'
@@ -128,6 +177,15 @@ export default {
   },
   name: "list",
   data: () => ({
+    exportLoading: false,
+    exportParam: {
+      startDate: null,
+      endDate: null
+    },
+    exportMenu: false,
+    exportMenu2: false,
+    exportDialog: false,
+    date: [],
     deleteLoading: false,
     years: [],
     menu: false,
@@ -214,18 +272,38 @@ export default {
     // }
   },
   methods: {
+    exportDialogHandler() {
+      if (this.exportParam.startDate == null) {
+        let date = this.getDateByStr('本年')
+        this.exportParam.startDate = date.start
+        this.exportParam.endDate = date.end
+      }
+      this.exportDialog = true
+    },
     exportHandler() {
+      if (this.exportParam.startDate == null || this.exportParam.endDate == null) {
+        this.message("请选择下载的时间范围");
+        return;
+      }
       const {sortBy, sortDesc, page, itemsPerPage} = this.options
       this.queryParam.sortName = sortBy[0];
       this.queryParam.sortOrder = sortDesc[0] ? "DESC" : "ASC";
       this.queryParam.pageSize = itemsPerPage;
       this.queryParam.pageNumber = page;
+      this.queryParam.startDate = this.exportParam.startDate;
+      this.queryParam.endDate = this.exportParam.endDate;
+      this.exportLoading = true
       exportExcel(this.queryParam).then(filePath => {
         let a = document.createElement("a")
         a.target = "_blank"
         a.href = filePath
         a.download = filePath.substring(filePath.lastIndexOf('/') + 1)
         a.click()
+      }).finally(() => {
+        this.exportLoading = false
+        this.queryParam.startDate = null;
+        this.queryParam.endDate = null;
+        this.exportDialog = false
       })
     },
     setDense() {

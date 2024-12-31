@@ -66,7 +66,6 @@
 
               </v-autocomplete>
             </v-col>
-
             <v-col sm="3">
               <v-autocomplete
                   @change="flow.templement = flow.wordModule.id"
@@ -79,6 +78,7 @@
 
               </v-autocomplete>
             </v-col>
+
             <v-col sm="3">
               <v-radio-group v-model="flow.type" label="流程绑定类型">
                 <v-radio key="0" label="关联窗体"></v-radio>
@@ -89,8 +89,31 @@
             <v-col sm="3">
               <v-text-field label="流程说明" v-model="flow.remark"></v-text-field>
             </v-col>
+            <v-col sm="3">
+              <v-autocomplete :disabled="flow.id == null"
+                              @change="insertPerHandler"
+                              v-model="perSection"
+                              :items="sectionList"
+                              item-text="name" return-object></v-autocomplete>
+            </v-col>
+
+
           </v-row>
 
+          <v-row>
+            <v-col cols="12">
+              <v-card-text>流程授权</v-card-text>
+              <v-data-table :items="flowPermission"
+                            :headers="[{text:'部门',value:'section.name'},{text:'操作',value:'del'}]"
+                            no-data-text="所有人可用"
+                            hide-default-header
+                            hide-default-footer>
+                <template v-slot:item.del="{item}">
+                  <v-btn x-small color="error" @click="delPermissionHandler(item)">删除</v-btn>
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
         </v-form>
 
         <v-card-actions>
@@ -104,15 +127,30 @@
 </template>
 
 <script>
-import {deleteFlow, folderList, insertFlow, list, updateFlow} from '@/api/flow'
+import {
+  deleteFlow,
+  delPermission,
+  flowPermission,
+  flowPermissionList,
+  folderList,
+  insertFlow,
+  list,
+  updateFlow
+} from '@/api/flow'
 import {searchMenu} from '@/api/menu'
 import {searchModule} from '@/api/article'
 import courseManager from './courseManager'
+import {getSections} from "@/api/section";
 
 
 export default {
   name: "index",
   data: () => ({
+    perSection: {
+      id: null,
+      name: null
+    },
+    sectionList: [],
     hideSeries: false,
     loading: false,
     flowTotal: 0,
@@ -146,6 +184,7 @@ export default {
 
     wordModuleList: [],
     searchWord: null,
+    flowPermission: []
   }),
   watch: {
     options: {
@@ -173,6 +212,10 @@ export default {
     folderList().then(result => {
       this.folderList = result
     });
+
+    getSections().then(sections => {
+      this.sectionList = sections
+    })
   },
   components: {
     courseManager,
@@ -218,6 +261,7 @@ export default {
       }).finally(() => this.loading = false);
     },
     updateHeader(item) {
+      this.flowPermission = []
       this.dialog = true
       if (item.wordModule != null) {
         this.wordModuleList.push(item.wordModule)
@@ -226,6 +270,7 @@ export default {
         this.menuList.push(item.menu)
       }
       this.flow = item
+      this.loadPermission()
     },
     deleteHeader(item) {
       this.confirm("确定删除流程吗？").then(() => {
@@ -233,6 +278,7 @@ export default {
       })
     },
     reset() {
+      this.flowPermission = []
       this.flow = {
         folderObj: null,
         name: null,
@@ -241,8 +287,18 @@ export default {
         wordModule: null,
         remark: null,
         type: 3,
-
       }
+    },
+    loadPermission() {
+      flowPermissionList(this.flow.id).then((result) => {
+        this.flowPermission = result
+      })
+    },
+    delPermissionHandler(item) {
+      delPermission(item.id).then(this.loadPermission)
+    },
+    insertPerHandler() {
+      flowPermission({flow: this.flow, section: this.perSection}).then(this.loadPermission)
     }
   }
 }

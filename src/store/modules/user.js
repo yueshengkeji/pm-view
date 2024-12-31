@@ -10,6 +10,7 @@ const user = {
         id: localStorage.getItem("SET_ID"),
         sectionName: localStorage.getItem("sectionName"),
         sectionId: localStorage.getItem("sectionId"),
+        sectionCoding: localStorage.getItem("sectionCoding"),
         coding: localStorage.getItem("SET_CODING"),
         avatar: sessionStorage.getItem("SET_AVATAR"),
         roles: localStorage.getItem("SET_ROLES"),
@@ -45,15 +46,25 @@ const user = {
             if (section == null) {
                 state.sectionName = null;
                 state.leader = null;
+                state.sectionId = null
+                state.sectionName = null
+                state.sectionCoding = null
+
                 localStorage.setItem("sectionName", null);
                 localStorage.setItem("sectionId", null);
                 localStorage.setItem("sectionLeader", null);
+                localStorage.setItem("sectionCoding", null);
             } else {
                 state.sectionName = section.name;
                 state.leader = section.managerid;
+                state.sectionId = section.id
+                state.sectionName = section.name
+                state.sectionCoding = section.coding
+
                 localStorage.setItem("sectionName", section.name);
                 localStorage.setItem("sectionId", section.id);
                 localStorage.setItem("sectionLeader", section.managerid);
+                localStorage.setItem("sectionCoding", section.coding);
             }
 
         }
@@ -75,7 +86,6 @@ const user = {
                     commit('SET_MENU', res.menus);
                     commit('SET_LOAD_MENU', true);
 
-                    console.log("PwdLogin() SET_MENU")
                     commit('SET_SECTION', user.section);
                     if (user.role) {
                         let rn = "";

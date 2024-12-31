@@ -124,7 +124,7 @@
 </template>
 
 <script>
-import {getApproveList, read, notifyMyNoReadCount, readAll} from '@/api/approve'
+import {getApproveList, notifyMyNoReadCount, read, readAll} from '@/api/approve'
 import {getMessageByFrameId} from '@/api/usedFlowApi'
 import {drawAvatar} from '@/utils/avatarUtil'
 import {cancelApplyDelete, deleteProcurementByApply, getApplyDelete} from '@/api/procurement'
@@ -140,7 +140,7 @@ export default {
   },
   name: "index",
   data: () => ({
-    deleteLoading:false,
+    deleteLoading: false,
     loading: false,
     menu: false,
     defaultTitle: "暂无代办工作",
@@ -224,7 +224,8 @@ export default {
     applyDeleteDialog: false,
     showApplyDelete: false,
     height: 520,
-    socket: null
+    socket: null,
+    readRequest: false
   }),
   created() {
     this.loadNotifyCount()
@@ -351,7 +352,7 @@ export default {
       }).catch(e => {
         this.msg = "删除失败,订单不存在或已入库，异常信息：" + e;
         this.showMsg = true;
-      }).finally(()=>this.deleteLoading = false)
+      }).finally(() => this.deleteLoading = false)
     },
     cancelApplyDelete() {
       this.applyDelete.state = true;
@@ -437,13 +438,14 @@ export default {
     },
 
     read(approve) {
+      this.readRequest = true
       if (approve.approveState === 0) {
         approve.approveState = 1;
-        read(approve);
+        read(approve).finally(this.readRequest = false)
         this.clearReadBadge()
       } else if (approve.approveState === 5) {
         approve.approveState = 6;
-        read(approve);
+        read(approve).finally(this.readRequest = false)
         this.clearReadBadge()
       }
     },

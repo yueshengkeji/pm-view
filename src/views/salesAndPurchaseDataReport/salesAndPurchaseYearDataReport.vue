@@ -352,7 +352,7 @@
                             }
                         },
                         legend: {
-                            data: ['开票', '收款', '收票', '支付']
+                            data: ['销售','开票', '收款', '采购','收票', '支付']
                         },
                         // toolbox: {
                         //     show: true,
@@ -381,6 +381,15 @@
                         ],
                         series: [
                             {
+                                name: '销售',
+                                type: 'bar',
+                                label: labelOption,
+                                emphasis: {
+                                    focus: 'series'
+                                },
+                                data: this.salesData
+                            },
+                            {
                                 name: '开票',
                                 type: 'bar',
                                 barGap: 0,
@@ -398,6 +407,15 @@
                                     focus: 'series'
                                 },
                                 data: this.receiveYearData
+                            },
+                            {
+                                name: '采购',
+                                type: 'bar',
+                                label: labelOption,
+                                emphasis: {
+                                    focus: 'series'
+                                },
+                                data: this.purchaseData
                             },
                             {
                                 name: '收票',

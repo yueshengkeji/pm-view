@@ -112,7 +112,7 @@
                                     label="收款单位"></v-autocomplete>
                 </v-col>
                 <v-col sm="3">
-                    <file-upload ref="file" @change="fileChangeHandler" :dense="false"></file-upload>
+                    <file-upload ref="file" @change="fileChangeHandler" :dense="false" :clear="clear"></file-upload>
                 </v-col>
                 <v-col sm="2">
                     <easy-flow coding="1320288" ref="easyFlow" default-flow-name="场地使用合同-多经"></easy-flow>
@@ -439,6 +439,7 @@ export default {
         receivedCompanyItems: [],
         isLoading2:false,
         searchReceivedCompany:null,
+        clear:false,
 
         menu1: false,
         menu2: false,
@@ -644,6 +645,7 @@ export default {
             return flag
         },
         submitUpdate() {
+            this.clear = false
             this.placeUseContractItem.termList = this.zlItems
             this.placeUseContractItem.bzlList = this.bzjItems
             return update(this.placeUseContractItem).then(res => {
@@ -655,14 +657,17 @@ export default {
                     frameCoding: 1320288,
                     frameColumn: 'id'
                 })
+                this.clear = true
                 return res
             })
         },
         savePlaceContract() {
+            this.clear = false
             this.placeUseContractItem.termList = this.zlItems
             this.placeUseContractItem.bzlList = this.bzjItems
             return update(this.placeUseContractItem).then(res => {
                 insertPlaceContractWordRecord(this.placeUseContractItem)
+                this.clear = true
                 return res
             })
         },
@@ -686,7 +691,7 @@ export default {
             }
         },
         fileChangeHandler({files}) {
-            this.placeUseContractItem.files = ""
+            // this.placeUseContractItem.files = ""
             files.forEach(item => {
                 this.placeUseContractItem.files += item.id + ";"
             })

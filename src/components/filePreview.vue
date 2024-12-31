@@ -1,4 +1,4 @@
-components<template>
+<template>
     <div>
         <v-col cols="12">
             <h3 class="text-center" v-if="fileTitle != '附件预览'">{{ fileTitle }}</h3>
@@ -58,15 +58,17 @@ components<template>
                             </v-row>
                         </template>
                     </v-img>
-                    <template v-else-if="file.suffix == 'txt'">
-                        <div class="d-block" @contextmenu="show($event,file)">
-                            <p>
-                                <a target="_blank" :key="file.showPath" :href="file.showPath"
-                                   :download="file.fileName">{{ file.fileName }}</a>
-                            </p>
-                            {{ file.content }}
-                        </div>
-                    </template>
+                    <v-card v-else-if="file.suffix == 'txt'" >
+                        <iframe style="border: 0px;width:100%;min-height:920px;background-color: white" :key="i" @contextmenu="show($event,file)" :ripple="false"
+                                :src="file.showPath"></iframe>
+<!--                        <div class="d-block" @contextmenu="show($event,file)">-->
+<!--                            <p>-->
+<!--                                <a target="_blank" :key="file.showPath" :href="file.showPath"-->
+<!--                                   :download="file.fileName">{{ file.fileName }}</a>-->
+<!--                            </p>-->
+<!--                            {{ file.content }}-->
+<!--                        </div>-->
+                    </v-card>
                     <template v-else>
                         <a target="_blank" :key="file.showPath" :href="file.showPath"
                            :download="file.fileName">{{ file.fileName }}</a>
@@ -91,9 +93,9 @@ components<template>
     // import axios from "axios";
     import {getConfig} from '@/api/systemConfig'
 
-
     export default {
         name: 'filePreview',
+        // components: {VueOfficeDocx,VueOfficeExcel},
         props: {
             filesItem: Array
         },
@@ -145,7 +147,7 @@ components<template>
                 })
             },
             isImg(file) {
-                let regular = new RegExp(/(bmp|jpg|png|tif|gif|pcx|tga|exif|fpx|svg|psd|cdr|pcd|dxf|ufo|eps|ai|raw|WMF|webp|jpeg|avif)$/)
+                let regular = new RegExp(/(ico|bmp|jpg|png|tif|gif|pcx|tga|exif|fpx|svg|psd|cdr|pcd|dxf|ufo|eps|ai|raw|WMF|webp|jpeg|avif)$/)
                 let isImg = regular.test(file.suffix);
                 return isImg;
             },

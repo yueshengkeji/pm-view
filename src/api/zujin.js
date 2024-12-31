@@ -227,5 +227,51 @@ export function deletePromotion(data) {
         method:'post',
         data
     })
+}
 
+export function insertDeductionRecord(data){
+    return request({
+        url: 'zujin/insertDeductionRecord',
+        method: 'post',
+        data
+    })
+}
+
+export function updateDeductionRecord(data){
+    return request({
+        url:'zujin/updateDeductionRecord',
+        method: 'post',
+        data
+    })
+}
+
+export function deleteDeductionRecord(data){
+    return request({
+        url:'zujin/deleteDeductionRecord',
+        method:'post',
+        params:data
+    })
+}
+
+export function listDeductionList(data){
+    return request({
+        url: 'zujin/listDeductionList',
+        method: 'get',
+        params: data
+    })
+}
+
+export function revokeDeduction(data){
+    return request({
+        url: 'zujin/revokeDeduction',
+        method: 'post',
+        data
+    })
+}
+
+export function previewBill(id) {
+    return request({
+        url: `zujin/previewBill/${id}`,
+        method: 'get'
+    })
 }

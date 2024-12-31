@@ -29,7 +29,7 @@
             </template>
         </v-data-table>
         <!--新增-->
-        <v-dialog v-model="addDialog" width="60%">
+        <v-dialog v-model="addDialog" width="80%">
             <v-toolbar flat>
                 <v-toolbar-title>场地使用合同</v-toolbar-title>
             </v-toolbar>
@@ -53,9 +53,10 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn @click="printContractWord">打印</v-btn>
-                    <v-btn :disabled="item.type == 9" @click="saveData">仅保存数据</v-btn>
-                    <v-btn :disabled="item.type == 9" @click="filesHandler">查看附件</v-btn>
                     <v-btn :disabled="item.type == 9" color="primary" @click="submitUpdate">确定</v-btn>
+                    <v-btn :disabled="item.type == 9" @click="saveData">仅保存数据</v-btn>
+                    <v-btn @click="filesHandler">查看流程</v-btn>
+                    <v-btn @click="showFiles">查看附件</v-btn>
                     <v-btn @click="updateDialog=false">取消</v-btn>
                 </v-card-actions>
             </v-card>
@@ -90,6 +91,10 @@
         <!--查看附件详情-->
         <instance-detail :frame="frameId"
                          @close="closeFrameHandler"></instance-detail>
+        <!--附件-->
+        <v-dialog v-model="showFilesDialog" width="60%">
+            <contract-files :type="2" :data="item"></contract-files>
+        </v-dialog>
     </div>
 </template>
 <script>
@@ -97,10 +102,18 @@
     import addPlaceContract from "./components/addPlaceContract";
     import updatePlaceContract from "./components/updatePlaceContract";
     import contractWordModel from "../components/contractWordModel";
+    import contractFiles from "@/views/zj/components/contractFiles.vue";
+    import data from "@/store/modules/showTooltip";
 
     export default {
         name: 'placeUseContract',
-        components: {addPlaceContract,updatePlaceContract,contractWordModel,
+        computed: {
+            data() {
+                return data
+            }
+        },
+        components: {
+            contractFiles, addPlaceContract,updatePlaceContract,contractWordModel,
             instanceDetail:() => import('@/components/easyflow/instance-detail.vue')},
         data: () => ({
             contractList: [],
@@ -140,8 +153,10 @@
             //合同模板
             btnLoading:false,
             modelPrintDialog:false,
-            //查看附件详情
-            frameId:null
+            //查看流程详情
+            frameId:null,
+            //附件
+            showFilesDialog:false,
         }),
         created() {
             this.loadContractList()
@@ -187,7 +202,6 @@
                 })
             },
             cancelPlaceUseContract(item){
-                console.log('item1',item)
                 let updateItem = item.item
                 this.confirm("确定作废该合同?").then(() => {
                     console.log('updateItem',updateItem)
@@ -219,6 +233,11 @@
             },
             filesHandler() {
                 this.frameId = this.item.id
+            },
+            showFiles() {
+                this.$nextTick(() => {
+                    this.showFilesDialog = true
+                })
             },
             closeFrameHandler(isClose) {
                 if (!isClose) {

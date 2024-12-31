@@ -101,7 +101,7 @@
         </v-col>
         <v-col lg="2" cols="6">
           <div title="显示的申请单跳转过来时的价格">
-            成本合计：<span>{{ cbCountMoney }}</span>
+            成本合计：<a href="###" @click="applyPriceDialog = true">{{ cbCountMoney }}</a>
           </div>
         </v-col>
         <v-col lg="2" cols="6">
@@ -301,6 +301,24 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!--    修改成本单价-->
+    <v-dialog v-model="applyPriceDialog" width="60%">
+      <v-card>
+        <v-data-table :items="data.material" :headers="applyPriceHeaders">
+          <template v-slot:item.applyPrice="{item}">
+            <v-text-field v-model="item.applyPrice" @change="updateApplyPriceHandler(item)"></v-text-field>
+          </template>
+          <template v-slot:item.applyMoney="{item}">
+            <div>{{ (item.applyPrice * item.sum).toFixed(2) }}</div>
+          </template>
+        </v-data-table>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="closeApplyPriceHandler">确定</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -309,7 +327,7 @@ import {insert, loadById, update, updateState} from '@/api/procurement'
 import {getByCompanyId} from '@/api/contract'
 import {getCompanyByMaterial, list as getCompany} from '@/api/company'
 import {searchCity} from '@/api/city'
-import {getApplyByMaterialId} from '@/api/apply'
+import {getApplyByMaterialId, updatePrice} from '@/api/apply'
 import {getConfig, list as scList} from '@/api/systemConfig'
 import easyFlow from "../../../components/easyflow/easyFlow"
 import materApi from '@/api/material'
@@ -372,6 +390,15 @@ export default {
     },
   },
   data: () => ({
+    applyPriceDialog: false,
+    applyPriceHeaders: [
+      {text: "材料名称", value: 'material.name', width: '20%'},
+      {text: "型号", value: 'material.model', width: '15%'},
+      {text: "品牌", value: 'material.brand', width: '8%'},
+      {text: "数量", value: 'sum', width: '10%'},
+      {text: "成本单价", value: 'applyPrice', width: '8%'},
+      {text: "成本金额", value: 'applyMoney', width: '9%'},
+    ],
     cbCountMoney: null,
     deleteTool: false,
     putHistoryDialog: false,
@@ -496,6 +523,20 @@ export default {
     // this.loadData();
   },
   methods: {
+    closeApplyPriceHandler() {
+      this.applyPriceDialog = false
+      this.refreshCbMoney()
+    },
+    refreshCbMoney() {
+      let temp = 0
+      this.data.material.forEach(item => {
+        temp += item.sum * item.applyPrice
+      })
+      this.cbCountMoney = temp.toFixed(2)
+    },
+    updateApplyPriceHandler(item) {
+      updatePrice({id: item.major, planPrice: item.applyPrice})
+    },
     typeChangeHandler(val) {
       if (val.value == null) {
         val.value = ''
@@ -882,15 +923,15 @@ export default {
     },
     refreshCountMoney() {
       this.countMoney = 0
+      let cbMoney = 0
       this.data.material.forEach(item => {
         //计算不含税金额 和 不含税单价
         this.setPriceMoney(item)
         this.countMoney += item.moneyTax
+        cbMoney += item.sum * item.applyPrice
       })
       this.countMoney = this.countMoney.toFixed(2)
-      if (this.cbCountMoney == null) {
-        this.cbCountMoney = this.countMoney
-      }
+      this.cbCountMoney = cbMoney.toFixed(2)
     },
     loadCity(val) {
       searchCity(val).then(result => {

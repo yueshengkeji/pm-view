@@ -2193,7 +2193,7 @@
             searchPlace: null,//地区
             placeItems: [],
 
-            invoiceCompanyItems: ['单位1', '单位2', '单位3'],//开票单位
+            invoiceCompanyItems: ['卓茂', '开丽', '安防'],//开票单位
 
             collectSwitch: false,
             dateMenu: false,
@@ -2249,6 +2249,7 @@
                     id: null,
                     remark: null
                 },
+                // invoiceCompany:'卓茂',
                 contractId: null,
                 id: null,
                 agreementID: '',
@@ -2292,6 +2293,7 @@
                     id: null,
                     remark: null
                 },
+                // invoiceCompany:'卓茂',
                 contractId: null,
                 id: null,
                 agreementID: '',
@@ -2449,7 +2451,7 @@
                 companyAddress: '',
                 taxID: '',
                 phone: '',
-                invoiceCompany: '-',
+                invoiceCompany: '卓茂',
                 collectedMoney: '',
                 province: '',//省
                 city: '',//市
@@ -2484,7 +2486,7 @@
                 companyAddress: '',
                 taxID: '',
                 phone: '',
-                invoiceCompany: '-',
+                invoiceCompany: '卓茂',
                 collectedMoney: '',
                 province: '',//省
                 city: '',//市
@@ -4114,6 +4116,7 @@
 
             //附件
             fileUpload(res) {
+                this.editedItem.files = []
                 for (let x = 0; x < res.files.length; x++) {
                     this.SalesFiles.fileUrl = res.files[x].ftpPath;
                     this.SalesFiles.fileName = res.files[x].fileName;

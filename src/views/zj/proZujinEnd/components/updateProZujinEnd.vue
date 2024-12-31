@@ -93,7 +93,7 @@
                                   v-model="proZujinEndItem.qualityBzj"></v-text-field>
                 </v-col>
                 <v-col md="2">
-                    <v-text-field type="number" label="质量时长/月"
+                    <v-text-field type="number" label="质量保证金时长/月"
                                   v-model="proZujinEndItem.qualityTime"></v-text-field>
                 </v-col>
 

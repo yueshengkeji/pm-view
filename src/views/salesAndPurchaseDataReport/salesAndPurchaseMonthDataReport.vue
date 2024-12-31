@@ -137,6 +137,8 @@
     export default {
         name: 'salesAndPurchaseMonthDataReport',
         data: () => ({
+            salesMonthData:null,
+            purchaseMonthData:null,
             invoiceMonthData: null,
             collectedMonthData: null,
             payMonthData: null,
@@ -189,6 +191,8 @@
                 spDataReportApi.getMonthData({dateSearch: dateYM}).then(result => {
                     console.log(result)
                     if (result != null) {
+                        this.salesMonthData = result.salesMonthData
+                        this.purchaseMonthData = result.purchaseMonthData
                         this.invoiceMonthData = result.invoiceMonthData;
                         this.collectedMonthData = result.collectedMonthData;
                         this.payMonthData = result.payMonthData;
@@ -231,7 +235,7 @@
                         }
                     },
                     legend: {
-                        data: ['开票', '收款', '收票', '支付']
+                        data: ['销售','开票', '收款','采购','收票', '支付']
                     },
                     // toolbox: {
                     //     show: true,
@@ -261,6 +265,15 @@
                     ],
                     series: [
                         {
+                            name: '销售',
+                            type: 'bar',
+                            label: labelOption,
+                            emphasis: {
+                                focus: 'series'
+                            },
+                            data: this.salesMonthData
+                        },
+                        {
                             name: '开票',
                             type: 'bar',
                             barGap: 0,
@@ -278,6 +291,15 @@
                                 focus: 'series'
                             },
                             data: this.receiveMonthData
+                        },
+                        {
+                            name: '采购',
+                            type: 'bar',
+                            label: labelOption,
+                            emphasis: {
+                                focus: 'series'
+                            },
+                            data: this.purchaseMonthData
                         },
                         {
                             name: '收票',
@@ -312,6 +334,8 @@
                 this.tableTitle = this.dateSearch
                 spDataReportApi.getMonthData({dateSearch: this.dateSearch}).then(result => {
                     if (result != null) {
+                        this.salesMonthData = result.salesMonthData
+                        this.purchaseMonthData = result.purchaseMonthData
                         this.invoiceMonthData = result.invoiceMonthData;
                         this.collectedMonthData = result.collectedMonthData;
                         this.payMonthData = result.payMonthData;

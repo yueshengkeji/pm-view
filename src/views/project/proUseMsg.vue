@@ -290,7 +290,7 @@ export default {
         {key: 'planMoney', title: '计划金额'},
         {key: 'applySum', title: '申请数量'},
         {key: 'proSum', title: '采购数量'},
-        {key: 'proMoney', title: '采购金额'},
+        {key: 'outSum', title: '出库数量'},
         {key: 'unitName', title: '单位'},
       ], data, "项目成本分析.xlsx")
     },

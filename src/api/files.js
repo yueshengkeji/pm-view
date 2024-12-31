@@ -43,3 +43,12 @@ export function downloadFile(filePath,downloadFile){
 export function pdfToImages(filePath){
     return request.get('/files/pdfToImages?filePath='+filePath)
 }
+
+export function list(data){
+    return request({
+        url:'/files/list',
+        method:'get',
+        params:data,
+        timeout:-1
+    })
+}

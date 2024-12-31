@@ -116,7 +116,7 @@ import {loadById, savePrintHistory} from '@/api/payment'
 export default {
   name: "default-print-10563",
   data: () => ({
-    openAccount2:false,
+    openAccount2: false,
     headers: [
       {text: "合同名称", value: "contract.name", width: '20%'},
       {text: "总价", value: "contract.price", width: '10%'},
@@ -157,27 +157,29 @@ export default {
         payment.moneys = 0.0;
         this.openAccount2 = (payment.payBankNumber && payment.payBankNumber != '')
         if (payment.details) {
+          let temp = 0
           payment.details.forEach((item, i) => {
             item.index = i + 1;
             if (item.contract.partyA.id != "229CAD0E-7AAA-48CE-A3AF-8C97994CC3FF") {
               payment.proCompanyName = item.contract.partyA.name;
             }
-            payment.moneys += item.applyMoney;
-            this.price += item.contract.price;
+            payment.moneys += item.applyMoney
+            this.price += item.contract.price
             if (this.fqFlag) {
               item.contract.yetPay = item.contract.yetPay - item.applyMoney
             }
-            this.yetMoneys = item.contract.yetPay;
+            temp += item.contract.yetPay
           });
+          this.yetMoneys = temp.toFixed(2)
           payment.moneys = payment.moneys.toFixed(2);
           this.applyMoney = payment.moneys;
         }
-        if(this.openAccount2){
+        if (this.openAccount2) {
           this.remark = `采购单位：${payment.proCompanyName}<br/>收款单位：${payment.company.name}<br/>开户行：${payment.company.openAccount2}<br/>账户：${payment.company.bankNumber2}`;
-        }else{
+        } else {
           this.remark = `采购单位：${payment.proCompanyName}<br/>收款单位：${payment.company.name}<br/>开户行：${payment.company.openAccount}<br/>账户：${payment.company.bankNumber}`;
         }
-        if(payment.company.lineNum != ''){
+        if (payment.company.lineNum != '') {
           this.remark += `<br/>银行行号：${payment.company.lineNum}`
         }
         this.remark += `<br/><span style="color:red;font-width: 600;">${payment.remark}</span>`

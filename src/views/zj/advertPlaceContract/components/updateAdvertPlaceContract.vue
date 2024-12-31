@@ -72,7 +72,7 @@
                                   v-model="advertPlaceContractItem.capitalizationElectricMoney"></v-text-field>
                 </v-col>
                 <v-col sm="3">
-                    <file-upload ref="file" @change="fileChangeHandler" :dense="false"></file-upload>
+                    <file-upload ref="file" @change="fileChangeHandler" :dense="false" :clear="clear"></file-upload>
                 </v-col>
                 <v-col sm="2">
                     <easy-flow coding="1320289" ref="easyFlow" default-flow-name="广告租赁合同"></easy-flow>
@@ -118,6 +118,7 @@
             },
             menu1: false,
             menu2: false,
+            clear: false
         }),
         watch: {
             'advertPlaceContractItem.money': {
@@ -158,6 +159,7 @@
                 return flag
             },
             submitUpdate() {
+                this.clear = false
                 return update(this.advertPlaceContractItem).then(res => {
                     insertAdvertPlaceContractWordRecord(this.advertPlaceContractItem)
                     this.$refs.easyFlow.startFlow({
@@ -167,12 +169,15 @@
                         frameCoding: 1320289,
                         frameColumn: 'id'
                     })
+                    this.clear = true
                     return res
                 })
             },
             saveAdvertPlaceContract(){
+                this.clear = false
                 return update(this.advertPlaceContractItem).then(res => {
                     insertAdvertPlaceContractWordRecord(this.advertPlaceContractItem)
+                    this.clear = true
                     return res
                 })
             },
@@ -272,7 +277,7 @@
             },
 
             fileChangeHandler({files}) {
-                this.advertPlaceContractItem.files = ""
+                // this.advertPlaceContractItem.files = ""
                 files.forEach(item => {
                     this.advertPlaceContractItem.files += item.id + ";"
                 })

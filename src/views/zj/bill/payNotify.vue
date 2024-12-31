@@ -83,12 +83,12 @@ export default {
       }
     },
     setCount() {
-      this.payMoney = 0
+      let payMoney = 0
       this.billList.forEach(val => {
         val.money = (val.arrearage && val.arrearage > 0) ? val.arrearage : val.money
-        this.payMoney += val.sjMoney || val.money
+        payMoney += val.money
       })
-      this.payMoney = this.payMoney.toFixed(2)
+      this.payMoney = payMoney.toFixed(2)
       this.upperPayMoney = this.parseUpperNum(this.payMoney)
     }
   },

@@ -11,6 +11,10 @@
                   chips
                   :multiple="multiple"
                   :label="label"
+                  :append-icon="'mdi-file-cloud'"
+                  @click:append="showRecentFile"
+                  :hide-input="ifHide"
+                  :accept="acceptType"
                   show-size>
       <template v-slot:selection="{file}">
         <v-chip @click.stop="reviewFile(file)" :id="file.id">
@@ -34,7 +38,8 @@
             <v-card class="pl-5" :ripple="false"
                     v-else-if="thanFile.suffix == 'html'" v-html="thanFile.content"></v-card>
             <v-img v-else-if="isImg(thanFile)" :alt="thanFile.fileName"
-                   max-width="1200" max-height="1200" :src="thanFile.showPath" class="grey lighten-2 pointer">
+                   max-width="1200" max-height="1200" :src="thanFile.showPath"
+                   class="grey lighten-2 pointer">
               <template v-slot:placeholder>
                 <v-row class="fill-height ma-0"
                        align="center"
@@ -64,16 +69,59 @@
     <!--    预览图片压缩，隐藏元素-->
     <img :src="prevImgUrl" ref="prevImg"
          style="width:auto;z-index: -1;position: fixed;opacity: 0">
+
+    <!-- -->
+    <v-dialog v-model="showRecentFileDialog" width="60%">
+      <v-data-table :headers="headers"
+                    v-model="selected"
+                    :items="items"
+                    :single-select="false"
+                    item-key="id"
+                    show-select
+                    class="elevation-1">
+        <template v-slot:item.name="item">
+          <span @click="preview(item.item)">{{ item.item.name }}</span>
+        </template>
+        <template v-slot:item.action="item">
+          <div style="width: 200px;height: 120px;overflow:hidden" @click="preview(item.item)">
+            <file-preview :files-item="item.item.itemArray"
+                          style="transform: scale(0.8);transform-origin: top left"></file-preview>
+          </div>
+        </template>
+      </v-data-table>
+    </v-dialog>
+    <v-dialog v-model="viewOthersDialog">
+      <file-preview :files-item="filesItem"></file-preview>
+    </v-dialog>
+    <v-dialog v-model="loading"
+              hide-overlay
+              persistent
+              width="300">
+      <v-card
+          color="primary"
+          dark>
+        <v-card-text>
+          正在加载。。。
+          <v-progress-linear
+              indeterminate
+              color="white"
+              class="mb-0"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import {deleteFile, dispose, getFiles, upload} from '@/api/files'
+import {deleteFile, dispose, getFiles, list, upload} from '@/api/files'
 import {getConfig} from '@/api/systemConfig'
+import filePreview from "@/components/filePreview.vue";
 // import heic2any from 'heic-convert'
 
 export default {
   name: "fileUpload",
+  components: {filePreview},
   data: () => ({
     files: [],
     fileLoading: false,
@@ -90,7 +138,31 @@ export default {
     disabled: false,
     error: null,
     prevImgUrl: null,
-    ftpRootFolder:null
+    ftpRootFolder: null,
+
+    viewOthersDialog: false,
+    filesItem: [],
+    showRecentFileDialog: false,
+    loading: false,
+    selected: [],
+    items: [],
+    headers: [
+      {text: '文件名称', value: 'name', width: '300px'},
+      // {text: '文件类型', value: 'pk00811',width:'200px'},
+      // {text: '上传人', value: 'uploadUser.name',width:'100px'},
+      {text: '上传时间', value: 'uploadDate', width: '200px'},
+      {text: '操作', value: 'action'},
+    ],
+    queryParams: {
+      startTime: null,
+      endTime: null,
+      ifMine: true,
+      search: null,
+      pageNum: 1,
+      pageSize: 10,
+      order: 'pk00805',
+      sort: 'desc'
+    }
   }),
   props: {
     mainId: String,
@@ -118,6 +190,14 @@ export default {
     zip: {
       type: Boolean,
       default: true
+    },
+    ifHide: {
+      type: Boolean,
+      default: false
+    },
+    acceptType: {
+      type: String,
+      default: ''
     }
   },
   model: {
@@ -153,12 +233,21 @@ export default {
     }
   },
   watch: {
+    selected: {
+      handler() {
+        if (this.selected.length > 0) {
+          this.dealSelect(this.selected)
+        }
+      },
+      deep: true
+    },
     clear: {
       handler() {
-        if (this.clear) {
+        if (this.clear == true) {
           this.reset();
         }
-      }
+      },
+      deep: true
     },
     mainId: {
       handler() {
@@ -207,12 +296,13 @@ export default {
     },
     reset() {
       this.id = null
-      this.files = [];
-      this.uploadFiles = [];
-      this.fileMap = [];
-      this.update = true;
-      this.resetState();
-      this.$emit("change",{files:[],mainId:null,ftpRootFolder:this.ftpRootFolder})
+      this.files = []
+      this.uploadFiles = []
+      this.fileMap = []
+      this.update = true
+      this.resetState()
+      this.selected = []
+      this.$emit("change", {files: [], mainId: null, ftpRootFolder: this.ftpRootFolder})
     },
     resetState() {
       window.setTimeout(() => {
@@ -235,7 +325,7 @@ export default {
             this.$emit("delete", f)
           }
         })
-        this.$emit("change", {files: this.files, mainId: this.id,ftpRootFolder:this.ftpRootFolder})
+        this.$emit("change", {files: this.files, mainId: this.id, ftpRootFolder: this.ftpRootFolder})
       }).finally(() => {
         this.update = true;
       });
@@ -247,7 +337,7 @@ export default {
         deleteFile(item.id);
       });
       this.uploadFiles = [];
-      this.$emit("change", {files: [], mainId: this.id,ftpRootFolder:this.ftpRootFolder})
+      this.$emit("change", {files: [], mainId: this.id, ftpRootFolder: this.ftpRootFolder})
     },
     fileChange() {
       if (this.update) {
@@ -289,8 +379,8 @@ export default {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
         if (this.isHeicImage(file)) {
-           this.heicToBase64(file).then((result)=>{
-             this.startZip(resolve, reject, result)
+          this.heicToBase64(file).then((result) => {
+            this.startZip(resolve, reject, result)
           })
         } else {
           reader.onload = () => {
@@ -338,7 +428,7 @@ export default {
       }
       if (isUpload) {
         this.upload(form)
-      }else{
+      } else {
         this.fileLoading = false
       }
     },
@@ -353,7 +443,7 @@ export default {
           uf.ftpPath = uf.name + uf.id + uf.fileName.substring(uf.fileName.lastIndexOf("."))
           this.uploadFiles.push(uf);
         })
-        this.$emit("change", {files: this.uploadFiles, mainId: this.id,ftpRootFolder:this.ftpRootFolder})
+        this.$emit("change", {files: this.uploadFiles, mainId: this.id, ftpRootFolder: this.ftpRootFolder})
         this.update = false;
         this.files = this.uploadFiles;
       }).catch(e => {
@@ -374,7 +464,7 @@ export default {
       getFiles(null, id || this.id, this.mainCoding).then(files => {
         this.files = files;
         this.uploadFiles = this.files;
-        this.$emit("change",{files:this.files,mainId:id,ftpRootFolder:this.ftpRootFolder})
+        this.$emit("change", {files: this.files, mainId: id, ftpRootFolder: this.ftpRootFolder})
       });
     },
     init() {
@@ -421,6 +511,74 @@ export default {
         this.reviewDialog = true;
       }).finally(() => this.fileLoading = false)
 
+    },
+
+    showRecentFile() {
+      this.loading = true
+      list(this.queryParams).then(res => {
+        this.items = res.list
+        this.items.forEach(item => {
+          item.viewUrl = '/preview' + item.name + item.id + item.pk00811
+          item.showPath = item.name + item.id + item.pk00811
+        })
+        this.fileSuffix(this.items)
+        this.items.forEach(item => {
+          let itemArray = []
+          itemArray.push(item)
+          item.itemArray = itemArray
+        })
+        this.loading = false
+        this.showRecentFileDialog = true
+      }).catch(e => {
+        console.log(e)
+      })
+    },
+    preview(item) {
+      this.filesItem = []
+      this.filesItem.push(item)
+      // this.fileSuffix(this.filesItem)
+      this.$nextTick(() => {
+        this.viewOthersDialog = true
+      })
+    },
+    fileSuffix(files) {
+      files.forEach(f => {
+        let name = f.showPath;
+        let suffix = '';
+        let index = name.lastIndexOf(".");
+        index = index == -1 ? f.length : index + 1;
+        suffix = f.showPath.substring(index, f.length);
+        f.suffix = suffix.toLowerCase();
+        f.downloadPath = decodeURIComponent(f.showPath);
+        if ((this.$vuetify.breakpoint.xs || this.$vuetify.breakpoint.sm)
+            && window.location.protocol == 'https:') {
+
+          if (f.suffix == 'pdf') {
+            if (f.pdfImgPath != null && f.pdfImgPath.length > 0) {
+              f.pdfImg = true
+              let paths = [];
+              f.pdfImgPath.forEach(path => {
+                paths.push(this.ftpRootFolder + "/" + encodeURIComponent(path))
+              })
+              f.pdfImgPath = paths
+            }
+          } else {
+            f.showPath = this.ftpRootFolder + "/" + f.downloadPath
+          }
+
+        } else {
+          //直接从配置的文件服务器预览
+          f.showPath = this.serverHost + f.downloadPath
+        }
+      });
+    },
+    dealSelect(selected) {
+      console.log(selected)
+      selected.forEach(item => {
+        item.ftpPath = item.name + item.id + item.fileName.substring(item.fileName.lastIndexOf("."))
+      })
+      this.$emit("change", {files: selected, mainId: null, ftpRootFolder: this.ftpRootFolder})
+      this.files = selected
     }
   }
 }

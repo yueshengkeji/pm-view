@@ -95,6 +95,18 @@
                 <v-col md="3">
                     <v-text-field label="电费" v-model="placeUseContractItem.electricPrice"></v-text-field>
                 </v-col>
+                <v-col md="2">
+                    <v-autocomplete v-model="placeUseContractItem.receivedCompany"
+                                    :items="receivedCompanyItems"
+                                    :loading="isLoading2"
+                                    :search-input.sync="searchReceivedCompany"
+                                    return-object
+                                    item-text="name"
+                                    :rules="[v => !!v || '请选择收款单位']"
+                                    :append-icon=" 'mdi-plus' "
+                                    @click:append="showAddCompanyDialog"
+                                    label="收款单位"></v-autocomplete>
+                </v-col>
                 <v-col sm="2">
                     <file-upload ref="file" @change="fileChangeHandler" :dense="false"></file-upload>
                 </v-col>
@@ -152,11 +164,16 @@
                 electricPrice: null,
                 bond: null,
                 electricType:null,
-                files: ''
+                files: '',
+                receivedCompany:null
             },
             companyItems: [],
             isLoading: false,
             searchCompany: null,
+            receivedCompanyItems: [],
+            isLoading2:false,
+            searchReceivedCompany:null,
+
             menu1: false,
             menu2: false,
             electricType: [
@@ -202,6 +219,14 @@
                 },
                 deep: true
             },
+            searchReceivedCompany:{
+                handler(){
+                    if (this.searchReceivedCompany != null){
+                        this.loadReceivedCompany(this.searchReceivedCompany)
+                    }
+                }  ,
+                deep:true
+            },
 
         },
 
@@ -246,6 +271,11 @@
                 this.placeUseContractItem.files = ""
                 files.forEach(item => {
                     this.placeUseContractItem.files += item.id + ";"
+                })
+            },
+            loadReceivedCompany(str){
+                list(str).then(res => {
+                    this.receivedCompanyItems = res
                 })
             },
             reset() {

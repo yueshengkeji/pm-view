@@ -49,8 +49,8 @@
 <script>
 
 import {getConfig, wxConfig} from '@/api/systemConfig'
-import {getTicket, getSha1} from '@/api/weixin'
-import { getById,updateParkingCost} from '@/api/outCarHistory'
+import {getSha1, getTicket} from '@/api/weixin'
+import {getById, updateParkingCost} from '@/api/outCarHistory'
 import {uploadByBase64} from "@/api/files";
 
 export default {
@@ -98,13 +98,14 @@ export default {
       }
     }
   },
+
   created() {
     getById(this.$route.params.id).then(result => {
       if (result && result.id) {
         getConfig("FTP_SERVER_PATH").then(result2 => {
           if(result2.id){
-            this.prevImg = result2.value + result.startImg
-            this.prevImg2 = result2.value + result.endImg
+            this.setImgPath(result, result2)
+
           }
         })
         this.data = result
@@ -119,6 +120,19 @@ export default {
     })
   },
   methods: {
+  setImgPath(d, conf) {
+      if (window.location.protocol == 'https:') {
+        let prevImg = d.startImg.replace("\\", "/")
+        this.prevImg = '/api/files/downloadFile?filePath=' + encodeURIComponent(prevImg) + "&downloadFile=t"
+        if(d.endImg){
+                    let prevImg2 = d.endImg.replace("\\", "/")
+                    this.prevImg2 = '/api/files/downloadFile?filePath=' + encodeURIComponent(prevImg2) + "&downloadFile=t"
+                }
+      } else {
+        this.prevImg = conf.value + d.startImg
+        this.prevImg2 = conf.value + d.endImg
+      }
+    },
     error() {
       this.msg = '数据不存在'
     },

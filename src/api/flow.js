@@ -20,3 +20,18 @@ export function updateFlow(flow) {
 export function deleteFlow(id) {
     return request.delete(`usedFlow/${id}`)
 }
+
+//获取流程授权记录
+export function flowPermissionList(id) {
+    return request.get(`usedFlow/permissionList/${id}`)
+}
+
+//删除流程授权
+export function delPermission(permissionId) {
+    return request.delete(`usedFlow/deletePermission/${permissionId}`)
+}
+
+//添加流程授权
+export function flowPermission(data) {
+    return request.post('usedFlow/flowPermission', data)
+}
