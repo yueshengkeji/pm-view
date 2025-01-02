@@ -1081,67 +1081,79 @@ export default {
         this.loadApproveLoading = false
       })
     },
+    parseSteps(steps) {
+      let tempMap = [];
+      this.disabledPrint = false;
+      this.approveList = steps;
+      this.fqFlag = false;
+      let tempArray = []
+      steps.forEach(item => {
+
+        if (this.operate && item.approveState <= 1) {
+          if (item.acceptUser.id == this.$store.state.user.id) {
+            this.operate = false
+            this.noWatch = true
+            item.message = this.approve.message
+            this.approve = item
+          }
+        }
+
+        if (item.po00421 == '1') {
+          this.fqFlag = true;
+        }
+        if (!tempMap[item.courseId]) {
+          let step = {
+            approves: [item],
+            courseId: item.courseId,
+            courseName: item.courseName,
+            status: item.approveState
+          };
+          tempMap[item.courseId] = step;
+          tempArray.push(step);
+        } else {
+          let step = tempMap[item.courseId]
+          let approves = step.approves;
+          if ((item.approveState <= 1 && step.status == 3)
+              || (step.status >= 5 && (item.approveState == 3 || item.approveState == 4))) {
+            //当前进度节点
+            tempMap[item.courseId].status = item.approveState;
+          }
+          approves.push(item);
+          approves.sort((a, b) => {
+            if (a.approveDate == "" || b.approveDate == "") {
+              return (a.approveDate < b.approveDate) ? 1 : -1;
+            } else {
+              return (a.approveDate > b.approveDate) ? 1 : -1;
+            }
+          })
+        }
+      });
+      this.steps = tempArray
+      this.$emit("loadSteps", steps)
+    },
     loadSteps() {
       this.consentFlag = false
       this.loadApproveLoading = true
       this.files = [];
       this.approveList = [];
-      let tempMap = [];
       this.disabledPrint = true;
       let approveResult;
-      if (this.instaceMsg.state === 1 || this.instaceMsg.startDate > (new Date().getFullYear() - 1 + "-12-31 23:59:59")) {
+      let reload = false;
+      if (this.instaceMsg.state === 1 || this.dayDiff(this.instaceMsg.startDate, new Date()) < 30) {
+        reload = true
         approveResult = getApproveSteps(this.instaceMsg.id)
       } else {
         approveResult = getApproveRecord(this.instaceMsg.id)
       }
       approveResult.then(steps => {
-        this.disabledPrint = false;
-        this.approveList = steps;
-        this.fqFlag = false;
-        let tempArray = []
-        steps.forEach(item => {
+        if (reload && (steps == null || steps.length == 0)) {
+          getApproveRecord(this.instaceMsg.id).then((res) => {
+            this.parseSteps(res)
+          })
+        } else {
+          this.parseSteps(steps)
+        }
 
-          if (this.operate && item.approveState <= 1) {
-            if (item.acceptUser.id == this.$store.state.user.id) {
-              this.operate = false
-              this.noWatch = true
-              item.message = this.approve.message
-              this.approve = item
-            }
-          }
-
-          if (item.po00421 == '1') {
-            this.fqFlag = true;
-          }
-          if (!tempMap[item.courseId]) {
-            let step = {
-              approves: [item],
-              courseId: item.courseId,
-              courseName: item.courseName,
-              status: item.approveState
-            };
-            tempMap[item.courseId] = step;
-            tempArray.push(step);
-          } else {
-            let step = tempMap[item.courseId]
-            let approves = step.approves;
-            if ((item.approveState <= 1 && step.status == 3)
-                || (step.status >= 5 && (item.approveState == 3 || item.approveState == 4))) {
-              //当前进度节点
-              tempMap[item.courseId].status = item.approveState;
-            }
-            approves.push(item);
-            approves.sort((a, b) => {
-              if (a.approveDate == "" || b.approveDate == "") {
-                return (a.approveDate < b.approveDate) ? 1 : -1;
-              } else {
-                return (a.approveDate > b.approveDate) ? 1 : -1;
-              }
-            })
-          }
-        });
-        this.steps = tempArray
-        this.$emit("loadSteps", steps)
       }).finally(() => {
         this.loadApproveLoading = false
       })
